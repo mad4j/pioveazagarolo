@@ -34,7 +34,6 @@
     async function retrieveData() {
       const response = await fetch("data.json");
       data = await response.json();
-      console.log(movies);
     }
 
     function displayData(data) {
@@ -44,6 +43,7 @@
     }
 
     await retrieveData();
+    console.log(data);
     displayData(data);
     
   </script>
