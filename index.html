@@ -31,9 +31,9 @@
     }
   */
     var data = 0;
-    async function retrieveData() {
-      const response = await fetch("data.json");
-      data = await response.json();
+    function retrieveData() {
+      const response = fetch("data.json");
+      data = response.json();
     }
 
     function displayData(data) {
