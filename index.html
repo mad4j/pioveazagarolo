@@ -1,37 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Piove domani a Zagarolo?</title>
-  <script>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Piove domani a Zagarolo?</title>
 
-    function fetchJSONFile(url, callback) {
-      var xhr = new XMLHttpRequest();
-      xhr.overrideMimeType("application/json");
-      xhr.open("GET", url, true);
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          callback(xhr.responseText);
-        }
-      };
-      xhr.send(null);
-    }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 
-    // Usage
-    fetchJSONFile("data.json", function (response) {
-      var data = JSON.parse(response);
-      // Process the JSON data
-      displayData(data);
-    });
+    <script>
 
-    function displayData(data) {
-      // Access and display the JSON data on the page
-      var output = document.getElementById("output");
-      output.innerHTML = JSON.stringify(data, null, 2);
-    }
-  </script>
-</head>
-<body>
-  <h1>Piove domani a Zagarolo?</h1>
-  <div id="output"></div>
-</body>
+      function displayData(data) {
+        // Access and display the JSON data on the page
+        var output = document.getElementById("output");
+        output.innerHTML = JSON.stringify(data, null, 2);
+      }
+  
+  
+      async function retrieveData() {
+        const response = await fetch("data.json");
+        const data = await response.json();
+        displayData(data);
+      }
+  
+      retrieveData();
+    </script>
+  </head>
+  <body>
+
+    <h1>Piove domani a Zagarolo?</h1>
+    <div id="output"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  </body>
 </html>
