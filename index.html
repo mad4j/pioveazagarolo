@@ -17,13 +17,12 @@
     Piove domani a Zagarolo?
   </div>
 
-  <div id="carouselExampleIndicators" class="carousel carousel-dark slide">
+  <div id="weahtercarousel" class="carousel carousel-dark slide">
     <div class="carousel-indicators">
-      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" aria-label="Oggi"></button>
-      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" class="active"
-        aria-current="true" aria-label="Domani"></button>
-      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
-        aria-label="Dopodomani"></button>
+      <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="0" aria-label="Oggi"></button>
+      <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="1" class="active" aria-current="true"
+        aria-label="Domani"></button>
+      <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="2" aria-label="Dopodomani"></button>
     </div>
     <div class="carousel-inner">
       <div class="carousel-item">
@@ -42,13 +41,11 @@
         </div>
       </div>
     </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
-      data-bs-slide="prev">
+    <button class="carousel-control-prev" type="button" data-bs-target="#weahtercarousel" data-bs-slide="prev">
       <span class="carousel-control-prev-icon" aria-hidden="true"></span>
       <span class="visually-hidden">Indietro</span>
     </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
-      data-bs-slide="next">
+    <button class="carousel-control-next" type="button" data-bs-target="#weahtercarousel" data-bs-slide="next">
       <span class="carousel-control-next-icon" aria-hidden="true"></span>
       <span class="visually-hidden">Avanti</span>
     </button>
@@ -62,10 +59,8 @@
 
   <script>
 
-
-    function displayData(data) {
-
-      const ctx = document.getElementById("tomorrow-chart");//.getContext('2d');
+    function buildChart(target, data) {
+      const ctx = document.getElementById(target);
       const myChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -75,26 +70,49 @@
               fill: true,
               backgroundColor: 'rgba(161, 198, 247, 1)',
               borderColor: 'rgb(47, 128, 237)',
-              data: data.hourly.precipitation_probability.slice(24, 48)
+              data: data
             }
           ]
         },
         options: {
+          layout: {
+            padding: 10
+          },
           scales: {
             y: {
               min: 0,
               max: 100,
+              grid: {
+                drawOnChartArea: true,
+              },
+              ticks: {
+                    callback: function(value, index, ticks) {
+                        return (value % 25 == 0) ? value : '';
+                    }
+                }
+            },
+            x: {
+              ticks: {
+                    callback: function(value, index, ticks) {
+                        return (value % 4 == 0) ? value : '';
+                    }
+                }
             }
           },
           plugins: {
             legend: {
-                display: false,
-            }
+              display: false,
+            },
           }
         },
       });
+    }
 
+    function displayData(data) {
 
+      buildChart("today-chart", data.hourly.precipitation_probability.slice(0, 24));
+      buildChart("tomorrow-chart", data.hourly.precipitation_probability.slice(24, 48));
+      buildChart("dayaftertomorrow-chart", data.hourly.precipitation_probability.slice(48, 96));
     }
 
     async function retrieveData() {
