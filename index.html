@@ -12,45 +12,45 @@
 </head>
 
 <body>
-
-  <div class="alert alert-primary" role="alert">
-    Piove domani a Zagarolo?
-  </div>
-
-  <div id="weahtercarousel" class="carousel carousel-dark slide">
-    <div class="carousel-indicators">
-      <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="0" aria-label="Oggi"></button>
-      <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="1" class="active" aria-current="true"
-        aria-label="Domani"></button>
-      <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="2" aria-label="Dopodomani"></button>
+  <div class="container p-3">
+    <div class="alert alert-primary" role="alert">
+      Piove domani a Zagarolo?
     </div>
-    <div class="carousel-inner">
-      <div class="carousel-item">
-        <div class="card d-block w-100">
-          <canvas id="today-chart"></canvas>
-        </div>
-      </div>
-      <div class="carousel-item active">
-        <div class="card d-block w-100">
-          <canvas id="tomorrow-chart"></canvas>
-        </div>
-      </div>
-      <div class="carousel-item">
-        <div class="card d-block w-100">
-          <canvas id="dayaftertomorrow-chart"></canvas>
-        </div>
-      </div>
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#weahtercarousel" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Indietro</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#weahtercarousel" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Avanti</span>
-    </button>
-  </div>
 
+    <div id="weahtercarousel" class="carousel carousel-dark slide">
+      <div class=" carousel-indicators">
+        <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="0" aria-label="Oggi"></button>
+        <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="1" class="active" aria-current="true"
+          aria-label="Domani"></button>
+        <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="2" aria-label="Dopodomani"></button>
+      </div>
+      <div class="carousel-inner">
+        <div class="carousel-item">
+          <div class="card d-block w-100">
+            <canvas id="today-chart"></canvas>
+          </div>
+        </div>
+        <div class="carousel-item active">
+          <div class="card d-block w-100">
+            <canvas id="tomorrow-chart"></canvas>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="card d-block w-100">
+            <canvas id="dayaftertomorrow-chart"></canvas>
+          </div>
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#weahtercarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Indietro</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#weahtercarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Avanti</span>
+      </button>
+    </div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
     crossorigin="anonymous"></script>
@@ -86,17 +86,17 @@
                 drawOnChartArea: true,
               },
               ticks: {
-                    callback: function(value, index, ticks) {
-                        return (value % 25 == 0) ? value : '';
-                    }
+                callback: function (value, index, ticks) {
+                  return (value % 25 == 0) ? value : '';
                 }
+              }
             },
             x: {
               ticks: {
-                    callback: function(value, index, ticks) {
-                        return (value % 4 == 0) ? value : '';
-                    }
+                callback: function (value, index, ticks) {
+                  return (value % 4 == 0) ? value : '';
                 }
+              }
             }
           },
           plugins: {
