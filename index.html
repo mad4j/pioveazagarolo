@@ -9,6 +9,58 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      color: #343a40;
+    }
+
+    .alert-primary {
+      background-color: #007bff;
+      color: white;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .btn-outline-primary {
+      border-color: #007bff;
+      color: #007bff;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .card {
+      background-color: #ffffff;
+      border: 1px solid #dee2e6;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .rain-icon {
+      font-size: 2rem;
+      color: #007bff;
+    }
+
+    .rain-percentage {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #343a40;
+    }
+
+    @media (max-width: 768px) {
+      .rain-icon {
+        font-size: 1.5rem;
+      }
+
+      .rain-percentage {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -16,36 +68,45 @@
     <div class="alert alert-primary" role="alert">
       Piove domani a Zagarolo?
     </div>
-
-    <div id="weahtercarousel" class="carousel carousel-dark slide">
-      <div class=" carousel-indicators">
-        <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="0" aria-label="Oggi"></button>
-        <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="1" class="active" aria-current="true"
-          aria-label="Domani"></button>
-        <button type="button" data-bs-target="#weahtercarousel" data-bs-slide-to="2" aria-label="Dopodomani"></button>
+    <div class="d-flex justify-content-center mb-3">
+      <div class="btn-group" role="group" aria-label="Calendario">
+        <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
+        <label class="btn btn-outline-primary" for="btnradio1">Oggi</label>
+        <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" checked>
+        <label class="btn btn-outline-primary" for="btnradio2">Domani</label>
+        <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
+        <label class="btn btn-outline-primary" for="btnradio3">Dopodomani</label>
       </div>
+    </div>
+    <div id="weather-carousel" class="carousel slide" data-bs-ride="carousel">
       <div class="carousel-inner">
         <div class="carousel-item">
-          <div class="card d-block w-100">
+          <div class="card">
+            <div class="rain-icon">☔</div>
+            <div class="rain-percentage" id="today-percentage">0%</div>
             <canvas id="today-chart"></canvas>
           </div>
         </div>
         <div class="carousel-item active">
-          <div class="card d-block w-100">
+          <div class="card">
+            <div class="rain-icon">☔</div>
+            <div class="rain-percentage" id="tomorrow-percentage">0%</div>
             <canvas id="tomorrow-chart"></canvas>
           </div>
         </div>
         <div class="carousel-item">
-          <div class="card d-block w-100">
+          <div class="card">
+            <div class="rain-icon">☔</div>
+            <div class="rain-percentage" id="dayaftertomorrow-percentage">0%</div>
             <canvas id="dayaftertomorrow-chart"></canvas>
           </div>
         </div>
       </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#weahtercarousel" data-bs-slide="prev">
+      <button class="carousel-control-prev" type="button" data-bs-target="#weather-carousel" data-bs-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Indietro</span>
       </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#weahtercarousel" data-bs-slide="next">
+      <button class="carousel-control-next" type="button" data-bs-target="#weather-carousel" data-bs-slide="next">
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Avanti</span>
       </button>
@@ -54,25 +115,20 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
     crossorigin="anonymous"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <script>
-
     function buildChart(target, data) {
       const ctx = document.getElementById(target);
-      const myChart = new Chart(ctx, {
+      new Chart(ctx, {
         type: 'line',
         data: {
           labels: [...Array(24).keys()],
-          datasets: [
-            {
-              fill: true,
-              backgroundColor: 'rgba(161, 198, 247, 1)',
-              borderColor: 'rgb(47, 128, 237)',
-              data: data
-            }
-          ]
+          datasets: [{
+            fill: true,
+            backgroundColor: 'rgba(161, 198, 247, 0.5)',
+            borderColor: 'rgb(47, 128, 237)',
+            data: data
+          }]
         },
         options: {
           layout: {
@@ -86,15 +142,8 @@
                 drawOnChartArea: true,
               },
               ticks: {
-                callback: function (value, index, ticks) {
-                  return (value % 25 == 0) ? value : '';
-                }
-              }
-            },
-            x: {
-              ticks: {
-                callback: function (value, index, ticks) {
-                  return (value % 4 == 0) ? value : '';
+                callback: function (value) {
+                  return value % 25 === 0 ? value + '%' : '';
                 }
               }
             }
@@ -109,10 +158,17 @@
     }
 
     function displayData(data) {
+      const todayData = data.hourly.precipitation_probability.slice(0, 24);
+      const tomorrowData = data.hourly.precipitation_probability.slice(24, 48);
+      const dayAfterTomorrowData = data.hourly.precipitation_probability.slice(48, 72);
 
-      buildChart("today-chart", data.hourly.precipitation_probability.slice(0, 24));
-      buildChart("tomorrow-chart", data.hourly.precipitation_probability.slice(24, 48));
-      buildChart("dayaftertomorrow-chart", data.hourly.precipitation_probability.slice(48, 96));
+      document.getElementById("today-percentage").textContent = `${Math.max(...todayData)}%`;
+      document.getElementById("tomorrow-percentage").textContent = `${Math.max(...tomorrowData)}%`;
+      document.getElementById("dayaftertomorrow-percentage").textContent = `${Math.max(...dayAfterTomorrowData)}%`;
+
+      buildChart("today-chart", todayData);
+      buildChart("tomorrow-chart", tomorrowData);
+      buildChart("dayaftertomorrow-chart", dayAfterTomorrowData);
     }
 
     async function retrieveData() {
@@ -123,7 +179,6 @@
 
     retrieveData();
   </script>
-
 </body>
 
 </html>
