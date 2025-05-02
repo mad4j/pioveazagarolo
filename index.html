@@ -13,105 +13,105 @@
     body {
       background-color: #f8f9fa;
       color: #343a40;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      max-height: 100%;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 0.5rem;
     }
 
     .alert-primary {
       background-color: #007bff;
       color: white;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       text-align: center;
-    }
-
-    .btn-outline-primary {
-      border-color: #007bff;
-      color: #007bff;
-    }
-
-    .btn-outline-primary:hover {
-      background-color: #007bff;
-      color: white;
+      padding: 0.5rem;
     }
 
     .card {
       background-color: #ffffff;
       border: 1px solid #dee2e6;
       border-radius: 0.5rem;
-      padding: 1rem;
+      padding: 0.5rem;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .rain-icon {
-      font-size: 2rem;
+      font-size: 1.2rem;
       color: #007bff;
     }
 
     .rain-percentage {
-      font-size: 1.5rem;
+      font-size: 1rem;
       font-weight: bold;
       color: #343a40;
     }
 
+    canvas {
+      height: 80px !important;
+    }
+
     @media (max-width: 768px) {
       .rain-icon {
-        font-size: 1.5rem;
+        font-size: 1rem;
       }
 
       .rain-percentage {
-        font-size: 1.2rem;
+        font-size: 0.9rem;
+      }
+
+      canvas {
+        height: 60px !important;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="container p-3">
+  <div class="container p-2">
     <div class="alert alert-primary" role="alert">
       Piove domani a Zagarolo?
     </div>
-    <div class="d-flex justify-content-center mb-3">
-      <div class="btn-group" role="group" aria-label="Calendario">
-        <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
-        <label class="btn btn-outline-primary" for="btnradio1">Oggi</label>
-        <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" checked>
-        <label class="btn btn-outline-primary" for="btnradio2">Domani</label>
-        <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
-        <label class="btn btn-outline-primary" for="btnradio3">Dopodomani</label>
+
+    <div class="d-flex flex-column gap-1">
+      <!-- Sezione Oggi -->
+      <div class="card">
+        <h6 class="card-title">Oggi</h6>
+        <div class="rain-icon">☔</div>
+        <div class="rain-percentage" id="today-percentage">0%</div>
+        <canvas id="today-chart"></canvas>
       </div>
-    </div>
-    <div id="weather-carousel" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner">
-        <div class="carousel-item">
-          <div class="card">
-            <div class="rain-icon">☔</div>
-            <div class="rain-percentage" id="today-percentage">0%</div>
-            <canvas id="today-chart"></canvas>
-          </div>
-        </div>
-        <div class="carousel-item active">
-          <div class="card">
-            <div class="rain-icon">☔</div>
-            <div class="rain-percentage" id="tomorrow-percentage">0%</div>
-            <canvas id="tomorrow-chart"></canvas>
-          </div>
-        </div>
-        <div class="carousel-item">
-          <div class="card">
-            <div class="rain-icon">☔</div>
-            <div class="rain-percentage" id="dayaftertomorrow-percentage">0%</div>
-            <canvas id="dayaftertomorrow-chart"></canvas>
-          </div>
-        </div>
+
+      <!-- Sezione Domani -->
+      <div class="card">
+        <h6 class="card-title">Domani</h6>
+        <div class="rain-icon">☔</div>
+        <div class="rain-percentage" id="tomorrow-percentage">0%</div>
+        <canvas id="tomorrow-chart"></canvas>
       </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#weather-carousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Indietro</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#weather-carousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Avanti</span>
-      </button>
+
+      <!-- Sezione Dopodomani -->
+      <div class="card">
+        <h6 class="card-title">Dopodomani</h6>
+        <div class="rain-icon">☔</div>
+        <div class="rain-percentage" id="dayaftertomorrow-percentage">0%</div>
+        <canvas id="dayaftertomorrow-chart"></canvas>
+      </div>
     </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
     crossorigin="anonymous"></script>
