@@ -11,103 +11,112 @@
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
   <style>
     body {
-      background-color: #f8f9fa;
-      color: #343a40;
+      background-color: #f4f4f9;
+      color: #333;
+      font-family: 'Arial', sans-serif;
       margin: 0;
       padding: 0;
-      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      min-height: 100vh;
     }
 
     .container {
-      max-height: 100%;
-      overflow: hidden;
-      display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 0.5rem;
+      max-width: 900px;
+      width: 100%;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .alert-primary {
-      background-color: #007bff;
-      color: white;
-      font-size: 1.2rem;
+    .header {
       text-align: center;
-      padding: 0.5rem;
+      margin-bottom: 1.5rem;
     }
 
-    .card {
-      background-color: #ffffff;
-      border: 1px solid #dee2e6;
-      border-radius: 0.5rem;
-      padding: 0.5rem;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .rain-icon {
-      font-size: 1.2rem;
+    .header h1 {
+      font-size: 1.8rem;
       color: #007bff;
     }
 
+    .card {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .rain-icon {
+      font-size: 2rem;
+      color: #007bff;
+      margin-bottom: 0.5rem;
+    }
+
     .rain-percentage {
-      font-size: 1rem;
+      font-size: 1.2rem;
       font-weight: bold;
-      color: #343a40;
+      color: #333;
     }
 
     canvas {
-      height: 80px !important;
+      height: 100px !important;
     }
 
     @media (max-width: 768px) {
       .rain-icon {
-        font-size: 1rem;
+        font-size: 1.5rem;
       }
 
       .rain-percentage {
-        font-size: 0.9rem;
+        font-size: 1rem;
       }
 
       canvas {
-        height: 60px !important;
+        height: 80px !important;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="container p-2">
-    <div class="alert alert-primary" role="alert">
-      Piove domani a Zagarolo?
+  <div class="container">
+    <div class="header">
+      <h1>Piove domani a Zagarolo?</h1>
     </div>
 
-    <div class="d-flex flex-wrap gap-1 flex-column flex-md-row"></div>
+    <div class="row">
       <!-- Sezione Oggi -->
-      <div class="card">
-        <h6 class="card-title">Oggi</h6>
-        <div class="rain-icon">☔</div>
-        <div class="rain-percentage" id="today-percentage">0%</div>
-        <canvas id="today-chart"></canvas>
+      <div class="col-md-4">
+        <div class="card">
+          <h6 class="card-title">Oggi</h6>
+          <div class="rain-icon">☔</div>
+          <div class="rain-percentage" id="today-percentage">0%</div>
+          <canvas id="today-chart"></canvas>
+        </div>
       </div>
 
       <!-- Sezione Domani -->
-      <div class="card">
-        <h6 class="card-title">Domani</h6>
-        <div class="rain-icon">☔</div>
-        <div class="rain-percentage" id="tomorrow-percentage">0%</div>
-        <canvas id="tomorrow-chart"></canvas>
+      <div class="col-md-4">
+        <div class="card">
+          <h6 class="card-title">Domani</h6>
+          <div class="rain-icon">☔</div>
+          <div class="rain-percentage" id="tomorrow-percentage">0%</div>
+          <canvas id="tomorrow-chart"></canvas>
+        </div>
       </div>
 
       <!-- Sezione Dopodomani -->
-      <div class="card">
-        <h6 class="card-title">Dopodomani</h6>
-        <div class="rain-icon">☔</div>
-        <div class="rain-percentage" id="dayaftertomorrow-percentage">0%</div>
-        <canvas id="dayaftertomorrow-chart"></canvas>
+      <div class="col-md-4">
+        <div class="card">
+          <h6 class="card-title">Dopodomani</h6>
+          <div class="rain-icon">☔</div>
+          <div class="rain-percentage" id="dayaftertomorrow-percentage">0%</div>
+          <canvas id="dayaftertomorrow-chart"></canvas>
+        </div>
       </div>
     </div>
   </div>
