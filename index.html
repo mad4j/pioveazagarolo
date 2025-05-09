@@ -92,9 +92,13 @@
       <!-- Sezione Oggi -->
       <div class="col-md-4">
         <div class="card">
-          <h6 class="card-title">Oggi</h6>
-          <div class="rain-icon">☔</div>
-          <div class="rain-percentage" id="today-percentage">0%</div>
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="card-title mb-0">Oggi</h6>
+            <div class="d-flex align-items-center">
+              <div class="rain-percentage me-2" id="today-percentage">0%</div>
+              <div class="rain-icon">☔</div>
+            </div>
+          </div>
           <canvas id="today-chart"></canvas>
         </div>
       </div>
@@ -102,9 +106,13 @@
       <!-- Sezione Domani -->
       <div class="col-md-4">
         <div class="card">
-          <h6 class="card-title">Domani</h6>
-          <div class="rain-icon">☔</div>
-          <div class="rain-percentage" id="tomorrow-percentage">0%</div>
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="card-title mb-0">Domani</h6>
+            <div class="d-flex align-items-center">
+              <div class="rain-percentage me-2" id="tomorrow-percentage">0%</div>
+              <div class="rain-icon">☔</div>
+            </div>
+          </div>
           <canvas id="tomorrow-chart"></canvas>
         </div>
       </div>
@@ -112,9 +120,13 @@
       <!-- Sezione Dopodomani -->
       <div class="col-md-4">
         <div class="card">
-          <h6 class="card-title">Dopodomani</h6>
-          <div class="rain-icon">☔</div>
-          <div class="rain-percentage" id="dayaftertomorrow-percentage">0%</div>
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="card-title mb-0">Dopodomani</h6>
+            <div class="d-flex align-items-center">
+              <div class="rain-percentage me-2" id="dayaftertomorrow-percentage">0%</div>
+              <div class="rain-icon">☔</div>
+            </div>
+          </div>
           <canvas id="dayaftertomorrow-chart"></canvas>
         </div>
       </div>
@@ -151,9 +163,7 @@
                 drawOnChartArea: true,
               },
               ticks: {
-                callback: function (value) {
-                  return value % 25 === 0 ? value + '%' : '';
-                }
+                display: false,
               }
             }
           },
@@ -167,6 +177,11 @@
     }
 
     function displayData(data) {
+
+      // debug
+      console.log("Data retrieved:");
+      console.log(data);
+
       const todayData = data.hourly.precipitation_probability.slice(0, 24);
       const tomorrowData = data.hourly.precipitation_probability.slice(24, 48);
       const dayAfterTomorrowData = data.hourly.precipitation_probability.slice(48, 72);
