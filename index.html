@@ -113,6 +113,7 @@
             </div>
           </div>
           <canvas id="today-chart"></canvas>
+          <small class="text-muted" id="today-date"></small>
         </div>
       </div>
 
@@ -127,6 +128,7 @@
             </div>
           </div>
           <canvas id="tomorrow-chart"></canvas>
+          <small class="text-muted" id="tomorrow-date"></small>
         </div>
       </div>
 
@@ -141,6 +143,7 @@
             </div>
           </div>
           <canvas id="dayaftertomorrow-chart"></canvas>
+          <small class="text-muted" id="dayaftertomorrow-date"></small>
         </div>
       </div>
     </div>
@@ -211,9 +214,13 @@
       document.getElementById("tomorrow-percentage").textContent = `${Math.max(...tomorrowData)}%`;
       document.getElementById("dayaftertomorrow-percentage").textContent = `${Math.max(...dayAfterTomorrowData)}%`;
 
+      document.getElementById("today-date").textContent = data.daily.time[0];
+      document.getElementById("tomorrow-date").textContent = data.daily.time[1];
+      document.getElementById("dayaftertomorrow-date").textContent = data.daily.time[2];
+
       buildChart("today-chart", todayData);
       buildChart("tomorrow-chart", tomorrowData);
-      buildChart("dayaftertomorrow-chart", dayAfterTomorrowData);
+      buildChart("dayaftertomorrow-chart", dayAfterTomorrowData);      
     }
 
     async function retrieveData() {
