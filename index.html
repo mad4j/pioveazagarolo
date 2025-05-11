@@ -236,7 +236,8 @@
     }
 
     async function retrieveData() {
-      const response = await fetch("data.json");
+      const randomQuery = `?nocache=${Math.random()}`;
+      const response = await fetch(`data.json${randomQuery}`);
       const data = await response.json();
       displayData(data);
     }
