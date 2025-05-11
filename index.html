@@ -236,7 +236,7 @@
     }
 
     async function retrieveData() {
-      const randomQuery = `?nocache=${Math.random()}`;
+      const randomQuery = `?nocache=${Math.floor(Date.now() / 60*1000)}`;
       const response = await fetch(`data.json${randomQuery}`);
       const data = await response.json();
       displayData(data);
