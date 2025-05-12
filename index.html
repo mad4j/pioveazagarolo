@@ -192,7 +192,13 @@
               grid: {
                 drawOnChartArea: true,
               },
+              
+        title: {
+          display: true,
+          text: 'Value'
+        },
               ticks: {
+                display: true,
                 callback: function (value, index, ticks) {
                   return (value % 1 == 0) ? value : '';
               }
