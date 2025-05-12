@@ -193,7 +193,8 @@
                 drawOnChartArea: true,
               },
               ticks: {
-                display: true,
+                callback: function (value, index, ticks) {
+                  return (value % 4 == 0) ? value : '';
               }
             },
             x: {
