@@ -218,9 +218,9 @@
       console.log("Data retrieved:");
       console.log(data);
 
-      const todayData = data.hourly.precipitation_probability.slice(0, 24);
-      const tomorrowData = data.hourly.precipitation_probability.slice(24, 48);
-      const dayAfterTomorrowData = data.hourly.precipitation_probability.slice(48, 72);
+      const todayData = data.hourly.precipitation.slice(0, 24);
+      const tomorrowData = data.hourly.precipitation.slice(24, 48);
+      const dayAfterTomorrowData = data.hourly.precipitation.slice(48, 72);
 
       document.getElementById("today-percentage").textContent = `${Math.max(...todayData)}%`;
       document.getElementById("tomorrow-percentage").textContent = `${Math.max(...tomorrowData)}%`;
