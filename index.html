@@ -41,10 +41,14 @@
     }
 
     .header h1 {
-      font-size: 2rem; /* Slightly larger font size */
-      font-weight: 600; /* Use a semi-bold font weight */
-      color: #0056b3; /* A darker shade of blue for a professional tone */
-      letter-spacing: 0.5px; /* Add slight letter spacing for readability */
+      font-size: 2rem;
+      /* Slightly larger font size */
+      font-weight: 600;
+      /* Use a semi-bold font weight */
+      color: #0056b3;
+      /* A darker shade of blue for a professional tone */
+      letter-spacing: 0.5px;
+      /* Add slight letter spacing for readability */
       font-family: 'Roboto', sans-serif;
     }
 
@@ -64,13 +68,15 @@
     }
 
     .rain-percentage {
-      font-size: 2rem; /* Increased font size */
+      font-size: 2rem;
+      /* Increased font size */
       font-weight: bold;
       color: #333;
     }
 
-     small.text-muted {
-      font-size: 0.5rem; /* Make text much smaller */
+    small.text-muted {
+      font-size: 0.5rem;
+      /* Make text much smaller */
     }
 
     canvas {
@@ -97,7 +103,6 @@
       margin-top: 0.2rem;
       color: #666;
     }
-
   </style>
 </head>
 
@@ -164,19 +169,31 @@
     crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    function buildChart(target, data) {
+    function buildChart(target, data1, data2) {
       const ctx = document.getElementById(target);
       new Chart(ctx, {
-        type: 'line',
+        //type: 'bar',
         data: {
           labels: [...Array(24).keys()],
           datasets: [{
+            type: 'line',
             fill: true,
             lineTension: 0.5,
             backgroundColor: 'rgba(161, 198, 247, 0.5)',
             borderColor: 'rgb(47, 128, 237)',
-            data: data,
+            data: data1,
             pointStyle: false,
+            yAxisID: 'y',
+          },
+          {
+            type: 'bar',
+            fill: true,
+            lineTension: 0.5,
+            backgroundColor: 'rgba(161, 198, 247, 0.5)',
+            borderColor: 'rgb(47, 128, 237)',
+            data: data2,
+            pointStyle: false,
+            yAxisID: 'y1',
           }]
         },
         options: {
@@ -189,19 +206,33 @@
             y: {
               min: 0,
               max: 100,
+              position: 'left',
               grid: {
                 drawOnChartArea: true,
               },
-              
-        title: {
-          display: true,
-          text: 'Value'
-        },
+              //title: {
+              //  display: false,
+              //  text: 'Value'
+              //},
               ticks: {
                 display: true,
-                callback: function (value, index, ticks) {
-                  return (value % 1 == 0) ? value : '';
+                callback: function(value, index, ticks) {
+                  if (value == 100) return '%';
+                  if (value == 50) return '50';
+                  if (index == 0) return '0';
+                  //return value + '%';
+                }
               }
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+
+              // grid line settings
+              grid: {
+                drawOnChartArea: false, // only want the grid lines for one axis to show up
+              },
             },
             x: {
               ticks: {
@@ -229,21 +260,25 @@
       const tomorrowData = data.hourly.precipitation_probability.slice(24, 48);
       const dayAfterTomorrowData = data.hourly.precipitation_probability.slice(48, 72);
 
-      document.getElementById("today-percentage").textContent = `${Math.max(...todayData)}%`;
-      document.getElementById("tomorrow-percentage").textContent = `${Math.max(...tomorrowData)}%`;
-      document.getElementById("dayaftertomorrow-percentage").textContent = `${Math.max(...dayAfterTomorrowData)}%`;
+      const todayPrecipitation = data.hourly.precipitation.slice(0, 24);
+      const tomorrowPrecipitation = data.hourly.precipitation.slice(24, 48);
+      const dayAfterTomorrowPrecipitation = data.hourly.precipitation.slice(48, 72);
+
+      document.getElementById("today-percentage").textContent = `${data.daily.precipitation_probability_max[0]}%`;//`${Math.max(...todayData)}%`;
+      document.getElementById("tomorrow-percentage").textContent =  `${data.daily.precipitation_probability_max[1]}%`;//`${Math.max(...tomorrowData)}%`;
+      document.getElementById("dayaftertomorrow-percentage").textContent =  `${data.daily.precipitation_probability_max[2]}%`;//`${Math.max(...dayAfterTomorrowData)}%`;
 
       document.getElementById("today-date").textContent = data.daily.time[0];
       document.getElementById("tomorrow-date").textContent = data.daily.time[1];
       document.getElementById("dayaftertomorrow-date").textContent = data.daily.time[2];
 
-      buildChart("today-chart", todayData);
-      buildChart("tomorrow-chart", tomorrowData);
-      buildChart("dayaftertomorrow-chart", dayAfterTomorrowData);      
+      buildChart("today-chart", todayData, todayPrecipitation);
+      buildChart("tomorrow-chart", tomorrowData, tomorrowPrecipitation);
+      buildChart("dayaftertomorrow-chart", dayAfterTomorrowData, dayAfterTomorrowPrecipitation);
     }
 
     async function retrieveData() {
-      const randomQuery = `?nocache=${Math.floor(Date.now() / 60*1000)}`;
+      const randomQuery = `?nocache=${Math.floor(Date.now() / 60 * 1000)}`;
       const response = await fetch(`data.json${randomQuery}`);
       const data = await response.json();
       displayData(data);
