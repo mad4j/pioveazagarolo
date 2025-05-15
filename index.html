@@ -42,13 +42,9 @@
 
     .header h1 {
       font-size: 2rem;
-      /* Slightly larger font size */
       font-weight: 600;
-      /* Use a semi-bold font weight */
       color: #0056b3;
-      /* A darker shade of blue for a professional tone */
       letter-spacing: 0.5px;
-      /* Add slight letter spacing for readability */
       font-family: 'Roboto', sans-serif;
     }
 
@@ -69,18 +65,23 @@
 
     .rain-percentage {
       font-size: 2rem;
-      /* Increased font size */
       font-weight: bold;
       color: #333;
     }
 
     small.text-muted {
       font-size: 0.5rem;
-      /* Make text much smaller */
     }
 
     canvas {
       height: 100px !important;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.75rem;
+      margin-top: 0.2rem;
+      color: #666;
     }
 
     @media (max-width: 768px) {
@@ -95,13 +96,6 @@
       canvas {
         height: 80px !important;
       }
-    }
-
-    footer {
-      text-align: center;
-      font-size: 0.75rem;
-      margin-top: 0.2rem;
-      color: #666;
     }
   </style>
 </head>
@@ -183,56 +177,24 @@
             borderColor: 'rgb(47, 128, 237)',
             data: data1,
             pointStyle: false,
-            yAxisID: 'y',
-          },
-          {
-            type: 'bar',
-            fill: true,
-            lineTension: 0.5,
-            backgroundColor: 'rgba(161, 198, 247, 0.5)',
-            borderColor: 'rgb(47, 128, 237)',
-            data: data2,
-            pointStyle: false,
-            yAxisID: 'y1',
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           layout: {
-            padding: 10
+            padding: 2
           },
           scales: {
             y: {
               min: 0,
               max: 100,
-              position: 'left',
               grid: {
                 drawOnChartArea: true,
               },
-              //title: {
-              //  display: false,
-              //  text: 'Value'
-              //},
               ticks: {
-                display: true,
-                //callback: function(value, index) {
-                //  if (value == 100) return '%';
-                //  if (value == 50) return '50';
-                //  if (index == 0) return '0';
-                  //return value + '%';
-                //}
+                display: false,
               }
-            },
-            y1: {
-              type: 'linear',
-              display: true,
-              position: 'right',
-
-              // grid line settings
-              grid: {
-                drawOnChartArea: false, // only want the grid lines for one axis to show up
-              },
             },
             x: {
               ticks: {
@@ -249,6 +211,7 @@
         },
       });
     }
+
 
     function displayData(data) {
 
