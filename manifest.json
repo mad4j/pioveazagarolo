@@ -3,7 +3,7 @@
   "name": "Piove domani a Zagarolo?",
   "short_name": "Piove a Zagarolo?",
   "start_url": "./index.html",
-  "display": "standalone",
+  "display": "browser",
   "background_color": "#f4f4f9",
   "theme_color": "#0056b3",
   "icons": [
