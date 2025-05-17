@@ -2,14 +2,16 @@
   "name": "Piove domani a Zagarolo?",
   "short_name": "Piove a Zagarolo?",
   "start_url": "./index.html",
-  "display": "browser",
-  "background_color": "#f4f4f9",
-  "theme_color": "#0056b3",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#2c3e50",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "watermark-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+   "categories": ["weather", "utilities"]
 }
