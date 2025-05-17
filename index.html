@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
 
 <head>
   <meta charset="utf-8">
@@ -13,12 +13,24 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/weather-icons.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #1abc9c;
+      --light-bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --text-muted: #7f8c8d;
+      --border-color: #e0e0e0;
+    }
 
     body {
-      background-color: #f4f4f9;
-      color: #333;
-      font-family: 'Roboto', sans-serif;
+      background-color: var(--light-bg);
+      color: var(--text-primary);
+      font-family: 'Montserrat', sans-serif;
       margin: 0;
       padding: 0;
       display: flex;
@@ -27,81 +39,187 @@
       min-height: 100vh;
     }
 
-    .container {
-      max-width: 900px;
+    .dashboard-container {
+      max-width: 1000px;
       width: 100%;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
     }
 
     .header {
       text-align: center;
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
+      position: relative;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .header h1 {
-      font-size: 2rem;
+      font-size: 2.25rem;
       font-weight: 600;
-      color: #0056b3;
+      color: var(--primary-color);
       letter-spacing: 0.5px;
-      font-family: 'Roboto', sans-serif;
     }
 
-    .card {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 0.5rem;
-      padding: 0.8rem;
-      text-align: center;
+    .header p {
+      color: var(--text-secondary);
+      margin-top: -0.25rem;
+      font-size: 1rem;
+    }
+
+    .forecast-card {
+      background-color: var(--card-bg);
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .forecast-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .day-title {
+      font-weight: 600;
+      color: var(--primary-color);
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .rain-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 1rem;
     }
 
     .rain-icon {
+      font-size: 2rem;
+      color: var(--secondary-color);
+      margin-right: 0.5rem;
+    }
+
+    .probability-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .drop-icon {
       font-size: 1.5rem;
-      color: #007bff;
+      color: var(--secondary-color);
+      margin-right: 0.5rem;
+    }
+
+    .drop-icon i {
+      background: linear-gradient(to bottom, #3498db, #2980b9);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .rain-percentage {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #333;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-color);
     }
 
-    small.text-muted {
-      font-size: 0.5rem;
+    .day-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    canvas {
-      height: 100px !important;
+    .day-date {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .chart-container {
+      height: 120px;
+      position: relative;
+      margin-top: 0.5rem;
     }
 
     footer {
       text-align: center;
+      padding-top: 1.5rem;
+      margin-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .footer-link {
+      color: var(--secondary-color);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-link:hover {
+      color: var(--accent-color);
+    }
+
+    .last-updated {
       font-size: 0.75rem;
-      margin-top: 0.2rem;
-      color: #666;
+      color: var(--text-muted);
+      text-align: right;
+      margin-top: 0.5rem;
+    }
+
+    .forecast-section {
+      border-radius: 10px;
+      padding: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .high-chance {
+      background-color: rgba(231, 76, 60, 0.1);
+    }
+
+    .medium-chance {
+      background-color: rgba(241, 196, 15, 0.1);
+    }
+
+    .low-chance {
+      background-color: rgba(46, 204, 113, 0.1);
     }
 
     @media (max-width: 768px) {
+      .dashboard-container {
+        padding: 1rem;
+      }
+      
+      .header h1 {
+        font-size: 1.75rem;
+      }
+      
+      .day-title {
+        font-size: 1.1rem;
+      }
+      
       .rain-icon {
         font-size: 1.5rem;
       }
-
+      
       .rain-percentage {
-        font-size: 1.2rem;
+        font-size: 1.5rem;
       }
-
-      canvas {
-        height: 80px !important;
+      
+      .chart-container {
+        height: 100px;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
+  <div class="dashboard-container">
     <div class="header">
       <h1>Piove domani a Zagarolo?</h1>
     </div>
@@ -109,52 +227,73 @@
     <div class="row">
       <!-- Sezione Oggi -->
       <div class="col-md-4">
-        <div class="card">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="card-title mb-0">Oggi</h6>
-            <div class="d-flex align-items-center">
-              <div class="rain-percentage me-2" id="today-percentage">0%</div>
-              <div class="rain-icon"><i class="wi wi-rain"></i></div>
+        <div class="forecast-card" id="today-card">
+          <div class="day-info">
+            <h3 class="day-title">Oggi</h3>
+            <span class="day-date" id="today-date"></span>
+          </div>
+          <div class="rain-info">
+            <div class="rain-icon"><i class="wi wi-rain"></i></div>
+            <div class="probability-container">
+              <div class="drop-icon"><i class="wi wi-raindrop"></i></div>
+              <div class="rain-percentage" id="today-percentage">0%</div>
             </div>
           </div>
-          <canvas id="today-chart"></canvas>
-          <small class="text-muted" id="today-date"></small>
+          <div class="chart-container">
+            <canvas id="today-chart"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- Sezione Domani -->
       <div class="col-md-4">
-        <div class="card">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="card-title mb-0">Domani</h6>
-            <div class="d-flex align-items-center">
-              <div class="rain-percentage me-2" id="tomorrow-percentage">0%</div>
-              <div class="rain-icon"><i class="wi wi-rain"></i></div>
+        <div class="forecast-card" id="tomorrow-card">
+          <div class="day-info">
+            <h3 class="day-title">Domani</h3>
+            <span class="day-date" id="tomorrow-date"></span>
+          </div>
+          <div class="rain-info">
+            <div class="rain-icon"><i class="wi wi-rain"></i></div>
+            <div class="probability-container">
+              <div class="drop-icon"><i class="wi wi-raindrop"></i></div>
+              <div class="rain-percentage" id="tomorrow-percentage">0%</div>
             </div>
           </div>
-          <canvas id="tomorrow-chart"></canvas>
-          <small class="text-muted" id="tomorrow-date"></small>
+          <div class="chart-container">
+            <canvas id="tomorrow-chart"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- Sezione Dopodomani -->
       <div class="col-md-4">
-        <div class="card">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="card-title mb-0">Dopodomani</h6>
-            <div class="d-flex align-items-center">
-              <div class="rain-percentage me-2" id="dayaftertomorrow-percentage">0%</div>
-              <div class="rain-icon"><i class="wi wi-rain"></i></div>
+        <div class="forecast-card" id="dayaftertomorrow-card">
+          <div class="day-info">
+            <h3 class="day-title">Dopodomani</h3>
+            <span class="day-date" id="dayaftertomorrow-date"></span>
+          </div>
+          <div class="rain-info">
+            <div class="rain-icon"><i class="wi wi-rain"></i></div>
+            <div class="probability-container">
+              <div class="drop-icon"><i class="wi wi-raindrop"></i></div>
+              <div class="rain-percentage" id="dayaftertomorrow-percentage">0%</div>
             </div>
           </div>
-          <canvas id="dayaftertomorrow-chart"></canvas>
-          <small class="text-muted" id="dayaftertomorrow-date"></small>
+          <div class="chart-container">
+            <canvas id="dayaftertomorrow-chart"></canvas>
+          </div>
         </div>
       </div>
     </div>
 
+    <div class="row">
+      <div class="col-12">
+        <div class="last-updated">Ultimo aggiornamento: <span id="last-updated">---</span></div>
+      </div>
+    </div>
+
     <footer>
-      daniele.olmisani@gmail.com
+      <a href="mailto:daniele.olmisani@gmail.com" class="footer-link">daniele.olmisani@gmail.com</a>
     </footer>
   </div>
 
@@ -163,27 +302,51 @@
     crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    function buildChart(target, data1, data2) {
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const options = { weekday: 'long', day: 'numeric', month: 'long' };
+      return date.toLocaleDateString('it-IT', options);
+    }
+
+    function updateCardClass(cardId, percentage) {
+      const card = document.getElementById(cardId);
+      
+      // Rimuovi tutte le classi esistenti
+      card.classList.remove('high-chance', 'medium-chance', 'low-chance');
+      
+      // Aggiungi la classe appropriata in base alla percentuale
+      if (percentage >= 60) {
+        card.classList.add('high-chance');
+      } else if (percentage >= 30) {
+        card.classList.add('medium-chance');
+      } else {
+        card.classList.add('low-chance');
+      }
+    }
+
+    function buildChart(target, data) {
       const ctx = document.getElementById(target);
       new Chart(ctx, {
-        //type: 'bar',
+        type: 'line',
         data: {
-          labels: [...Array(24).keys()],
+          labels: [...Array(24).keys()].map(hour => `${hour}:00`),
           datasets: [{
-            type: 'line',
             fill: true,
-            lineTension: 0.5,
-            backgroundColor: 'rgba(161, 198, 247, 0.5)',
-            borderColor: 'rgb(47, 128, 237)',
-            data: data1,
-            pointStyle: false,
+            lineTension: 0.4,
+            backgroundColor: 'rgba(52, 152, 219, 0.3)',
+            borderColor: 'rgb(41, 128, 185)',
+            borderWidth: 2,
+            data: data,
+            pointBackgroundColor: 'rgb(41, 128, 185)',
+            pointRadius: 0,
+            pointHoverRadius: 4,
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           layout: {
-            padding: 2
+            padding: 5
           },
           scales: {
             y: {
@@ -191,15 +354,30 @@
               max: 100,
               grid: {
                 drawOnChartArea: true,
+                color: 'rgba(200, 200, 200, 0.2)',
               },
               ticks: {
                 display: false,
+                font: {
+                  family: "'Montserrat', sans-serif",
+                  size: 10
+                }
               }
             },
             x: {
+              grid: {
+                display: false
+              },
               ticks: {
-                maxRotation: 0, // Prevent rotation
-                minRotation: 0,  // Ensure horizontal labels
+                maxRotation: 0,
+                minRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 6,
+                font: {
+                  family: "'Montserrat', sans-serif",
+                  size: 10
+                },
+                color: '#7f8c8d'
               }
             }
           },
@@ -207,55 +385,100 @@
             legend: {
               display: false,
             },
+            tooltip: {
+              backgroundColor: 'rgba(44, 62, 80, 0.9)',
+              titleFont: {
+                family: "'Montserrat', sans-serif",
+                size: 12
+              },
+              bodyFont: {
+                family: "'Montserrat', sans-serif",
+                size: 12
+              },
+              callbacks: {
+                title: function(tooltipItems) {
+                  return `Ore ${tooltipItems[0].label}`;
+                },
+                label: function(context) {
+                  return `Probabilità: ${context.parsed.y}%`;
+                }
+              }
+            }
+          },
+          interaction: {
+            mode: 'index',
+            intersect: false
           }
         },
       });
     }
 
-
     function displayData(data) {
-
-      // debug
-      console.log("Data retrieved:");
-      console.log(data);
+      // Debug
+      console.log("Data retrieved:", data);
 
       const todayData = data.hourly.precipitation_probability.slice(0, 24);
       const tomorrowData = data.hourly.precipitation_probability.slice(24, 48);
       const dayAfterTomorrowData = data.hourly.precipitation_probability.slice(48, 72);
 
-      const todayPrecipitation = data.hourly.precipitation.slice(0, 24);
-      const tomorrowPrecipitation = data.hourly.precipitation.slice(24, 48);
-      const dayAfterTomorrowPrecipitation = data.hourly.precipitation.slice(48, 72);
+      const todayPercentage = data.daily.precipitation_probability_max[0];
+      const tomorrowPercentage = data.daily.precipitation_probability_max[1];
+      const dayAfterTomorrowPercentage = data.daily.precipitation_probability_max[2];
 
-      document.getElementById("today-percentage").textContent = `${data.daily.precipitation_probability_max[0]}%`;//`${Math.max(...todayData)}%`;
-      document.getElementById("tomorrow-percentage").textContent =  `${data.daily.precipitation_probability_max[1]}%`;//`${Math.max(...tomorrowData)}%`;
-      document.getElementById("dayaftertomorrow-percentage").textContent =  `${data.daily.precipitation_probability_max[2]}%`;//`${Math.max(...dayAfterTomorrowData)}%`;
+      document.getElementById("today-percentage").textContent = `${todayPercentage}%`;
+      document.getElementById("tomorrow-percentage").textContent = `${tomorrowPercentage}%`;
+      document.getElementById("dayaftertomorrow-percentage").textContent = `${dayAfterTomorrowPercentage}%`;
 
-      document.getElementById("today-date").textContent = data.daily.time[0];
-      document.getElementById("tomorrow-date").textContent = data.daily.time[1];
-      document.getElementById("dayaftertomorrow-date").textContent = data.daily.time[2];
+      // Formatta le date
+      document.getElementById("today-date").textContent = formatDate(data.daily.time[0]);
+      document.getElementById("tomorrow-date").textContent = formatDate(data.daily.time[1]);
+      document.getElementById("dayaftertomorrow-date").textContent = formatDate(data.daily.time[2]);
 
-      buildChart("today-chart", todayData, todayPrecipitation);
-      buildChart("tomorrow-chart", tomorrowData, tomorrowPrecipitation);
-      buildChart("dayaftertomorrow-chart", dayAfterTomorrowData, dayAfterTomorrowPrecipitation);
+      // Aggiorna le classi delle carte in base alle percentuali
+      updateCardClass("today-card", todayPercentage);
+      updateCardClass("tomorrow-card", tomorrowPercentage);
+      updateCardClass("dayaftertomorrow-card", dayAfterTomorrowPercentage);
+
+      buildChart("today-chart", todayData);
+      buildChart("tomorrow-chart", tomorrowData);
+      buildChart("dayaftertomorrow-chart", dayAfterTomorrowData);
+
+      // Aggiorna l'ultimo aggiornamento
+      const now = new Date();
+      const options = { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' };
+      document.getElementById("last-updated").textContent = now.toLocaleDateString('it-IT', options);
     }
 
     async function retrieveData() {
-      const randomQuery = `?nocache=${Math.floor(Date.now() / 60 * 1000)}`;
-      const response = await fetch(`data.json${randomQuery}`);
-      const data = await response.json();
-      displayData(data);
+      try {
+        const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
+        const response = await fetch(`data.json${randomQuery}`);
+        
+        if (!response.ok) {
+          throw new Error('Errore nel caricamento dei dati meteo');
+        }
+        
+        const data = await response.json();
+        displayData(data);
+      } catch (error) {
+        console.error('Errore:', error);
+        alert('Si è verificato un errore nel caricamento dei dati. Riprova più tardi.');
+      }
     }
 
-    retrieveData();
+    // Inizializzazione
+    document.addEventListener('DOMContentLoaded', function() {
+      retrieveData();
+    });
 
+    // Registra il service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
         .then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
+          console.log('Service Worker registrato con successo:', registration.scope);
         })
         .catch(error => {
-          console.error('Service Worker registration failed:', error);
+          console.error('Errore nella registrazione del Service Worker:', error);
         });
     }
   </script>
