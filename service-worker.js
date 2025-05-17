@@ -8,9 +8,9 @@ const ASSETS_TO_CACHE = [
   '/favicon.png',
   '/css/weather-icons.min.css',
   '/manifest.json',
- // 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
- // 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js',
- // 'https://cdn.jsdelivr.net/npm/chart.js'
+  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
+  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js',
+  'https://cdn.jsdelivr.net/npm/chart.js'
 ];
 
 // Installazione del Service Worker
@@ -27,6 +27,11 @@ self.addEventListener('install', event => {
       .then(() => {
         console.log('[Service Worker] Installato e cache inizializzata');
         return self.skipWaiting(); // Forza l'attivazione immediata
+      })
+      .catch(error => {
+        console.error('Installazione del Service Worker fallita:', error);
+        // Continua comunque, l'app funzionerà ma in modalità "online-only"
+        return Promise.resolve();
       })
   );
 });
