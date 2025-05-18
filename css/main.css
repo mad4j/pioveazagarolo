@@ -118,7 +118,7 @@ body {
 }
 
 .rain-mm {
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   display: inline-block;
   margin-left: 0.3em;
@@ -134,7 +134,7 @@ body {
 }
 
 .day-date {
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   font-weight: 500;
 }
@@ -151,7 +151,7 @@ footer {
   margin-top: 1rem;
   border-top: 1px solid var(--border-color);
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.7rem;
 }
 
 .footer-link {
@@ -165,7 +165,7 @@ footer {
 }
 
 .last-updated {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   text-align: right;
   margin-top: 0.5rem;
