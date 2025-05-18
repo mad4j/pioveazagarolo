@@ -149,17 +149,22 @@ body {
 
 footer {
   text-align: center;
-  padding-top: 1.5rem;
-  margin-top: 1rem;
-  border-top: 1px solid var(--border-color);
+  /* padding-top: 1.5rem; */
+  /* margin-top: 1rem; */
+  /* border-top: 1px solid var(--border-color); */
   color: var(--text-muted);
   font-size: 0.7rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .footer-link {
   color: var(--secondary-color);
   text-decoration: none;
   transition: color 0.2s ease;
+  margin-left: 0.5em;
 }
 
 .footer-link:hover {
@@ -169,8 +174,8 @@ footer {
 .last-updated {
   font-size: 0.7rem;
   color: var(--text-muted);
-  text-align: right;
-  margin-top: 0.5rem;
+  text-align: left;
+  margin-top: 0;
 }
 
 .forecast-section {
@@ -230,6 +235,18 @@ footer {
   }
   .last-updated, footer {
     font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 600px) {
+  footer {
+    flex-direction: column;
+    gap: 0.2em;
+    align-items: flex-start;
+  }
+  .footer-link, .last-updated {
+    margin-left: 0;
+    text-align: left;
   }
 }
 
