@@ -125,6 +125,8 @@ function displayData(data) {
     buildChart("today-chart", todayData);
     buildChart("tomorrow-chart", tomorrowData);
     buildChart("dayaftertomorrow-chart", dayAfterTomorrowData);
+
+    document.getElementById("last-updated").textContent = data.last_update.trim();
 }
 
 async function retrieveData() {
@@ -142,21 +144,9 @@ async function retrieveData() {
     }
 }
 
-async function updateLastUpdatedFromFile() {
-    try {
-        const response = await fetch('lastupdate.txt');
-        if (response.ok) {
-            const text = await response.text();
-            document.getElementById("last-updated").textContent = text.trim();
-        }
-    } catch (e) {
-        // fallback: non mostrare nulla o lasciare il valore precedente
-    }
-}
 
 document.addEventListener('DOMContentLoaded', function () {
     retrieveData();
-    updateLastUpdatedFromFile();
 });
 
 if ('serviceWorker' in navigator) {
