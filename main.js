@@ -78,6 +78,17 @@ function buildChart(target, data) {
     });
 }
 
+function getRainIconClass(weatherCode) {
+    // Esempio mapping, personalizza secondo le tue esigenze/meteo
+    if ([61, 63, 65, 80, 81, 82].includes(weatherCode)) return 'wi wi-rain'; // Pioggia
+    if ([95, 96, 99].includes(weatherCode)) return 'wi wi-thunderstorm'; // Temporale
+    if ([71, 73, 75, 77, 85, 86].includes(weatherCode)) return 'wi wi-snow'; // Neve
+    if ([45, 48].includes(weatherCode)) return 'wi wi-fog'; // Nebbia
+    if ([51, 53, 55, 56, 57].includes(weatherCode)) return 'wi wi-sprinkle'; // Pioviggine
+    if ([0].includes(weatherCode)) return 'wi wi-day-sunny'; // Sereno
+    return 'wi wi-cloud'; // Default nuvoloso
+}
+
 function displayData(data) {
     const todayData = data.hourly.precipitation_probability.slice(0, 24);
     const tomorrowData = data.hourly.precipitation_probability.slice(24, 48);
@@ -90,6 +101,11 @@ function displayData(data) {
     const precipitationToday = data.daily.precipitation_sum[0];
     const precipitationTomorrow = data.daily.precipitation_sum[1];
     const precipitationDayAfterTomorrow = data.daily.precipitation_sum[2];
+
+    // Cambia icona in base al weather_code
+    document.getElementById('today-icon').className = getRainIconClass(data.daily.weather_code[0]);
+    document.getElementById('tomorrow-icon').className = getRainIconClass(data.daily.weather_code[1]);
+    document.getElementById('dayaftertomorrow-icon').className = getRainIconClass(data.daily.weather_code[2]);
 
     document.getElementById("today-percentage").textContent = `${todayPercentage}%`;
     document.getElementById("today-mm").textContent = `${precipitationToday.toFixed(1)} mm`;
