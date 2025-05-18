@@ -75,7 +75,7 @@ function buildChart(target, probabilityData, precipitationData) {
                     min: 0,
                     max: Math.max(...precipitationData, 1) < 2 ? 2 : Math.ceil(Math.max(...precipitationData, 1)),
                     position: 'right',
-                    grid: { drawOnChartArea: false },
+                    grid: { drawOnChartArea: false, drawTicks: false },
                     ticks: { display: false, font: { family: "'Montserrat', sans-serif", size: 10 } }
                 },
                 x: {
