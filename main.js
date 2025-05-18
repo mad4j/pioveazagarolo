@@ -125,10 +125,6 @@ function displayData(data) {
     buildChart("today-chart", todayData);
     buildChart("tomorrow-chart", tomorrowData);
     buildChart("dayaftertomorrow-chart", dayAfterTomorrowData);
-
-    const now = new Date();
-    const options = { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' };
-    document.getElementById("last-updated").textContent = now.toLocaleDateString('it-IT', options);
 }
 
 async function retrieveData() {
