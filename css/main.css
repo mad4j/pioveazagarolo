@@ -143,7 +143,7 @@ body {
 }
 
 .chart-container {
-  height: 150px;
+  height: 160px;
   position: relative;
   margin-top: 0.5rem;
 }
@@ -232,7 +232,7 @@ footer {
     font-size: 0.7rem;
   }
   .chart-container {
-    height: 80px;
+    height: 100px;
   }
   .last-updated, footer {
     font-size: 0.7rem;
