@@ -11,28 +11,31 @@ const urlsToCache = [
 ];
 
 self.addEventListener("install", event => {
+  self.skipWaiting(); // Activate new SW immediately
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
+      // Do NOT cache data.json on install, it's dynamic
+      const staticAssets = urlsToCache.filter(url => !url.includes("data.json"));
+      return cache.addAll(staticAssets);
     })
   );
 });
 
 self.addEventListener("fetch", event => {
+  // Stale-while-revalidate for data.json
   if (event.request.url.includes("data.json")) {
     event.respondWith(
-      fetch(event.request)
-        .then(networkResponse => {
-          // Aggiorna la cache con la nuova risposta
-          return caches.open(CACHE_NAME).then(cache => {
+      caches.open(CACHE_NAME).then(async cache => {
+        const cached = await cache.match(event.request);
+        const fetchPromise = fetch(event.request)
+          .then(networkResponse => {
             cache.put(event.request, networkResponse.clone());
             return networkResponse;
-          });
-        })
-        .catch(() => {
-          // Se la rete non è disponibile, usa la cache
-          return caches.match(event.request);
-        })
+          })
+          .catch(() => cached);
+        // Return cached first, then update in background
+        return cached || fetchPromise;
+      })
     );
   } else {
     event.respondWith(
@@ -44,6 +47,7 @@ self.addEventListener("fetch", event => {
 });
 
 self.addEventListener("activate", event => {
+  self.clients.claim(); // Take control immediately
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {

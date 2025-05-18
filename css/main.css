@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --accent-color: #1abc9c;
+  --light-bg: #f8f9fa;
+  --card-bg: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-muted: #7f8c8d;
+  --border-color: #e0e0e0;
+}
+
+body {
+  background-color: var(--light-bg);
+  color: var(--text-primary);
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.dashboard-container {
+  max-width: 1000px;
+  width: 100%;
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 1rem;
+  position: relative;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header h1 {
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  letter-spacing: 0.5px;
+}
+
+.header p {
+  color: var(--text-secondary);
+  margin-top: -0.25rem;
+  font-size: 1rem;
+}
+
+.forecast-card {
+  background-color: var(--card-bg);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.forecast-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.day-title {
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.rain-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.rain-icon {
+  font-size: 2rem;
+  color: var(--secondary-color);
+  margin-right: 0.5rem;
+}
+
+.probability-container {
+  display: flex;
+  align-items: center;
+}
+
+.drop-icon {
+  font-size: 1.5rem;
+  color: var(--secondary-color);
+  margin-right: 0.5rem;
+}
+
+.drop-icon i {
+  background: linear-gradient(to bottom, #3498db, #2980b9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rain-percentage {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.day-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.day-date {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.chart-container {
+  height: 120px;
+  position: relative;
+  margin-top: 0.5rem;
+}
+
+footer {
+  text-align: center;
+  padding-top: 1.5rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.footer-link {
+  color: var(--secondary-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: var(--accent-color);
+}
+
+.last-updated {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 0.5rem;
+}
+
+.forecast-section {
+  border-radius: 10px;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.high-chance {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.medium-chance {
+  background-color: rgba(241, 196, 15, 0.1);
+}
+
+.low-chance {
+  background-color: rgba(46, 204, 113, 0.1);
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+  
+  .header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .day-title {
+    font-size: 1.1rem;
+  }
+  
+  .rain-icon {
+    font-size: 1.5rem;
+  }
+  
+  .rain-percentage {
+    font-size: 1.5rem;
+  }
+  
+  .chart-container {
+    height: 100px;
+  }
+}

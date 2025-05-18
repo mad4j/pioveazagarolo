@@ -1,44 +1,45 @@
 let deferredPrompt;
+const installButton = document.getElementById('install-button');
 
+// Nascondi il pulsante se non supportato
+if (!window.matchMedia('(display-mode: standalone)').matches && installButton) {
+  installButton.style.display = 'none';
+}
 
 window.addEventListener('beforeinstallprompt', (event) => {
-
-    event.preventDefault();
-
-    deferredPrompt = event;
-
-    document.getElementById('install-button').style.display = 'block';
-
+  event.preventDefault();
+  deferredPrompt = event;
+  if (installButton) installButton.style.display = 'block';
 });
 
-
-document.getElementById('install-button').addEventListener('click', () => {
-
+if (installButton) {
+  installButton.addEventListener('click', async () => {
     if (deferredPrompt) {
-
-        deferredPrompt.prompt();
-
-        deferredPrompt.userChoice.then((choiceResult) => {
-
-            if (choiceResult.outcome === 'accepted') {
-
-                console.log('User accepted the install prompt');
-
-            }
-
-            deferredPrompt = null;
-
-        });
-
+      deferredPrompt.prompt();
+      try {
+        const choiceResult = await deferredPrompt.userChoice;
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+      } catch (e) {
+        console.error('Install prompt error:', e);
+      }
+      deferredPrompt = null;
+      installButton.style.display = 'none';
     }
-
-});
-
+  });
+}
 
 window.addEventListener('appinstalled', () => {
+  console.log('PWA installed');
+  if (installButton) installButton.style.display = 'none';
+});
 
-    console.log('PWA installed');
-
-    document.getElementById('install-button').style.display = 'none';
-
+// Nascondi il pulsante se già installata (standalone)
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.matchMedia('(display-mode: standalone)').matches && installButton) {
+    installButton.style.display = 'none';
+  }
 });
