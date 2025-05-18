@@ -193,26 +193,54 @@ footer {
 
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 1rem;
+    padding: 0.5rem;
+    border-radius: 0;
+    box-shadow: none;
   }
-  
+  .row {
+    flex-direction: column;
+  }
+  .col-md-4 {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+    margin-bottom: 1rem;
+  }
+  .forecast-card {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+  }
   .header h1 {
-    font-size: 1.75rem;
+    font-size: 1.2rem;
   }
-  
   .day-title {
+    font-size: 1rem;
+  }
+  .rain-icon {
+    font-size: 1.2rem;
+  }
+  .rain-percentage {
     font-size: 1.1rem;
   }
-  
-  .rain-icon {
-    font-size: 1.5rem;
+  .rain-mm {
+    font-size: 0.7rem;
   }
-  
-  .rain-percentage {
-    font-size: 1.5rem;
-  }
-  
   .chart-container {
-    height: 100px;
+    height: 70px;
+  }
+  .last-updated, footer {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .header h1 {
+    font-size: 1rem;
+  }
+  .forecast-card {
+    padding: 0.5rem;
+  }
+  .chart-container {
+    height: 50px;
   }
 }
