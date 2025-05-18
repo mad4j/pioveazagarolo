@@ -8,7 +8,7 @@ const urlsToCache = [
   "./main.js",
   "./pwa-install.js",
   "./manifest.json",
-  ":/css/main.css",
+  "./css/main.css",
   "./css/weather-icons.min.css",
   "./font/weathericons-regular-webfont.eot",
   "./font/weathericons-regular-webfont.svg",
