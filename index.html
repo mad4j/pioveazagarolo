@@ -17,8 +17,13 @@
 
 <body>
   <div class="dashboard-container">
-    <div class="header">
-      <h1>Piove domani a Zagarolo?</h1>
+    <div class="header d-flex align-items-center justify-content-between">
+      <div class="flex-grow-1 text-center">
+        <h1 class="mb-0">Piove domani a Zagarolo?</h1>
+      </div>
+      <button id="install-button" class="btn btn-sm ms-2" style="display:none; background-color: var(--secondary-color); color: #fff; border: none;" title="Installa app">
+        <i class="wi wi-cloud-up"></i>
+      </button>
     </div>
 
     <div class="row">
@@ -90,9 +95,6 @@
     </div>
 
     <footer>
-      <button id="install-button" class="btn btn-outline-secondary btn-sm" style="display:none; margin-bottom: 0.5rem;" title="Installa app">
-        <i class="wi wi-cloud-download"></i>
-      </button>
       <script src="pwa-install.js"></script>
       <a href="mailto:daniele.olmisani@gmail.com" class="footer-link">daniele.olmisani@gmail.com</a>
     </footer>
