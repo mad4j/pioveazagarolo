@@ -1,138 +1,145 @@
 function formatDate(dateString) {
-  const date = new Date(dateString);
-  const options = { weekday: 'long', day: 'numeric', month: 'long' };
-  return date.toLocaleDateString('it-IT', options);
+    const date = new Date(dateString);
+    const options = { weekday: 'long', day: 'numeric', month: 'long' };
+    return date.toLocaleDateString('it-IT', options);
 }
 
 function updateCardClass(cardId, percentage) {
-  const card = document.getElementById(cardId);
-  card.classList.remove('high-chance', 'medium-chance', 'low-chance');
-  if (percentage >= 60) {
-    card.classList.add('high-chance');
-  } else if (percentage >= 30) {
-    card.classList.add('medium-chance');
-  } else {
-    card.classList.add('low-chance');
-  }
+    const card = document.getElementById(cardId);
+    card.classList.remove('high-chance', 'medium-chance', 'low-chance');
+    if (percentage >= 60) {
+        card.classList.add('high-chance');
+    } else if (percentage >= 30) {
+        card.classList.add('medium-chance');
+    } else {
+        card.classList.add('low-chance');
+    }
 }
 
 function buildChart(target, data) {
-  const ctx = document.getElementById(target);
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [...Array(24).keys()].map(hour => `${hour}:00`),
-      datasets: [{
-        fill: true,
-        lineTension: 0.4,
-        backgroundColor: 'rgba(52, 152, 219, 0.3)',
-        borderColor: 'rgb(41, 128, 185)',
-        borderWidth: 2,
-        data: data,
-        pointBackgroundColor: 'rgb(41, 128, 185)',
-        pointRadius: 0,
-        pointHoverRadius: 4,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: { padding: 5 },
-      scales: {
-        y: {
-          min: 0,
-          max: 100,
-          grid: { drawOnChartArea: true, color: 'rgba(200, 200, 200, 0.2)' },
-          ticks: { display: false, font: { family: "'Montserrat', sans-serif", size: 10 } }
+    const ctx = document.getElementById(target);
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [...Array(24).keys()].map(hour => `${hour}:00`),
+            datasets: [{
+                fill: true,
+                lineTension: 0.4,
+                backgroundColor: 'rgba(52, 152, 219, 0.3)',
+                borderColor: 'rgb(41, 128, 185)',
+                borderWidth: 2,
+                data: data,
+                pointBackgroundColor: 'rgb(41, 128, 185)',
+                pointRadius: 0,
+                pointHoverRadius: 4,
+            }]
         },
-        x: {
-          grid: { display: false },
-          ticks: {
-            maxRotation: 0,
-            minRotation: 0,
-            autoSkip: true,
-            maxTicksLimit: 6,
-            font: { family: "'Montserrat', sans-serif", size: 10 },
-            color: '#7f8c8d'
-          }
-        }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(44, 62, 80, 0.9)',
-          titleFont: { family: "'Montserrat', sans-serif", size: 12 },
-          bodyFont: { family: "'Montserrat', sans-serif", size: 12 },
-          callbacks: {
-            title: function(tooltipItems) {
-              return `Ore ${tooltipItems[0].label}`;
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: 5 },
+            scales: {
+                y: {
+                    min: 0,
+                    max: 100,
+                    grid: { drawOnChartArea: true, color: 'rgba(200, 200, 200, 0.2)' },
+                    ticks: { display: false, font: { family: "'Montserrat', sans-serif", size: 10 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        maxRotation: 0,
+                        minRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: 6,
+                        font: { family: "'Montserrat', sans-serif", size: 10 },
+                        color: '#7f8c8d'
+                    }
+                }
             },
-            label: function(context) {
-              return `Probabilità: ${context.parsed.y}%`;
-            }
-          }
-        }
-      },
-      interaction: { mode: 'index', intersect: false }
-    },
-  });
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(44, 62, 80, 0.9)',
+                    titleFont: { family: "'Montserrat', sans-serif", size: 12 },
+                    bodyFont: { family: "'Montserrat', sans-serif", size: 12 },
+                    callbacks: {
+                        title: function (tooltipItems) {
+                            return `Ore ${tooltipItems[0].label}`;
+                        },
+                        label: function (context) {
+                            return `Probabilità: ${context.parsed.y}%`;
+                        }
+                    }
+                }
+            },
+            interaction: { mode: 'index', intersect: false }
+        },
+    });
 }
 
 function displayData(data) {
-  const todayData = data.hourly.precipitation_probability.slice(0, 24);
-  const tomorrowData = data.hourly.precipitation_probability.slice(24, 48);
-  const dayAfterTomorrowData = data.hourly.precipitation_probability.slice(48, 72);
+    const todayData = data.hourly.precipitation_probability.slice(0, 24);
+    const tomorrowData = data.hourly.precipitation_probability.slice(24, 48);
+    const dayAfterTomorrowData = data.hourly.precipitation_probability.slice(48, 72);
 
-  const todayPercentage = data.daily.precipitation_probability_max[0];
-  const tomorrowPercentage = data.daily.precipitation_probability_max[1];
-  const dayAfterTomorrowPercentage = data.daily.precipitation_probability_max[2];
+    const todayPercentage = data.daily.precipitation_probability_max[0];
+    const tomorrowPercentage = data.daily.precipitation_probability_max[1];
+    const dayAfterTomorrowPercentage = data.daily.precipitation_probability_max[2];
 
-  document.getElementById("today-percentage").textContent = `${todayPercentage}%`;
-  document.getElementById("tomorrow-percentage").textContent = `${tomorrowPercentage}%`;
-  document.getElementById("dayaftertomorrow-percentage").textContent = `${dayAfterTomorrowPercentage}%`;
+    const precipitationToday = data.daily.precipitation_sum[0];
+    const precipitationTomorrow = data.daily.precipitation_sum[1];
+    const precipitationDayAfterTomorrow = data.daily.precipitation_sum[2];
 
-  document.getElementById("today-date").textContent = formatDate(data.daily.time[0]);
-  document.getElementById("tomorrow-date").textContent = formatDate(data.daily.time[1]);
-  document.getElementById("dayaftertomorrow-date").textContent = formatDate(data.daily.time[2]);
+    document.getElementById("today-percentage").textContent = `${todayPercentage}%`;
+    document.getElementById("today-mm").textContent = `${precipitationToday.toFixed(1)} mm`;
+    document.getElementById("tomorrow-percentage").textContent = `${tomorrowPercentage}%`;
+    document.getElementById("tomorrow-mm").textContent = `${precipitationTomorrow.toFixed(1)} mm`;
+    document.getElementById("dayaftertomorrow-percentage").textContent = `${dayAfterTomorrowPercentage}%`;
+    document.getElementById("dayaftertomorrow-mm").textContent = `${precipitationDayAfterTomorrow.toFixed(1)} mm`;
 
-  updateCardClass("today-card", todayPercentage);
-  updateCardClass("tomorrow-card", tomorrowPercentage);
-  updateCardClass("dayaftertomorrow-card", dayAfterTomorrowPercentage);
+    document.getElementById("today-date").textContent = formatDate(data.daily.time[0]);
+    document.getElementById("tomorrow-date").textContent = formatDate(data.daily.time[1]);
+    document.getElementById("dayaftertomorrow-date").textContent = formatDate(data.daily.time[2]);
 
-  buildChart("today-chart", todayData);
-  buildChart("tomorrow-chart", tomorrowData);
-  buildChart("dayaftertomorrow-chart", dayAfterTomorrowData);
+    updateCardClass("today-card", todayPercentage);
+    updateCardClass("tomorrow-card", tomorrowPercentage);
+    updateCardClass("dayaftertomorrow-card", dayAfterTomorrowPercentage);
 
-  const now = new Date();
-  const options = { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' };
-  document.getElementById("last-updated").textContent = now.toLocaleDateString('it-IT', options);
+    buildChart("today-chart", todayData);
+    buildChart("tomorrow-chart", tomorrowData);
+    buildChart("dayaftertomorrow-chart", dayAfterTomorrowData);
+
+    const now = new Date();
+    const options = { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' };
+    document.getElementById("last-updated").textContent = now.toLocaleDateString('it-IT', options);
 }
 
 async function retrieveData() {
-  try {
-    const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
-    const response = await fetch(`data.json${randomQuery}`);
-    if (!response.ok) {
-      throw new Error('Errore nel caricamento dei dati meteo');
+    try {
+        const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
+        const response = await fetch(`data.json${randomQuery}`);
+        if (!response.ok) {
+            throw new Error('Errore nel caricamento dei dati meteo');
+        }
+        const data = await response.json();
+        displayData(data);
+    } catch (error) {
+        console.error('Errore:', error);
+        alert('Si è verificato un errore nel caricamento dei dati. Riprova più tardi.');
     }
-    const data = await response.json();
-    displayData(data);
-  } catch (error) {
-    console.error('Errore:', error);
-    alert('Si è verificato un errore nel caricamento dei dati. Riprova più tardi.');
-  }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  retrieveData();
+document.addEventListener('DOMContentLoaded', function () {
+    retrieveData();
 });
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js')
-    .then(registration => {
-      console.log('Service Worker registrato con successo:', registration.scope);
-    })
-    .catch(error => {
-      console.error('Errore nella registrazione del Service Worker:', error);
-    });
+    navigator.serviceWorker.register('service-worker.js')
+        .then(registration => {
+            console.log('Service Worker registrato con successo:', registration.scope);
+        })
+        .catch(error => {
+            console.error('Errore nella registrazione del Service Worker:', error);
+        });
 }
