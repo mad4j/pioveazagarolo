@@ -249,6 +249,9 @@ footer {
     margin-left: 0;
     text-align: left;
   }
+  .chart-container {
+    height: 100px;
+  }
 }
 
 @media (max-width: 400px) {
