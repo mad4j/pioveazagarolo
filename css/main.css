@@ -91,7 +91,7 @@ body {
 
 .probability-container {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .drop-icon {
@@ -111,6 +111,18 @@ body {
   font-size: 2rem;
   font-weight: 700;
   color: var(--primary-color);
+  display: inline-block;
+  line-height: 1;
+}
+
+.rain-mm {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: inline-block;
+  margin-left: 0.3em;
+  line-height: 1;
+  vertical-align: bottom;
+  align-self: flex-end;
 }
 
 .day-info {
