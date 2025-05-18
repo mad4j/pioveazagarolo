@@ -68,7 +68,7 @@ function buildChart(target, probabilityData, precipitationData) {
                     min: 0,
                     max: 100,
                     position: 'left',
-                    grid: { drawOnChartArea: true, color: 'rgba(200, 200, 200, 0.2)' },
+                    grid: { drawOnChartArea: true, color: 'rgba(200, 200, 200, 0.2)', drawTicks: false },
                     ticks: { display: false, font: { family: "'Montserrat', sans-serif", size: 10 } }
                 },
                 y1: {
