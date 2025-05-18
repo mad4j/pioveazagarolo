@@ -146,8 +146,21 @@ async function retrieveData() {
     }
 }
 
+async function updateLastUpdatedFromFile() {
+    try {
+        const response = await fetch('lastupdate.txt');
+        if (response.ok) {
+            const text = await response.text();
+            document.getElementById("last-updated").textContent = text.trim();
+        }
+    } catch (e) {
+        // fallback: non mostrare nulla o lasciare il valore precedente
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     retrieveData();
+    updateLastUpdatedFromFile();
 });
 
 if ('serviceWorker' in navigator) {
