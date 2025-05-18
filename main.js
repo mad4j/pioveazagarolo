@@ -16,23 +16,38 @@ function updateCardClass(cardId, percentage) {
     }
 }
 
-function buildChart(target, data) {
+function buildChart(target, probabilityData, precipitationData) {
     const ctx = document.getElementById(target);
     new Chart(ctx, {
-        type: 'line',
+        
         data: {
             labels: [...Array(24).keys()].map(hour => `${hour}:00`),
-            datasets: [{
-                fill: true,
-                lineTension: 0.4,
-                backgroundColor: 'rgba(52, 152, 219, 0.3)',
-                borderColor: 'rgb(41, 128, 185)',
-                borderWidth: 2,
-                data: data,
-                pointBackgroundColor: 'rgb(41, 128, 185)',
-                pointRadius: 0,
-                pointHoverRadius: 4,
-            }]
+            datasets: [
+                {
+                    label: 'Probabilità (%)',
+                    type: 'line',
+                    fill: true,
+                    lineTension: 0.4,
+                    backgroundColor: 'rgba(52, 152, 219, 0.3)',
+                    borderColor: 'rgb(41, 128, 185)',
+                    borderWidth: 2,
+                    data: probabilityData,
+                    pointBackgroundColor: 'rgb(41, 128, 185)',
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'Precipitazione (mm)',
+                    type: 'bar',
+                    backgroundColor: 'rgba(46, 204, 113, 0.4)',
+                    borderColor: 'rgba(39, 174, 96, 0.8)',
+                    borderWidth: 1,
+                    data: precipitationData,
+                    yAxisID: 'y1',
+                    order: 2,
+                }
+            ]
         },
         options: {
             responsive: true,
@@ -42,7 +57,15 @@ function buildChart(target, data) {
                 y: {
                     min: 0,
                     max: 100,
+                    position: 'left',
                     grid: { drawOnChartArea: true, color: 'rgba(200, 200, 200, 0.2)' },
+                    ticks: { display: false, font: { family: "'Montserrat', sans-serif", size: 10 } }
+                },
+                y1: {
+                    min: 0,
+                    max: Math.max(...precipitationData, 1) < 2 ? 2 : Math.ceil(Math.max(...precipitationData, 1)),
+                    position: 'right',
+                    grid: { drawOnChartArea: false },
                     ticks: { display: false, font: { family: "'Montserrat', sans-serif", size: 10 } }
                 },
                 x: {
@@ -68,7 +91,11 @@ function buildChart(target, data) {
                             return `Ore ${tooltipItems[0].label}`;
                         },
                         label: function (context) {
-                            return `Probabilità: ${context.parsed.y}%`;
+                            if (context.datasetIndex === 0) {
+                                return `Probabilità: ${context.parsed.y}%`;
+                            } else {
+                                return `Precipitazione: ${context.parsed.y} mm`;
+                            }
                         }
                     }
                 }
@@ -80,11 +107,14 @@ function buildChart(target, data) {
 
 function getRainIconClass(weatherCode) {
     // Esempio mapping, personalizza secondo le tue esigenze/meteo
+    if ([95, 96, 99].includes(weatherCode)) return 'wi wi-thunderstorm'; // Temporale
+    if ([85, 86].includes(weatherCode)) return 'wi wi-storm-showers'; // Neve
     if ([61, 63, 65, 80, 81, 82].includes(weatherCode)) return 'wi wi-rain'; // Pioggia
     if ([95, 96, 99].includes(weatherCode)) return 'wi wi-thunderstorm'; // Temporale
     if ([71, 73, 75, 77, 85, 86].includes(weatherCode)) return 'wi wi-snow'; // Neve
     if ([45, 48].includes(weatherCode)) return 'wi wi-fog'; // Nebbia
     if ([51, 53, 55, 56, 57].includes(weatherCode)) return 'wi wi-sprinkle'; // Pioviggine
+    if ([1, 2, 3].includes(weatherCode)) return 'wi wi-cloud'; // Parzialmente nuvoloso
     if ([0].includes(weatherCode)) return 'wi wi-day-sunny'; // Sereno
     return 'wi wi-cloud'; // Default nuvoloso
 }
@@ -93,6 +123,10 @@ function displayData(data) {
     const todayData = data.hourly.precipitation_probability.slice(0, 24);
     const tomorrowData = data.hourly.precipitation_probability.slice(24, 48);
     const dayAfterTomorrowData = data.hourly.precipitation_probability.slice(48, 72);
+
+    const todayPrecip = data.hourly.precipitation.slice(0, 24);
+    const tomorrowPrecip = data.hourly.precipitation.slice(24, 48);
+    const dayAfterTomorrowPrecip = data.hourly.precipitation.slice(48, 72);
 
     const todayPercentage = data.daily.precipitation_probability_max[0];
     const tomorrowPercentage = data.daily.precipitation_probability_max[1];
@@ -122,9 +156,9 @@ function displayData(data) {
     updateCardClass("tomorrow-card", tomorrowPercentage);
     updateCardClass("dayaftertomorrow-card", dayAfterTomorrowPercentage);
 
-    buildChart("today-chart", todayData);
-    buildChart("tomorrow-chart", tomorrowData);
-    buildChart("dayaftertomorrow-chart", dayAfterTomorrowData);
+    buildChart("today-chart", todayData, todayPrecip);
+    buildChart("tomorrow-chart", tomorrowData, tomorrowPrecip);
+    buildChart("dayaftertomorrow-chart", dayAfterTomorrowData, dayAfterTomorrowPrecip);
 
     document.getElementById("last-updated").textContent = data.last_update.trim();
 }
