@@ -16,6 +16,16 @@ function updateCardClass(cardId, percentage) {
     }
 }
 
+function getPrecipitationBarColor(value) {
+    if (value > 30) return '#6c3483'; // Nubifragio: viola scuro
+    if (value > 10) return '#b03a2e'; // Rovescio: rosso scuro
+    if (value > 6) return '#e74c3c'; // Pioggia forte: rosso
+    if (value > 4) return '#f39c12'; // Pioggia moderata: arancio
+    if (value > 2) return '#27ae60'; // Pioggia leggera: verde
+    if (value > 1) return '#3498db'; // Pioggia debole: azzurro
+    return '#85c1e9'; // Sotto 1 mm/h: azzurro chiaro
+}
+
 function buildChart(target, probabilityData, precipitationData) {
     const ctx = document.getElementById(target);
     new Chart(ctx, {
@@ -40,8 +50,8 @@ function buildChart(target, probabilityData, precipitationData) {
                 {
                     label: 'Precipitazione (mm)',
                     type: 'bar',
-                    backgroundColor: 'rgba(46, 204, 113, 0.4)',
-                    borderColor: 'rgba(39, 174, 96, 0.8)',
+                    backgroundColor: precipitationData.map(getPrecipitationBarColor),
+                    borderColor: precipitationData.map(getPrecipitationBarColor),
                     borderWidth: 1,
                     data: precipitationData,
                     yAxisID: 'y1',
