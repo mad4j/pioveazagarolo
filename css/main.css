@@ -249,7 +249,7 @@ footer {
     text-align: left;
   }
   .chart-container {
-    height: 100px;
+    height: 120px;
   }
 }
 
@@ -262,6 +262,6 @@ footer {
     padding: 0.5rem;
   }
   .chart-container {
-    height: 100px;
+    height: 110px;
   }
 }
