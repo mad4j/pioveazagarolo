@@ -259,9 +259,9 @@ footer {
   }
   .forecast-card {
     margin-bottom: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.75rem;
   }
   .chart-container {
-    height: 110px;
+    height: 105px;
   }
 }
