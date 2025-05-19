@@ -212,7 +212,7 @@ footer {
     margin-bottom: 1rem;
   }
   .forecast-card {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     padding: 0.75rem;
   }
   .header h1 {
@@ -258,6 +258,7 @@ footer {
     font-size: 1.25rem;
   }
   .forecast-card {
+    margin-bottom: 0.5rem;
     padding: 0.5rem;
   }
   .chart-container {
