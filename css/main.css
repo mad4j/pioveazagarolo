@@ -231,7 +231,7 @@ footer {
     font-size: 0.7rem;
   }
   .chart-container {
-    height: 100px;
+    height: 120px;
   }
   .last-updated, footer {
     font-size: 0.7rem;
@@ -249,7 +249,7 @@ footer {
     text-align: left;
   }
   .chart-container {
-    height: 120px;
+    height: 110px;
   }
 }
 
