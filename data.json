@@ -1,7 +1,7 @@
 {
   "latitude": 41.75,
   "longitude": 12.875,
-  "generationtime_ms": 0.047087669372558594,
+  "generationtime_ms": 0.046253204345703125,
   "utc_offset_seconds": 7200,
   "timezone": "Europe/Rome",
   "timezone_abbreviation": "GMT+2",
@@ -109,13 +109,13 @@
       0.00,
       0.00,
       0.00,
-      0.20,
-      0.90,
-      0.80,
-      0.60,
-      0.60,
-      1.70,
-      1.70,
+      0.00,
+      0.10,
+      0.50,
+      0.40,
+      0.70,
+      1.90,
+      1.50,
       0.10,
       0.00,
       0.00,
@@ -253,8 +253,8 @@
       95
     ],
     "precipitation_sum": [
-      1.20,
-      5.50,
+      0.20,
+      5.10,
       3.30
     ],
     "precipitation_probability_max": [
@@ -263,5 +263,5 @@
       46
     ]
   },
-  "last_update": "2025-05-22 18:20"
+  "last_update": "2025-05-22 20:23"
 }
