@@ -152,12 +152,12 @@ function displayData(data) {
     document.getElementById('dayaftertomorrow-icon').className = getRainIconClass(data.daily.weather_code[2]);
 
     // Temperatura max/min accanto all'icona
-    document.getElementById('today-temp-max').textContent = `${data.daily.temperature_2m_max[0].toFixed(1)}°`;
-    document.getElementById('today-temp-min').textContent = `${data.daily.temperature_2m_min[0].toFixed(1)}°`;
-    document.getElementById('tomorrow-temp-max').textContent = `${data.daily.temperature_2m_max[1].toFixed(1)}°`;
-    document.getElementById('tomorrow-temp-min').textContent = `${data.daily.temperature_2m_min[1].toFixed(1)}°`;
-    document.getElementById('dayaftertomorrow-temp-max').textContent = `${data.daily.temperature_2m_max[2].toFixed(1)}°`;
-    document.getElementById('dayaftertomorrow-temp-min').textContent = `${data.daily.temperature_2m_min[2].toFixed(1)}°`;
+    document.getElementById('today-temp-max').textContent = `${Math.round(data.daily.temperature_2m_max[0])}°`;
+    document.getElementById('today-temp-min').textContent = `${Math.round(data.daily.temperature_2m_min[0])}°`;
+    document.getElementById('tomorrow-temp-max').textContent = `${Math.round(data.daily.temperature_2m_max[1])}°`;
+    document.getElementById('tomorrow-temp-min').textContent = `${Math.round(data.daily.temperature_2m_min[1])}°`;
+    document.getElementById('dayaftertomorrow-temp-max').textContent = `${Math.round(data.daily.temperature_2m_max[2])}°`;
+    document.getElementById('dayaftertomorrow-temp-min').textContent = `${Math.round(data.daily.temperature_2m_min[2])}°`;
 
     document.getElementById("today-percentage").textContent = `${todayPercentage}%`;
     document.getElementById("today-mm").textContent = `${precipitationToday.toFixed(1)} mm`;

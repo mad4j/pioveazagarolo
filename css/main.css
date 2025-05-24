@@ -151,9 +151,6 @@ body {
 
 footer {
   text-align: center;
-  /* padding-top: 1.5rem; */
-  /* margin-top: 1rem; */
-  /* border-top: 1px solid var(--border-color); */
   color: var(--text-muted);
   font-size: 0.7rem;
   display: flex;
@@ -201,8 +198,8 @@ footer {
 .temp-values {
   display: flex;
   flex-direction: column;
-  margin-left: 0.5em;
-  font-size: 0.7rem;
+  margin-left: 0.6em;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   font-weight: 500;
   vertical-align: middle;
@@ -218,8 +215,9 @@ footer {
   color: #2980b9;
 }
 
-@media (max-width: 892px) {
+@media (max-width: 916px) {
   .dashboard-container {
+    max-width: 500px;
     padding: 0.5rem;
     border-radius: 0;
     box-shadow: none;
@@ -260,7 +258,7 @@ footer {
   }
   .temp-values {
     font-size: 0.7rem;
-    margin-left: 0.3em;
+    margin-left: 0.5em;
   }
 }
 
@@ -341,7 +339,7 @@ footer {
   }
   .temp-values {
     font-size: 0.6rem;
-    margin-left: 0.2em;
+    margin-left: 0.3em;
   }
 }
 
