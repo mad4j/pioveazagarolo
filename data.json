@@ -1,7 +1,7 @@
 {
   "latitude": 41.75,
   "longitude": 12.875,
-  "generationtime_ms": 0.04458427429199219,
+  "generationtime_ms": 0.05698204040527344,
   "utc_offset_seconds": 7200,
   "timezone": "Europe/Rome",
   "timezone_abbreviation": "GMT+2",
@@ -250,13 +250,13 @@
       "2025-05-30"
     ],
     "temperature_2m_max": [
-      25.7,
+      25.5,
       25.8,
       26.2
     ],
     "temperature_2m_min": [
-      12.6,
-      13.9,
+      12.3,
+      14.2,
       14.0
     ],
     "weather_code": [
@@ -275,5 +275,5 @@
       0
     ]
   },
-  "last_update": "2025-05-28 06:21"
+  "last_update": "2025-05-28 08:24"
 }
