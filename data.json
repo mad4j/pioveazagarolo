@@ -1,7 +1,7 @@
 {
   "latitude": 41.75,
   "longitude": 12.875,
-  "generationtime_ms": 0.07617473602294922,
+  "generationtime_ms": 28.348684310913086,
   "utc_offset_seconds": 7200,
   "timezone": "Europe/Rome",
   "timezone_abbreviation": "GMT+2",
@@ -275,5 +275,5 @@
       3
     ]
   },
-  "last_update": "2025-07-19 14:33"
+  "last_update": "2025-07-19 16:15"
 }
