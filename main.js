@@ -12,6 +12,34 @@ function getDaySlice(array, dayIndex) {
     return array.slice(start, start + 24);
 }
 
+// ----- Caching configurazione -----
+const DATA_CACHE_KEY = 'weatherDataV1';
+const DATA_CACHE_TTL_MS = 3 * 60 * 60 * 1000; // 3 ore (cron ogni 2h -> margine)
+let displayedFromCache = false;
+
+function loadCachedData() {
+    try {
+        const raw = localStorage.getItem(DATA_CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.data || !parsed.storedAt) return null;
+        if (Date.now() - parsed.storedAt > DATA_CACHE_TTL_MS) return null; // scaduto
+        return parsed;
+    } catch {
+        return null;
+    }
+}
+
+function saveCachedData(data) {
+    try {
+        localStorage.setItem(DATA_CACHE_KEY, JSON.stringify({ storedAt: Date.now(), data }));
+    } catch (e) {
+        // Se quota piena prova a liberare e ritentare una sola volta
+        try { localStorage.removeItem(DATA_CACHE_KEY); } catch {}
+        try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify({ storedAt: Date.now(), data })); } catch {}
+    }
+}
+
 function updateCardClass(cardId, percentage) {
     const card = document.getElementById(cardId);
     card.classList.remove('high-chance', 'medium-chance', 'low-chance');
@@ -213,9 +241,22 @@ async function retrieveData() {
         const data = await response.json();
         displayData(data);
         hideError();
+        saveCachedData(data);
+        if (displayedFromCache) {
+            showToast('Dati aggiornati (rete)', 'success', 2500, true);
+        }
     } catch (error) {
         console.error('Errore:', error);
-        showError('Errore nel caricamento dati. Ritento fra 60 secondi...');
+        const cached = loadCachedData();
+        if (cached && !displayedFromCache) {
+            displayData(cached.data);
+            displayedFromCache = true;
+            showToast('Offline: mostrati dati salvati', 'info', 4000);
+        } else if (cached) {
+            showToast('Errore rete, dati cache già mostrati', 'error', 4000);
+        } else {
+            showError('Errore nel caricamento dati. Ritento fra 60 secondi...');
+        }
         setTimeout(retrieveData, 60_000);
     }
 }
@@ -269,7 +310,15 @@ function showToast(message, type = 'info', duration = 5000, silent = false) {
 
 
 document.addEventListener('DOMContentLoaded', function () {
+    const cached = loadCachedData();
+    if (cached) {
+        displayData(cached.data);
+        displayedFromCache = true;
+        showToast('Dati caricati dalla cache', 'info', 2000, true);
+    }
     retrieveData();
+    // Aggiornamento periodico (stale-while-revalidate lato client) ogni 30 minuti
+    setInterval(retrieveData, 30 * 60 * 1000);
 });
 
 if ('serviceWorker' in navigator) {
