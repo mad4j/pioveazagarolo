@@ -7,6 +7,35 @@ function formatDate(dateString) {
 // Mappa grafici per eventuale aggiornamento futuro
 const chartInstances = {};
 
+// Plugin per auto-hide tooltip dopo 10s di inattività (soprattutto su touch dove resta "appiccicato")
+const tooltipTimeoutPlugin = {
+    id: 'tooltipTimeout',
+    beforeEvent(chart, args) {
+        const now = Date.now();
+        // Aggiorna timestamp all'evento (escludo mouseout per evitare reset mentre esce)
+        if (args.event && args.event.type && args.event.type !== 'mouseout') {
+            chart.$_lastInteractionTs = now;
+        }
+        const tooltip = chart.tooltip;
+        if (!tooltip) return;
+        if (tooltip.opacity > 0) {
+            const last = chart.$_lastInteractionTs || now;
+            if (now - last > 10_000) { // 10 secondi
+                // Svuota elementi attivi per nascondere tooltip
+                tooltip.setActiveElements([], {x: 0, y: 0});
+                // Aggiorna una sola volta per ciclo (debounce semplice)
+                if (!chart.$_pendingTooltipHide) {
+                    chart.$_pendingTooltipHide = true;
+                    requestAnimationFrame(() => {
+                        chart.$_pendingTooltipHide = false;
+                        chart.update();
+                    });
+                }
+            }
+        }
+    }
+};
+
 // Plugin linea ora corrente (Europa/Rome) per il grafico di "Oggi"
 // La linea è calcolata solo al primo draw (cache) e non si aggiorna finché non si ricarica la pagina.
 const currentHourLinePlugin = {
@@ -111,7 +140,7 @@ function buildChart(target, probabilityData, precipitationData) {
         chartInstances[target].destroy();
     }
     chartInstances[target] = new Chart(ctx, {
-    plugins: target === 'today-chart' ? [currentHourLinePlugin] : [],
+    plugins: target === 'today-chart' ? [currentHourLinePlugin, tooltipTimeoutPlugin] : [tooltipTimeoutPlugin],
         data: {
             labels: [...Array(24).keys()].map(hour => `${hour}:00`),
             datasets: [
