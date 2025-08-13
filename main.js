@@ -30,7 +30,15 @@ const currentHourLinePlugin = {
         const { top, bottom } = chart.chartArea;
         const ctx = chart.ctx;
         ctx.save();
-    ctx.strokeStyle = opts.color || '#27ae60';
+        // Overlay grigio a sinistra della linea dell'ora corrente (solo chart oggi)
+        try {
+            const { left, right } = chart.chartArea;
+            if (x > left) {
+                ctx.fillStyle = opts.overlayColor || 'rgba(120,120,120,0.15)';
+                ctx.fillRect(left, top, x - left, bottom - top);
+            }
+        } catch {}
+    	ctx.strokeStyle = opts.color || '#27ae60';
         ctx.lineWidth = 1; // più fine
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
@@ -165,7 +173,7 @@ function buildChart(target, probabilityData, precipitationData) {
                 }
             },
             plugins: {
-                currentHourLine: { color: '#27ae60' }, // opzioni plugin (solo se presente)
+                currentHourLine: { color: '#27ae60', overlayColor: 'rgba(128,128,128,0.18)' }, // opzioni plugin (solo se presente)
                 legend: { display: false },
                 tooltip: {
                     backgroundColor: 'rgba(44, 62, 80, 0.9)',
