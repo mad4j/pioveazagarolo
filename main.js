@@ -400,6 +400,21 @@ document.addEventListener('DOMContentLoaded', function () {
         showToast('Sei offline: dati da cache', 'info', 4000, true);
     });
     updateOfflineBadge();
+    // Carica build info per tooltip titolo
+    (async () => {
+        try {
+            const r = await fetch('build-info.json?nocache=' + Date.now());
+            if (r.ok) {
+                const info = await r.json();
+                const titleEl = document.getElementById('page-title');
+                if (titleEl) {
+                    const date = new Date(info.buildDate || Date.now());
+                    const fmt = new Intl.DateTimeFormat('it-IT', { dateStyle: 'short', timeStyle: 'short' }).format(date);
+                    titleEl.title = `Build: ${fmt} (commit ${info.commitHash || 'n/a'})`;
+                }
+            }
+        } catch {}
+    })();
     const cached = loadCachedData();
     if (cached) displayData(cached.data);
     retrieveData();
