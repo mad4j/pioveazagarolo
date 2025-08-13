@@ -7,23 +7,27 @@ function formatDate(dateString) {
 // Mappa grafici per eventuale aggiornamento futuro
 const chartInstances = {};
 
-// Plugin per auto-hide tooltip dopo 10s di inattività (soprattutto su touch dove resta "appiccicato")
+// Plugin per auto-hide tooltip dopo 5s di inattività SOLO su dispositivi touch
 const tooltipTimeoutPlugin = {
     id: 'tooltipTimeout',
     beforeEvent(chart, args) {
+        // Rileva dispositivo touch (usa cache per non ricalcolare)
+        if (typeof chart.$_isTouch === 'undefined') {
+            chart.$_isTouch = (typeof window !== 'undefined') && (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0);
+        }
+        if (!chart.$_isTouch) return; // Non interferire su desktop: tooltip rimane finché hover
         const now = Date.now();
-        // Aggiorna timestamp all'evento (escludo mouseout per evitare reset mentre esce)
-        if (args.event && args.event.type && args.event.type !== 'mouseout') {
+        const evType = args?.event?.type;
+        // Considera interazioni rilevanti (touchstart, touchmove, click, mousemove su device ibridi)
+        if (evType && evType !== 'mouseout') {
             chart.$_lastInteractionTs = now;
         }
         const tooltip = chart.tooltip;
         if (!tooltip) return;
         if (tooltip.opacity > 0) {
             const last = chart.$_lastInteractionTs || now;
-            if (now - last > 10_000) { // 10 secondi
-                // Svuota elementi attivi per nascondere tooltip
-                tooltip.setActiveElements([], {x: 0, y: 0});
-                // Aggiorna una sola volta per ciclo (debounce semplice)
+            if (now - last > 5_000) { // 5 secondi
+                tooltip.setActiveElements([], { x: 0, y: 0 });
                 if (!chart.$_pendingTooltipHide) {
                     chart.$_pendingTooltipHide = true;
                     requestAnimationFrame(() => {
