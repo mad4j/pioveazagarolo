@@ -102,6 +102,30 @@
   to { opacity:0; transform: translateY(-6px) scale(.96); }
 }
 
+/* Offline badge */
+#offline-badge {
+  position: fixed;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  background: linear-gradient(135deg, #7f8c8d, #5d6d73);
+  color: #fff;
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  padding: 0.35rem 0.55rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  z-index: 1100;
+  animation: offline-in .35s ease;
+  font-weight: 600;
+}
+@keyframes offline-in { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+@media (prefers-color-scheme: dark) {
+  #offline-badge { background: linear-gradient(135deg, #4b565b, #3a4347); }
+}
+
 body {
   background-color: var(--light-bg);
   color: var(--text-primary);

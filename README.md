@@ -47,7 +47,7 @@ Lista di possibili evoluzioni (ordinamento grossolano per impatto vs sforzo):
 ### PWA & Offline
 
 - Aggiungere fallback offline esplicito (pagina offline con ultimo snapshot e note).
-- Mostrare badge “Offline” quando le richieste rete falliscono e stiamo servendo cache.
+- Mostrare badge “Offline” quando le richieste rete falliscono e stiamo servendo cache. **[DONE]**
 - Persistenza estesa dei dati meteo in IndexedDB (storico ultimi N giorni) per analisi trend.
 - Invio opzionale di Web Push per “Probabilità pioggia > X% domani” (con opt‑in chiaro).
 

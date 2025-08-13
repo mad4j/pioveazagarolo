@@ -350,6 +350,27 @@ function showToast(message, type = 'info', duration = 5000, silent = false) {
 
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Gestione badge offline
+    const offlineBadge = document.getElementById('offline-badge');
+    function updateOfflineBadge() {
+        if (!offlineBadge) return;
+        if (navigator.onLine) {
+            offlineBadge.hidden = true;
+        } else {
+            offlineBadge.hidden = false;
+        }
+    }
+    window.addEventListener('online', () => {
+        updateOfflineBadge();
+        showToast('Connessione ripristinata', 'success', 3000, true);
+        // Provo un refresh dati se eravamo offline
+        retrieveData();
+    });
+    window.addEventListener('offline', () => {
+        updateOfflineBadge();
+        showToast('Sei offline: dati da cache', 'info', 4000, true);
+    });
+    updateOfflineBadge();
     const cached = loadCachedData();
     if (cached) displayData(cached.data);
     retrieveData();

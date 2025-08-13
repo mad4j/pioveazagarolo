@@ -1,5 +1,6 @@
 // Incrementare CACHE_NAME per forzare l'installazione di un nuovo Service Worker
-const CACHE_NAME = "piove-a-zagarolo-cache-v3";
+// v4: aggiunto badge offline & aggiornamenti UI
+const CACHE_NAME = "piove-a-zagarolo-cache-v4";
 const urlsToCache = [
   "./",
   "./index.html",
