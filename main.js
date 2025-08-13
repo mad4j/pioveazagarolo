@@ -190,16 +190,17 @@ function buildChart(target, probabilityData, precipitationData) {
     });
 }
 
+// Icone meteo basate su WMO weather_code
 function getRainIconClass(weatherCode) {
-    if ([95, 96, 99].includes(weatherCode)) return 'wi wi-thunderstorm'; // Temporale
-    if ([85, 86].includes(weatherCode)) return 'wi wi-storm-showers';   // Neve
+    if ([95, 96, 99].includes(weatherCode)) return 'wi wi-thunderstorm';     // Temporale
+    if ([85, 86].includes(weatherCode)) return 'wi wi-storm-showers';        // Neve
     if ([61, 63, 65, 80, 81, 82].includes(weatherCode)) return 'wi wi-rain'; // Pioggia
-    if ([71, 73, 75, 77].includes(weatherCode)) return 'wi wi-snow';    // Neve
-    if ([45, 48].includes(weatherCode)) return 'wi wi-fog';             // Nebbia
+    if ([71, 73, 75, 77].includes(weatherCode)) return 'wi wi-snow';         // Neve
+    if ([45, 48].includes(weatherCode)) return 'wi wi-fog';                  // Nebbia
     if ([51, 53, 55, 56, 57].includes(weatherCode)) return 'wi wi-sprinkle'; // Pioviggine
-    if ([1, 2, 3].includes(weatherCode)) return 'wi wi-cloud';          // Parzialmente nuvoloso
-    if (weatherCode === 0) return 'wi wi-day-sunny';                    // Sereno
-    return 'wi wi-cloud';                                               // Default nuvoloso
+    if ([2, 3].includes(weatherCode)) return 'wi wi-cloud';                  // Parzialmente nuvoloso
+    if ([0, 1].includes(weatherCode)) return 'wi wi-day-sunny';              // Sereno
+    return 'wi wi-cloud';                                                    // Default nuvoloso
 }
 
 function displayData(data) {
