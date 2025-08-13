@@ -460,6 +460,8 @@ footer {
   .forecast-card { box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
   .header h1 { color: var(--secondary-color); }
   .rain-percentage { color: var(--secondary-color); }
+  /* Day titles (Oggi, Domani, Dopodomani) lighter for readability on dark bg */
+  .day-title { color: var(--text-primary); }
   .high-chance { background-color: rgba(231,76,60,0.18); }
   .medium-chance { background-color: rgba(241,196,15,0.18); }
   .low-chance { background-color: rgba(46,204,113,0.18); }
