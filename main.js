@@ -7,6 +7,40 @@ function formatDate(dateString) {
 // Mappa grafici per eventuale aggiornamento futuro
 const chartInstances = {};
 
+// Plugin linea ora corrente (Europa/Rome) per il grafico di "Oggi"
+// La linea è calcolata solo al primo draw (cache) e non si aggiorna finché non si ricarica la pagina.
+const currentHourLinePlugin = {
+    id: 'currentHourLine',
+    afterDraw(chart, args, opts) {
+        if (chart.config?.data?.labels?.length !== 24) return; // aspettati 24 ore
+        if (!opts) return;
+        // Usa ora già cache oppure calcola e memorizza
+        if (typeof opts._cachedHour !== 'number') {
+            try {
+                opts._cachedHour = parseInt(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Europe/Rome' }).format(new Date()), 10);
+                if (Number.isNaN(opts._cachedHour)) opts._cachedHour = new Date().getHours();
+            } catch {
+                opts._cachedHour = new Date().getHours();
+            }
+        }
+        const hour = opts._cachedHour;
+        const xScale = chart.scales.x;
+        if (!xScale) return;
+        const x = xScale.getPixelForValue(hour);
+        const { top, bottom } = chart.chartArea;
+        const ctx = chart.ctx;
+        ctx.save();
+    ctx.strokeStyle = opts.color || '#27ae60';
+        ctx.lineWidth = 1; // più fine
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(x, top);
+        ctx.lineTo(x, bottom);
+        ctx.stroke();
+        ctx.restore();
+    }
+};
+
 function getDaySlice(array, dayIndex) {
     const start = dayIndex * 24;
     return array.slice(start, start + 24);
@@ -69,7 +103,7 @@ function buildChart(target, probabilityData, precipitationData) {
         chartInstances[target].destroy();
     }
     chartInstances[target] = new Chart(ctx, {
-        
+    plugins: target === 'today-chart' ? [currentHourLinePlugin] : [],
         data: {
             labels: [...Array(24).keys()].map(hour => `${hour}:00`),
             datasets: [
@@ -131,6 +165,7 @@ function buildChart(target, probabilityData, precipitationData) {
                 }
             },
             plugins: {
+                currentHourLine: { color: '#27ae60' }, // opzioni plugin (solo se presente)
                 legend: { display: false },
                 tooltip: {
                     backgroundColor: 'rgba(44, 62, 80, 0.9)',
