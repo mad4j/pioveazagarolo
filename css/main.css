@@ -138,6 +138,8 @@ body {
   min-height: 100vh;
 }
 
+#page-title { cursor: default; }
+
 .dashboard-container {
   max-width: 1000px;
   width: 96%;
