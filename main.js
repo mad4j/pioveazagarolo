@@ -7,39 +7,6 @@ function formatDate(dateString) {
 // Mappa grafici per eventuale aggiornamento futuro
 const chartInstances = {};
 
-// Plugin per auto-hide tooltip dopo 5s di inattività SOLO su dispositivi touch
-const tooltipTimeoutPlugin = {
-    id: 'tooltipTimeout',
-    beforeEvent(chart, args) {
-        // Rileva dispositivo touch (usa cache per non ricalcolare)
-        if (typeof chart.$_isTouch === 'undefined') {
-            chart.$_isTouch = (typeof window !== 'undefined') && (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0);
-        }
-        if (!chart.$_isTouch) return; // Non interferire su desktop: tooltip rimane finché hover
-        const now = Date.now();
-        const evType = args?.event?.type;
-        // Considera interazioni rilevanti (touchstart, touchmove, click, mousemove su device ibridi)
-        if (evType && evType !== 'mouseout') {
-            chart.$_lastInteractionTs = now;
-        }
-        const tooltip = chart.tooltip;
-        if (!tooltip) return;
-        if (tooltip.opacity > 0) {
-            const last = chart.$_lastInteractionTs || now;
-            if (now - last > 5_000) { // 5 secondi
-                tooltip.setActiveElements([], { x: 0, y: 0 });
-                if (!chart.$_pendingTooltipHide) {
-                    chart.$_pendingTooltipHide = true;
-                    requestAnimationFrame(() => {
-                        chart.$_pendingTooltipHide = false;
-                        chart.update();
-                    });
-                }
-            }
-        }
-    }
-};
-
 // Plugin linea ora corrente (Europa/Rome) per il grafico di "Oggi"
 // La linea è calcolata solo al primo draw (cache) e non si aggiorna finché non si ricarica la pagina.
 const currentHourLinePlugin = {
@@ -79,6 +46,33 @@ const currentHourLinePlugin = {
         ctx.lineTo(x, bottom);
         ctx.stroke();
         ctx.restore();
+    }
+};
+
+// Plugin: auto-hide tooltip after 5s on touch devices (tooltip on tap otherwise resta indefinitamente)
+const isTouchDevice = (typeof window !== 'undefined') && (('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0);
+const tooltipAutoHidePlugin = {
+    id: 'tooltipAutoHide',
+    afterEvent(chart, args) {
+        if (!isTouchDevice) return; // Solo dispositivi touch
+        const evType = args?.event?.type;
+        // Considera interazioni che normalmente mostrano tooltip persistente
+        if (['click', 'touchstart', 'pointerup', 'pointerdown'].includes(evType)) {
+            const tt = chart.tooltip;
+            if (tt && tt.opacity) {
+                if (chart.$_tooltipTimer) clearTimeout(chart.$_tooltipTimer);
+                chart.$_tooltipTimer = setTimeout(() => {
+                    // Se ancora visibile dopo 5s, rimuovi
+                    if (chart.tooltip && chart.tooltip.opacity) {
+                        chart.setActiveElements([]);
+                        chart.update();
+                    }
+                }, 5000);
+            }
+        }
+    },
+    beforeDestroy(chart) {
+        if (chart.$_tooltipTimer) clearTimeout(chart.$_tooltipTimer);
     }
 };
 
@@ -143,8 +137,10 @@ function buildChart(target, probabilityData, precipitationData) {
     if (chartInstances[target]) {
         chartInstances[target].destroy();
     }
+    const pluginList = [tooltipAutoHidePlugin];
+    if (target === 'today-chart') pluginList.push(currentHourLinePlugin);
     chartInstances[target] = new Chart(ctx, {
-    plugins: target === 'today-chart' ? [currentHourLinePlugin, tooltipTimeoutPlugin] : [tooltipTimeoutPlugin],
+    plugins: pluginList,
         data: {
             labels: [...Array(24).keys()].map(hour => `${hour}:00`),
             datasets: [
