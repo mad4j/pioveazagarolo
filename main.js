@@ -4,6 +4,11 @@ function formatDate(dateString) {
     return dayFormatter.format(new Date(dateString));
 }
 
+// Funzione per rilevare dispositivi touchscreen
+function isTouchDevice() {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+}
+
 // Mappa grafici per eventuale aggiornamento futuro
 const chartInstances = {};
 
@@ -145,6 +150,20 @@ function buildChart(target, probabilityData, precipitationData) {
             responsive: true,
             maintainAspectRatio: false,
             layout: { padding: 5 },
+            onHover: (event, activeElements, chart) => {
+                // Implementa timeout di 5 secondi per dispositivi touchscreen
+                if (isTouchDevice() && activeElements.length > 0) {
+                    // Cancella qualsiasi timeout precedente
+                    if (chart._tooltipTimeout) {
+                        clearTimeout(chart._tooltipTimeout);
+                    }
+                    // Imposta nuovo timeout di 5 secondi
+                    chart._tooltipTimeout = setTimeout(() => {
+                        chart.tooltip.setActiveElements([], {x: 0, y: 0});
+                        chart.update('none');
+                    }, 5000);
+                }
+            },
             scales: {
                 y: {
                     min: 0,
