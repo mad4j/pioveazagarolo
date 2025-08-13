@@ -49,33 +49,6 @@ const currentHourLinePlugin = {
     }
 };
 
-// Plugin: auto-hide tooltip after 5s on touch devices (tooltip on tap otherwise resta indefinitamente)
-const isTouchDevice = (typeof window !== 'undefined') && (('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0);
-const tooltipAutoHidePlugin = {
-    id: 'tooltipAutoHide',
-    afterEvent(chart, args) {
-        if (!isTouchDevice) return; // Solo dispositivi touch
-        const evType = args?.event?.type;
-        // Considera interazioni che normalmente mostrano tooltip persistente
-        if (['click', 'touchstart', 'pointerup', 'pointerdown'].includes(evType)) {
-            const tt = chart.tooltip;
-            if (tt && tt.opacity) {
-                if (chart.$_tooltipTimer) clearTimeout(chart.$_tooltipTimer);
-                chart.$_tooltipTimer = setTimeout(() => {
-                    // Se ancora visibile dopo 5s, rimuovi
-                    if (chart.tooltip && chart.tooltip.opacity) {
-                        chart.setActiveElements([]);
-                        chart.update();
-                    }
-                }, 5000);
-            }
-        }
-    },
-    beforeDestroy(chart) {
-        if (chart.$_tooltipTimer) clearTimeout(chart.$_tooltipTimer);
-    }
-};
-
 function getDaySlice(array, dayIndex) {
     const start = dayIndex * 24;
     return array.slice(start, start + 24);
@@ -137,10 +110,8 @@ function buildChart(target, probabilityData, precipitationData) {
     if (chartInstances[target]) {
         chartInstances[target].destroy();
     }
-    const pluginList = [tooltipAutoHidePlugin];
-    if (target === 'today-chart') pluginList.push(currentHourLinePlugin);
     chartInstances[target] = new Chart(ctx, {
-    plugins: pluginList,
+    plugins: target === 'today-chart' ? [currentHourLinePlugin] : [],
         data: {
             labels: [...Array(24).keys()].map(hour => `${hour}:00`),
             datasets: [
@@ -400,21 +371,6 @@ document.addEventListener('DOMContentLoaded', function () {
         showToast('Sei offline: dati da cache', 'info', 4000, true);
     });
     updateOfflineBadge();
-    // Carica build info per tooltip titolo
-    (async () => {
-        try {
-            const r = await fetch('build-info.json?nocache=' + Date.now());
-            if (r.ok) {
-                const info = await r.json();
-                const titleEl = document.getElementById('page-title');
-                if (titleEl) {
-                    const date = new Date(info.buildDate || Date.now());
-                    const fmt = new Intl.DateTimeFormat('it-IT', { dateStyle: 'short', timeStyle: 'short' }).format(date);
-                    titleEl.title = `Build: ${fmt} (commit ${info.commitHash || 'n/a'})`;
-                }
-            }
-        } catch {}
-    })();
     const cached = loadCachedData();
     if (cached) displayData(cached.data);
     retrieveData();

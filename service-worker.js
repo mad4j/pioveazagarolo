@@ -8,7 +8,6 @@ const urlsToCache = [
   "./watermark-512x512.png",
   "./main.js",
   "./pwa-install.js",
-  "./build-info.json",
   "./manifest.json",
   "./css/main.css",
   "./css/weather-icons.min.css",
