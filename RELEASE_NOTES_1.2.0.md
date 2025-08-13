@@ -1,4 +1,4 @@
-# Release 0.2.0 (2025-08-13)
+# Release 1.2.0 (2025-08-13)
 
 ## Novità / Funzionalità
 
@@ -26,4 +26,4 @@
 
 ## Note
 
-La numerazione 0.2.0 è inferiore alla precedente 1.1.0: valutare riallineamento (es. 1.2.0) nelle prossime release.
+Versione rinumerata da 0.2.0 a 1.2.0 per coerenza con versioni precedenti (segue 1.1.0).

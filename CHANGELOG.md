@@ -2,9 +2,9 @@
 
 Tutte le modifiche rilevanti a questo progetto verranno documentate in questo file.
 
-Il formato si ispira a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/) e a [Semantic Versioning](https://semver.org/), anche se questa release (0.2.0) viene creata dopo la 1.1.0: si consiglia in futuro di riallineare la numerazione (ad es. usare 1.2.0) per coerenza semantica.
+Il formato si ispira a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0/) e a [Semantic Versioning](https://semver.org/).
 
-## [0.2.0] - 2025-08-13
+## [1.2.0] - 2025-08-13
 
 ### Novità / Funzionalità
 
@@ -34,7 +34,7 @@ Il formato si ispira a [Keep a Changelog](https://keepachangelog.com/it-IT/1.1.0
 
 Questa release introduce numerose ottimizzazioni PWA e miglioramenti di UX attorno al grafico delle precipitazioni/condizioni correnti, oltre a un sistema di caching locale per ridurre le chiamate alla API.
 
-Attenzione: la numerazione 0.2.0 è inferiore alla precedente 1.1.0. Per rispettare il versioning semantico sarebbe opportuno che la prossima release riprenda da 1.2.0 o successiva.
+Nota: questa versione è stata inizialmente pubblicata come 0.2.0 ed è stata rinumerata a 1.2.0 per riallineare la sequenza semantica dopo 1.1.0.
 
 ## Storico Versioni Precedenti
 
