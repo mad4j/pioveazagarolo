@@ -1,18 +1,15 @@
 {
   "name": "Piove a Zagarolo?",
-  "short_name": "Piove a Zagarolo?",
+  "short_name": "Piove Zagarolo",
+  "id": "/?source=pwa",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f8f9fa",
   "theme_color": "#2c3e50",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "watermark-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    }
+    { "src": "watermark-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
-   "categories": ["weather", "utilities"]
+  "categories": ["weather", "utilities"]
 }

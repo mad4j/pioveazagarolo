@@ -1,8 +1,7 @@
-const CACHE_NAME = "piove-a-zagarolo-cache-v1";
+const CACHE_NAME = "piove-a-zagarolo-cache-v2";
 const urlsToCache = [
   "./",
   "./index.html",
-  "./data.json",
   "./favicon.png",
   "./watermark-512x512.png",
   "./main.js",
@@ -10,63 +9,74 @@ const urlsToCache = [
   "./manifest.json",
   "./css/main.css",
   "./css/weather-icons.min.css",
+  "./vendor/bootstrap/bootstrap.min.css",
+  "./vendor/bootstrap/bootstrap.bundle.min.js",
+  "./vendor/chart/chart.umd.min.js",
   "./font/weathericons-regular-webfont.eot",
   "./font/weathericons-regular-webfont.svg",
   "./font/weathericons-regular-webfont.woff",
   "./font/weathericons-regular-webfont.woff2",
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css",
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js",
-  "https://cdn.jsdelivr.net/npm/chart.js"
+  
 ];
 
 self.addEventListener("install", event => {
-  self.skipWaiting(); // Activate new SW immediately
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      // Do NOT cache data.json on install, it's dynamic
-      const staticAssets = urlsToCache.filter(url => !url.includes("data.json"));
-      return cache.addAll(staticAssets);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
 self.addEventListener("fetch", event => {
-  // Stale-while-revalidate for data.json
-  if (event.request.url.includes("data.json")) {
+  const { request } = event;
+
+  // Navigazioni HTML: Network first con fallback cache
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(c => c.put('./', copy));
+          return response;
+        })
+        .catch(() => caches.match('./') || caches.match('index.html'))
+    );
+    return;
+  }
+
+  // API dinamica data.json: Stale-While-Revalidate
+  if (request.url.includes('data.json')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async cache => {
-        const cached = await cache.match(event.request);
-        const fetchPromise = fetch(event.request)
-          .then(networkResponse => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
+        const cached = await cache.match(request);
+        const networkPromise = fetch(request)
+          .then(resp => {
+            cache.put(request, resp.clone());
+            return resp;
           })
           .catch(() => cached);
-        // Return cached first, then update in background
-        return cached || fetchPromise;
+        return cached || networkPromise;
       })
     );
-  } else {
-    event.respondWith(
-      caches.match(event.request).then(response => {
-        return response || fetch(event.request);
-      })
-    );
+    return;
   }
+
+  // Static assets: Cache first fallback network
+  event.respondWith(
+    caches.match(request).then(cached => cached || fetch(request))
+  );
 });
 
 self.addEventListener("activate", event => {
-  self.clients.claim(); // Take control immediately
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (!cacheWhitelist.includes(cacheName)) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches.keys().then(cacheNames => Promise.all(
+      cacheNames.map(name => !cacheWhitelist.includes(name) && caches.delete(name))
+    )).then(() => self.clients.claim())
   );
+});
+
+// Aggiornamento controllato dal client
+self.addEventListener('message', event => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

@@ -12,6 +12,80 @@
   --border-color: #e0e0e0;
 }
 
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Toasts */
+#toast-container {
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+.app-toast {
+  background: linear-gradient(135deg, var(--primary-color), #1d2b36);
+  color: #fff;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  transform: translateY(-8px) scale(.98);
+  animation: toast-in .35s ease forwards;
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+}
+.app-toast::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent-color);
+}
+.app-toast.error { background: linear-gradient(135deg, #8b1e23, #5c0f13); }
+.app-toast.error::before { background:#e74c3c; }
+.app-toast.success { background: linear-gradient(135deg, #1e5c32, #134021); }
+.app-toast.success::before { background:#27ae60; }
+.app-toast.info { background: linear-gradient(135deg, #2c3e50, #22313f); }
+.app-toast.info::before { background:#3498db; }
+.toast-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.8;
+  transition: opacity .2s;
+}
+.toast-close:hover { opacity:1; }
+@keyframes toast-in {
+  to { opacity:1; transform: translateY(0) scale(1); }
+}
+@keyframes toast-out {
+  to { opacity:0; transform: translateY(-6px) scale(.96); }
+}
+
 body {
   background-color: var(--light-bg);
   color: var(--text-primary);
@@ -354,4 +428,23 @@ footer {
     height: min(18vh, 70px);
     min-height: 40px;
   }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --light-bg: #1f2124;
+    --card-bg: #2a2d31;
+    --text-primary: #f2f2f2;
+    --text-secondary: #c5c5c5;
+    --text-muted: #9aa0a6;
+    --border-color: #3a3d40;
+  }
+  body { background-color: var(--light-bg); }
+  .forecast-card { box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+  .header h1 { color: var(--secondary-color); }
+  .rain-percentage { color: var(--secondary-color); }
+  .high-chance { background-color: rgba(231,76,60,0.18); }
+  .medium-chance { background-color: rgba(241,196,15,0.18); }
+  .low-chance { background-color: rgba(46,204,113,0.18); }
 }

@@ -1,7 +1,15 @@
+// Date formatter riusabile
+const dayFormatter = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 function formatDate(dateString) {
-    const date = new Date(dateString);
-    const options = { weekday: 'long', day: 'numeric', month: 'long' };
-    return date.toLocaleDateString('it-IT', options);
+    return dayFormatter.format(new Date(dateString));
+}
+
+// Mappa grafici per eventuale aggiornamento futuro
+const chartInstances = {};
+
+function getDaySlice(array, dayIndex) {
+    const start = dayIndex * 24;
+    return array.slice(start, start + 24);
 }
 
 function updateCardClass(cardId, percentage) {
@@ -28,7 +36,11 @@ function getPrecipitationBarColor(value) {
 
 function buildChart(target, probabilityData, precipitationData) {
     const ctx = document.getElementById(target);
-    new Chart(ctx, {
+    if (!ctx) return;
+    if (chartInstances[target]) {
+        chartInstances[target].destroy();
+    }
+    chartInstances[target] = new Chart(ctx, {
         
         data: {
             labels: [...Array(24).keys()].map(hour => `${hour}:00`),
@@ -128,13 +140,13 @@ function getRainIconClass(weatherCode) {
 }
 
 function displayData(data) {
-    const todayData = data.hourly.precipitation_probability.slice(0, 24);
-    const tomorrowData = data.hourly.precipitation_probability.slice(24, 48);
-    const dayAfterTomorrowData = data.hourly.precipitation_probability.slice(48, 72);
+    const todayData = getDaySlice(data.hourly.precipitation_probability, 0);
+    const tomorrowData = getDaySlice(data.hourly.precipitation_probability, 1);
+    const dayAfterTomorrowData = getDaySlice(data.hourly.precipitation_probability, 2);
 
-    const todayPrecip = data.hourly.precipitation.slice(0, 24);
-    const tomorrowPrecip = data.hourly.precipitation.slice(24, 48);
-    const dayAfterTomorrowPrecip = data.hourly.precipitation.slice(48, 72);
+    const todayPrecip = getDaySlice(data.hourly.precipitation, 0);
+    const tomorrowPrecip = getDaySlice(data.hourly.precipitation, 1);
+    const dayAfterTomorrowPrecip = getDaySlice(data.hourly.precipitation, 2);
 
     const todayPercentage = data.daily.precipitation_probability_max[0];
     const tomorrowPercentage = data.daily.precipitation_probability_max[1];
@@ -145,9 +157,21 @@ function displayData(data) {
     const precipitationDayAfterTomorrow = data.daily.precipitation_sum[2];
 
     // Cambia icona in base al weather_code
-    document.getElementById('today-icon').className = getRainIconClass(data.daily.weather_code[0]);
-    document.getElementById('tomorrow-icon').className = getRainIconClass(data.daily.weather_code[1]);
-    document.getElementById('dayaftertomorrow-icon').className = getRainIconClass(data.daily.weather_code[2]);
+    const todayIcon = document.getElementById('today-icon');
+    const tomorrowIcon = document.getElementById('tomorrow-icon');
+    const dayAfterTomorrowIcon = document.getElementById('dayaftertomorrow-icon');
+    if (todayIcon) {
+        todayIcon.className = getRainIconClass(data.daily.weather_code[0]);
+        todayIcon.setAttribute('aria-label', `Meteo oggi codice ${data.daily.weather_code[0]}`);
+    }
+    if (tomorrowIcon) {
+        tomorrowIcon.className = getRainIconClass(data.daily.weather_code[1]);
+        tomorrowIcon.setAttribute('aria-label', `Meteo domani codice ${data.daily.weather_code[1]}`);
+    }
+    if (dayAfterTomorrowIcon) {
+        dayAfterTomorrowIcon.className = getRainIconClass(data.daily.weather_code[2]);
+        dayAfterTomorrowIcon.setAttribute('aria-label', `Meteo dopodomani codice ${data.daily.weather_code[2]}`);
+    }
 
     // Temperatura max/min accanto all'icona
     document.getElementById('today-temp-max').textContent = `${Math.round(data.daily.temperature_2m_max[0])}°`;
@@ -176,21 +200,70 @@ function displayData(data) {
     buildChart("tomorrow-chart", tomorrowData, tomorrowPrecip);
     buildChart("dayaftertomorrow-chart", dayAfterTomorrowData, dayAfterTomorrowPrecip);
 
-    document.getElementById("last-updated").textContent = data.last_update.trim();
+    const lastUpdated = document.getElementById("last-updated");
+    if (lastUpdated) lastUpdated.textContent = data.last_update.trim();
+    announceUpdate(`Dati meteo aggiornati alle ${data.last_update.trim()}`);
 }
 
 async function retrieveData() {
     try {
-        const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
+        const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`; // invalida ogni minuto
         const response = await fetch(`data.json${randomQuery}`);
-        if (!response.ok) {
-            throw new Error('Errore nel caricamento dei dati meteo');
-        }
+        if (!response.ok) throw new Error('Errore nel caricamento dei dati meteo');
         const data = await response.json();
         displayData(data);
+        hideError();
     } catch (error) {
         console.error('Errore:', error);
-        alert('Si è verificato un errore nel caricamento dei dati. Riprova più tardi.');
+        showError('Errore nel caricamento dati. Ritento fra 60 secondi...');
+        setTimeout(retrieveData, 60_000);
+    }
+}
+
+function showError(message) {
+    showToast(message, 'error');
+}
+
+function hideError() {
+    // Non serve più con i toast; eventuale implementazione futura
+}
+
+function announceUpdate(message) {
+    showToast(message, 'info', 3000, true);
+}
+
+// Sistema toast riutilizzabile
+function showToast(message, type = 'info', duration = 5000, silent = false) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `app-toast ${type}`;
+    const btn = document.createElement('button');
+    btn.className = 'toast-close';
+    btn.setAttribute('aria-label', 'Chiudi notifica');
+    btn.innerHTML = '&times;';
+    btn.onclick = () => dismiss();
+    toast.innerHTML = `<span>${message}</span>`;
+    toast.appendChild(btn);
+    container.appendChild(toast);
+
+    if (!silent) {
+        const live = document.getElementById('app-alert');
+        if (live) {
+            live.textContent = message;
+            setTimeout(() => { live.textContent = ''; }, 2000);
+        }
+    }
+
+    let autoTimer = null;
+    if (duration > 0) {
+        autoTimer = setTimeout(() => dismiss(), duration);
+    }
+
+    function dismiss() {
+        if (autoTimer) clearTimeout(autoTimer);
+        toast.style.animation = 'toast-out .35s forwards';
+        setTimeout(() => toast.remove(), 360);
     }
 }
 
@@ -200,11 +273,41 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-        .then(registration => {
-            console.log('Service Worker registrato con successo:', registration.scope);
-        })
-        .catch(error => {
-            console.error('Errore nella registrazione del Service Worker:', error);
+    const updateBtn = document.getElementById('update-button');
+    navigator.serviceWorker.register('service-worker.js').then(registration => {
+        console.log('Service Worker registrato con successo:', registration.scope);
+
+        function showUpdateButton(sw) {
+            if (!updateBtn) return;
+            updateBtn.style.display = 'inline-flex';
+            updateBtn.onclick = () => {
+                if (sw && sw.state === 'installed') {
+                    sw.postMessage('SKIP_WAITING');
+                }
+            };
+        }
+
+        // SW già in waiting
+        if (registration.waiting) {
+            showUpdateButton(registration.waiting);
+        }
+
+        // Nuovo SW trovato
+        registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (!newWorker) return;
+            newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    showUpdateButton(newWorker);
+                }
+            });
         });
+
+        // Dopo skipWaiting ricarico pagina
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload();
+        });
+    }).catch(error => {
+        console.error('Errore nella registrazione del Service Worker:', error);
+    });
 }

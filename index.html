@@ -4,11 +4,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Probabilità e intensità di pioggia a Zagarolo per oggi, domani e dopodomani con grafici orari. Dati da Open-Meteo.">
+  <meta name="theme-color" content="#2c3e50">
 
   <title>Piove a Zagarolo?</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link href="vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/weather-icons.min.css">
@@ -21,10 +22,18 @@
       <div class="flex-grow-1 text-center">
         <h1 class="mb-0">Piove a Zagarolo?</h1>
       </div>
-      <button id="install-button" class="btn btn-sm ms-2" style="display:none; background-color: var(--secondary-color); color: #fff; border: none;" title="Installa app">
-        <i class="wi wi-cloud-down"></i>
+      <button id="install-button" class="btn btn-sm ms-2" style="display:none; background-color: var(--secondary-color); color: #fff; border: none;" title="Installa app" aria-label="Installa applicazione PWA">
+        <i class="wi wi-cloud-down" aria-hidden="true"></i>
+      </button>
+      <button id="update-button" class="btn btn-sm ms-1" style="display:none; background-color: var(--accent-color); color:#fff; border:none;" title="Aggiorna app" aria-label="Aggiorna applicazione all'ultima versione">
+        <i class="wi wi-refresh" aria-hidden="true"></i>
       </button>
     </div>
+
+  <!-- Live region nascosta per screen reader -->
+  <div id="app-alert" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+  <!-- Container toasts -->
+  <div id="toast-container" class="toast-container position-fixed" aria-live="polite" aria-atomic="false"></div>
 
     <div class="row">
       <!-- Sezione Oggi -->
@@ -36,7 +45,7 @@
           </div>
           <div class="rain-info">
             <div class="rain-icon">
-              <i class="wi wi-rain" id="today-icon"></i>
+              <i class="wi wi-rain" id="today-icon" role="img" aria-label="Condizioni meteo di oggi"></i>
               <span class="temp-values">
                 <span id="today-temp-max" class="temp-max"></span>
                 <span id="today-temp-min" class="temp-min"></span>
@@ -63,7 +72,7 @@
           </div>
           <div class="rain-info">
             <div class="rain-icon">
-              <i class="wi wi-rain" id="tomorrow-icon"></i>
+              <i class="wi wi-rain" id="tomorrow-icon" role="img" aria-label="Condizioni meteo di domani"></i>
               <span class="temp-values">
                 <span id="tomorrow-temp-max" class="temp-max"></span>
                 <span id="tomorrow-temp-min" class="temp-min"></span>
@@ -90,7 +99,7 @@
           </div>
           <div class="rain-info">
             <div class="rain-icon">
-              <i class="wi wi-rain" id="dayaftertomorrow-icon"></i>
+              <i class="wi wi-rain" id="dayaftertomorrow-icon" role="img" aria-label="Condizioni meteo di dopodomani"></i>
               <span class="temp-values">
                 <span id="dayaftertomorrow-temp-max" class="temp-max"></span>
                 <span id="dayaftertomorrow-temp-min" class="temp-min"></span>
@@ -115,8 +124,8 @@
     </footer>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js" defer></script>
+  <script src="vendor/chart/chart.umd.min.js" defer></script>
   <script src="main.js" defer></script>
   <script src="pwa-install.js" defer></script>
 </body>
