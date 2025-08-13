@@ -1,0 +1,10 @@
+{
+  "name": "piovedomaniazagarolo",
+  "private": true,
+  "version": "1.2.0",
+  "description": "Sito meteo - generazione automatica CHANGELOG",
+  "license": "MIT",
+  "scripts": {
+    "generate-changelog": "node scripts/generate-changelog.js"
+  }
+}
