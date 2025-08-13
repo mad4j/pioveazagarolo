@@ -15,7 +15,7 @@ function getDaySlice(array, dayIndex) {
 // ----- Caching configurazione -----
 const DATA_CACHE_KEY = 'weatherDataV1';
 const DATA_CACHE_TTL_MS = 3 * 60 * 60 * 1000; // 3 ore (cron ogni 2h -> margine)
-let displayedFromCache = false;
+let lastToastMessage = '';
 
 function loadCachedData() {
     try {
@@ -230,7 +230,7 @@ function displayData(data) {
 
     const lastUpdated = document.getElementById("last-updated");
     if (lastUpdated) lastUpdated.textContent = data.last_update.trim();
-    announceUpdate(`Dati meteo aggiornati alle ${data.last_update.trim()}`);
+    // Nessun toast di aggiornamento per evitare rumore
 }
 
 async function retrieveData() {
@@ -242,20 +242,15 @@ async function retrieveData() {
         displayData(data);
         hideError();
         saveCachedData(data);
-        if (displayedFromCache) {
-            showToast('Dati aggiornati (rete)', 'success', 2500, true);
-        }
+    // Messaggio success handler gestito in displayData quando proveniamo da cache
     } catch (error) {
         console.error('Errore:', error);
         const cached = loadCachedData();
-        if (cached && !displayedFromCache) {
+        if (cached) {
+            // Mostra dati cache senza notifiche
             displayData(cached.data);
-            displayedFromCache = true;
-            showToast('Offline: mostrati dati salvati', 'info', 4000);
-        } else if (cached) {
-            showToast('Errore rete, dati cache già mostrati', 'error', 4000);
         } else {
-            showError('Errore nel caricamento dati. Ritento fra 60 secondi...');
+            showError('Errore rete. Ritento fra 60 secondi...');
         }
         setTimeout(retrieveData, 60_000);
     }
@@ -269,12 +264,13 @@ function hideError() {
     // Non serve più con i toast; eventuale implementazione futura
 }
 
-function announceUpdate(message) {
-    showToast(message, 'info', 3000, true);
-}
+function announceUpdate(message) { /* disabilitato per evitare popup eccessivi */ }
 
 // Sistema toast riutilizzabile
 function showToast(message, type = 'info', duration = 5000, silent = false) {
+    // Deduplica immediata se stesso messaggio recente (entro 2s window basata su referenza)
+    if (message === lastToastMessage && type !== 'error') return;
+    lastToastMessage = message;
     const container = document.getElementById('toast-container');
     if (!container) return;
     const toast = document.createElement('div');
@@ -311,11 +307,7 @@ function showToast(message, type = 'info', duration = 5000, silent = false) {
 
 document.addEventListener('DOMContentLoaded', function () {
     const cached = loadCachedData();
-    if (cached) {
-        displayData(cached.data);
-        displayedFromCache = true;
-        showToast('Dati caricati dalla cache', 'info', 2000, true);
-    }
+    if (cached) displayData(cached.data);
     retrieveData();
     // Aggiornamento periodico (stale-while-revalidate lato client) ogni 30 minuti
     setInterval(retrieveData, 30 * 60 * 1000);
