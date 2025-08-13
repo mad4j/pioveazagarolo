@@ -1,4 +1,5 @@
-const CACHE_NAME = "piove-a-zagarolo-cache-v2";
+// Incrementare CACHE_NAME per forzare l'installazione di un nuovo Service Worker
+const CACHE_NAME = "piove-a-zagarolo-cache-v3";
 const urlsToCache = [
   "./",
   "./index.html",

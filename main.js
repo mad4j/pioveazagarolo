@@ -307,6 +307,21 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
             window.location.reload();
         });
+
+        // Poll ogni 5 minuti per update (in caso di mancato evento)
+        setInterval(async () => {
+            try {
+                await registration.update();
+            } catch {}
+        }, 300_000);
+
+        // Se compare un waiting successivo senza updatefound (edge cases)
+        setInterval(() => {
+            if (registration.waiting && updateBtn && updateBtn.style.display === 'none') {
+                showToast('Nuovo aggiornamento disponibile', 'info', 4000);
+                showUpdateButton(registration.waiting);
+            }
+        }, 10_000);
     }).catch(error => {
         console.error('Errore nella registrazione del Service Worker:', error);
     });
