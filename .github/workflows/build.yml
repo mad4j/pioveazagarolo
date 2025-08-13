@@ -4,12 +4,14 @@ name: Update Weather Data
 
 # Controls when the workflow will run
 on:
-  # Run every 3 hours
+  # Run every 2 hours (già impostato)
   schedule:
     - cron: '0 */2 * * *'
-
-  # Allows you to run this workflow manually from the Actions tab
+  # Manual trigger
   workflow_dispatch:
+  # Rigenera build-info su ogni push su main
+  push:
+    branches: [ main ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -22,6 +24,9 @@ jobs:
       # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
       contents: write
 
+    env:
+      SKIP_BUILD_INFO_COMMIT: ''
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -29,25 +34,41 @@ jobs:
         with:
           fetch-depth: 0 # necessario per recuperare info commit corretta
 
-      # Runs a single command using the runners shell
-      - name: Retrieve Weather Data from external site
+      - name: Retrieve Weather Data from external site (solo schedule)
+        if: github.event_name == 'schedule'
         run: |
           curl 'https://api.open-meteo.com/v1/forecast?latitude=41.8416&longitude=12.8154&hourly=precipitation,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,precipitation_probability_max&timezone=auto&forecast_days=3' > data.json
           cat data.json
-          # TZ="Europe/Rome" date +"%F %R" > lastupdate.txt
           LAST_UPDATE=$(TZ="Europe/Rome" date +"%F %R")
           jq --arg update "$LAST_UPDATE" '. += {"last_update": $update}' data.json > temp.json && mv temp.json data.json
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Generate build info
+      - name: Generate build info (tutti gli eventi)
         run: |
-          npm ci || npm install
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
           npm run build-info
-     
-      # commit changes
-      - uses: stefanzweifel/git-auto-commit-action@v5
+
+      - name: Verifica se commit precedente è già build-info
+        id: check_prev
+        run: |
+          LAST_MSG=$(git log -1 --pretty=%s)
+          echo "Ultimo commit: $LAST_MSG"
+          if [[ "$LAST_MSG" == ci(build-info):* ]]; then
+            echo "SKIP_BUILD_INFO_COMMIT=1" >> $GITHUB_ENV
+          fi
+
+      - name: Commit dati + build-info (schedule)
+        if: github.event_name == 'schedule'
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "data: aggiorna dataset e build-info"
           file_pattern: data.json build-info.json
+
+      - name: Commit solo build-info (push)
+        if: github.event_name == 'push' && env.SKIP_BUILD_INFO_COMMIT != '1'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "ci(build-info): aggiorna build-info"
+          file_pattern: build-info.json
