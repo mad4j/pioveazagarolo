@@ -157,11 +157,12 @@ function buildChart(target, probabilityData, precipitationData) {
                     if (chart._tooltipTimeout) {
                         clearTimeout(chart._tooltipTimeout);
                     }
-                    // Imposta nuovo timeout di 5 secondi
+                    // Imposta nuovo timeout di 3 secondi
                     chart._tooltipTimeout = setTimeout(() => {
                         chart.tooltip.setActiveElements([], {x: 0, y: 0});
+                        chart.setActiveElements([]);
                         chart.update('none');
-                    }, 5000);
+                    }, 3000);
                 }
             },
             scales: {
