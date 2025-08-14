@@ -68,16 +68,14 @@
 .app-toast.info { background: linear-gradient(135deg, #2c3e50, #22313f); }
 .app-toast.info::before { background:#3498db; }
 .icon-btn {
-  width: 38px;
-  height: 38px;
+  width: 1.75rem;
+  height: 1.75rem;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 8px;
-  line-height: 1;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
 }
 #install-button, #update-button { color: #fff; }
 #install-button { background-color: var(--secondary-color); }
