@@ -374,98 +374,99 @@ footer {
 }
 
 @media (max-width: 600px) {
-  footer {
-    font-size: 0.7rem;
-    flex-direction: column;
-    gap: 0.2em;
-    align-items: flex-start;
-  }
-  .footer-link, .last-updated {
-    margin-left: 0;
-    text-align: left;
-  }
-  .chart-container {
-    /* Altezza dinamica in base allo schermo, max 30vh per evitare overflow */
-    height: min(30vh, 150px);
-    min-height: 70px;
-    margin-top: 0.2rem;
-  }
-  .forecast-card {
-    margin-bottom: 0.4rem;
-    padding: 0.7rem;
-  }
+  /* Layout mobile ottimizzato per occupare l'intera altezza evitando lo scroll verticale */
+  html, body { height: 100dvh; overflow: hidden; }
+  body { align-items: stretch; }
   .dashboard-container {
-    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    padding: 0.45rem 0.5rem 0.35rem;
+    gap: 0.25rem;
+    min-height: 100dvh;
+    box-shadow: none;
+    border-radius: 0;
   }
-  .rain-info {
-    margin-bottom: 0.5rem;
+  .header { margin: 0 0 0.2rem; }
+  .header h1 { font-size: 1.05rem; margin: 0; }
+  .row {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
   }
+  .col-md-4 { flex: 1 1 0; display: flex; padding: 0; margin: 0; }
+  .forecast-card {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0.55rem 0.55rem 0.45rem;
+  }
+  .day-info { margin-bottom: 0.15rem; }
+  .day-title { font-size: 0.85rem; margin: 0; }
+  .day-date { font-size: 0.55rem; }
+  .rain-info { margin: 0 0 0.25rem; }
+  .rain-icon { font-size: 1.25rem; }
+  .temp-values { font-size: 0.55rem; gap: 0.05rem; }
+  .rain-percentage { font-size: 0.95rem; }
+  .rain-mm { font-size: 0.5rem; }
+  .drop-icon { font-size: 1rem; }
+  /* Contenitore grafico elastico: sfrutta lo spazio residuo del card */
   .chart-container {
-    margin-top: 0.2rem;
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0; /* Permette al flex container di ridursi su schermi molto bassi */
+    margin: 0;
   }
+  .chart-container canvas { height: 100% !important; width: 100% !important; }
+  footer {
+    font-size: 0.55rem;
+    padding-top: 0.15rem;
+    margin-top: 0.15rem;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .footer-link, .last-updated { margin-left: 0; }
 }
 
 @media (max-width: 400px) {
-  .header h1 {
-    font-size: 1.2rem;
-  }
-  .forecast-card {
-    margin-bottom: 0.35rem;
-    padding: 0.7rem;
-  }
-  .day-title {
-    font-size: 0.85rem;
-  }
-  .rain-icon {
-    font-size: 1.5rem;
-    margin-right: 0.2rem;
-  }
-  .rain-percentage {
-    font-size: 0.85rem;
-  }
-  .rain-mm {
-    font-size: 0.6rem;
-  }
-  .chart-container {
-    height: min(22vh, 100px);
-    min-height: 50px;
-    margin-top: 0.1rem;
-  }
-  .day-date {
-    font-size: 0.6rem;
-  }
-  .rain-info {
-    flex-direction: row;
-    gap: 0.2em;
-    margin-bottom: 0.5rem;
-  }
-  .probability-container {
-    gap: 0.1em;
-  }
-  .dashboard-container {
-    padding: 0.4rem;
-  }
-  footer {
-    font-size: 0.6rem;
-    gap: 0.1em;
-  }
-  .temp-values {
-    font-size: 0.6rem;
-    margin-left: 0.3em;
-  }
+  /* Ulteriore compressione per dispositivi molto stretti */
+  .header h1 { font-size: 0.95rem; }
+  .forecast-card { padding: 0.45rem 0.45rem 0.4rem; }
+  .day-title { font-size: 0.75rem; }
+  .rain-icon { font-size: 1.05rem; margin-right: 0.15rem; }
+  .temp-values { font-size: 0.5rem; }
+  .rain-percentage { font-size: 0.75rem; }
+  .rain-mm { font-size: 0.45rem; }
+  .drop-icon { font-size: 0.85rem; }
+  footer { font-size: 0.5rem; }
 }
 
 @media (max-width: 340px) {
-  .header h1 {
-    font-size: 0.95rem;
-  }
-  .forecast-card {
-    padding: 0.5rem;
-  }
-  .chart-container {
-    height: min(18vh, 70px);
-    min-height: 40px;
-  }
+  /* Schermi estremamente piccoli (es. vecchi iPhone SE in modalità zoom) */
+  .header h1 { font-size: 0.85rem; }
+  .forecast-card { padding: 0.4rem; }
+  .rain-icon { font-size: 0.95rem; }
+  .chart-container { min-height: 0; }
+  .day-date { display: none; }
+}
+
+/* Adattamento per altezze ridotte indipendentemente dalla larghezza */
+@media (max-height: 640px) and (max-width: 600px) {
+  .header h1 { font-size: 0.9rem; }
+  .rain-info { margin-bottom: 0.15rem; }
+  .rain-percentage { font-size: 0.7rem; }
+  .rain-mm { display: none; }
+  footer { font-size: 0.48rem; }
+}
+
+@media (max-height: 560px) and (max-width: 600px) {
+  .day-date { display: none; }
+  .temp-values { display: none; }
+  .drop-icon { display: none; }
+  .probability-container { align-items: center; }
 }
 
 /* Dark mode */
