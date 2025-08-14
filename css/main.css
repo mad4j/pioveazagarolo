@@ -431,44 +431,6 @@ footer {
   .footer-link, .last-updated { margin-left: 0; }
 }
 
-@media (max-width: 400px) {
-  /* Ulteriore compressione per dispositivi molto stretti */
-  .header h1 { font-size: 0.95rem; }
-  .forecast-card { padding: 0.45rem 0.45rem 0.4rem; }
-  .day-title { font-size: 0.75rem; }
-  .rain-icon { font-size: 1.05rem; margin-right: 0.15rem; }
-  .temp-values { font-size: 0.5rem; }
-  .rain-percentage { font-size: 0.75rem; }
-  .rain-mm { font-size: 0.45rem; }
-  .drop-icon { font-size: 0.85rem; }
-  footer { font-size: 0.5rem; }
-}
-
-@media (max-width: 340px) {
-  /* Schermi estremamente piccoli (es. vecchi iPhone SE in modalità zoom) */
-  .header h1 { font-size: 0.85rem; }
-  .forecast-card { padding: 0.4rem; }
-  .rain-icon { font-size: 0.95rem; }
-  .chart-container { min-height: 0; }
-  .day-date { display: none; }
-}
-
-/* Adattamento per altezze ridotte indipendentemente dalla larghezza */
-@media (max-height: 640px) and (max-width: 600px) {
-  .header h1 { font-size: 0.9rem; }
-  .rain-info { margin-bottom: 0.15rem; }
-  .rain-percentage { font-size: 0.7rem; }
-  .rain-mm { display: none; }
-  footer { font-size: 0.48rem; }
-}
-
-@media (max-height: 560px) and (max-width: 600px) {
-  .day-date { display: none; }
-  .temp-values { display: none; }
-  .drop-icon { display: none; }
-  .probability-container { align-items: center; }
-}
-
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
