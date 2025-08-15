@@ -171,7 +171,7 @@ body {
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 1.25rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.9rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -326,54 +326,8 @@ footer {
   color: #2980b9;
 }
 
-@media (max-width: 916px) {
-  .dashboard-container {
-    max-width: 500px;
-    padding: 0.5rem;
-    border-radius: 0;
-    box-shadow: none;
-  }
-  .row {
-    flex-direction: column;
-  }
-  .col-md-4 {
-    width: 100%;
-    max-width: 100%;
-    flex: 0 0 100%;
-    margin-bottom: 1rem;
-  }
-  .forecast-card {
-    margin-bottom: 0.74rem;
-    padding: 1rem;
-  }
-  .header h1 {
-    font-size: 1.2rem;
-  }
-  .day-title {
-    font-size: 1rem;
-  }
-  .rain-icon {
-    font-size: 1.5rem;
-  }
-  .rain-percentage {
-    font-size: 1.1rem;
-  }
-  .rain-mm {
-    font-size: 0.7rem;
-  }
-  .chart-container {
-    height: 120px;
-  }
-  footer {
-    font-size: 0.7rem;
-  }
-  .temp-values {
-    font-size: 0.7rem;
-    margin-left: 0.5em;
-  }
-}
-
-@media (max-width: 600px) {
+/* Layout switch form horizontal to vertical layout at 768px, but it is definied elsewhere */
+@media (max-width: 768px) {
   /* Layout mobile ottimizzato per occupare l'intera altezza evitando lo scroll verticale */
   html, body { height: 100dvh; overflow: hidden; }
   body { align-items: stretch; }
