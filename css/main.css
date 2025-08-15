@@ -383,52 +383,52 @@ footer {
     padding: 0.45rem 0.5rem 0.35rem;
     gap: 0.25rem;
     min-height: 100dvh;
+    max-width: 100dvw;
     box-shadow: none;
     border-radius: 0;
   }
-  .header { margin: 0 0 0.2rem; }
-  .header h1 { font-size: 1.05rem; margin: 0; }
   .row {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    margin: 0;
   }
-  .col-md-4 { flex: 1 1 0; display: flex; padding: 0; margin: 0; }
+  .col-md-4 { flex: 1 1 0; display: flex; margin: 0; min-height: 0;}
   .forecast-card {
     flex: 1 1 0;
     display: flex;
     flex-direction: column;
-    margin: 0;
     padding: 0.55rem 0.55rem 0.45rem;
   }
-  .day-info { margin-bottom: 0.15rem; }
-  .day-title { font-size: 0.85rem; margin: 0; }
-  .day-date { font-size: 0.55rem; }
+  .header h1 {
+    font-size: 1.2rem;
+  }
+  .day-title {
+    font-size: 1rem;
+  }
+  .rain-icon {
+    font-size: 1.5rem;
+  }
+  .rain-percentage {
+    font-size: 1.1rem;
+  }
+  .rain-mm {
+    font-size: 0.7rem;
+  }
   .rain-info { margin: 0 0 0.25rem; }
-  .rain-icon { font-size: 1.25rem; }
-  .temp-values { font-size: 0.55rem; gap: 0.05rem; }
-  .rain-percentage { font-size: 0.95rem; }
-  .rain-mm { font-size: 0.5rem; }
-  .drop-icon { font-size: 1rem; }
+  .temp-values {
+    font-size: 0.7rem;
+    margin-left: 0.5em;
+  }
   /* Contenitore grafico elastico: sfrutta lo spazio residuo del card */
   .chart-container {
     flex: 1 1 auto;
     height: auto;
     min-height: 0; /* Permette al flex container di ridursi su schermi molto bassi */
-    margin: 0;
   }
   .chart-container canvas { height: 100% !important; width: 100% !important; }
   footer {
-    font-size: 0.55rem;
-    padding-top: 0.15rem;
-    margin-top: 0.15rem;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
+    font-size: 0.6rem;
   }
-  .footer-link, .last-updated { margin-left: 0; }
 }
 
 /* Dark mode */
