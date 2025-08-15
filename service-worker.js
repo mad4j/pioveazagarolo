@@ -1,6 +1,7 @@
 // Incrementare CACHE_NAME per forzare l'installazione di un nuovo Service Worker
 // v4: aggiunto badge offline & aggiornamenti UI
-const CACHE_NAME = "piove-a-zagarolo-cache-v4";
+// v5: migliorata la gestione del layout dinamico sugli schermi piccoli
+const CACHE_NAME = "piove-a-zagarolo-cache-v5";
 const urlsToCache = [
   "./",
   "./index.html",
