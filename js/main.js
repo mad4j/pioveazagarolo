@@ -463,3 +463,297 @@ if ('serviceWorker' in navigator) {
         console.error('Errore nella registrazione del Service Worker:', error);
     });
 }
+
+// Script di debug mobile con output visuale sulla pagina
+console.log('🔍 DEBUG MOBILE - Script caricato');
+
+// Crea un pannello di debug visuale
+function createDebugPanel() {
+  // Rimuovi pannello esistente se presente
+  const existing = document.getElementById('mobile-debug-panel');
+  if (existing) existing.remove();
+  
+  const panel = document.createElement('div');
+  panel.id = 'mobile-debug-panel';
+  panel.style.cssText = `
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.9);
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 9999;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    display: none;
+  `;
+  
+  // Aggiungi pulsanti di controllo
+  const controls = document.createElement('div');
+  controls.style.cssText = `
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 10000;
+  `;
+  
+  const toggleBtn = document.createElement('button');
+  toggleBtn.textContent = '🐛';
+  toggleBtn.style.cssText = `
+    width: 40px;
+    height: 40px;
+    background: #007acc;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    margin-right: 5px;
+  `;
+  
+  const copyBtn = document.createElement('button');
+  copyBtn.textContent = '📋';
+  copyBtn.style.cssText = `
+    width: 40px;
+    height: 40px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    margin-right: 5px;
+  `;
+  
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = '🗑️';
+  clearBtn.style.cssText = `
+    width: 40px;
+    height: 40px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+  `;
+  
+  controls.appendChild(toggleBtn);
+  controls.appendChild(copyBtn);
+  controls.appendChild(clearBtn);
+  
+  document.body.appendChild(panel);
+  document.body.appendChild(controls);
+  
+  // Event listeners
+  toggleBtn.addEventListener('click', () => {
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  });
+  
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(panel.textContent).then(() => {
+      copyBtn.textContent = '✅';
+      setTimeout(() => copyBtn.textContent = '📋', 1000);
+    }).catch(() => {
+      // Fallback per browser che non supportano clipboard API
+      const textarea = document.createElement('textarea');
+      textarea.value = panel.textContent;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      copyBtn.textContent = '✅';
+      setTimeout(() => copyBtn.textContent = '📋', 1000);
+    });
+  });
+  
+  clearBtn.addEventListener('click', () => {
+    panel.textContent = '';
+    window.debugLogs = [];
+  });
+  
+  return panel;
+}
+
+// Array per salvare tutti i log
+window.debugLogs = [];
+
+// Funzione per loggare con output sia console che visuale
+function mobileLog(message, data = {}) {
+  const timestamp = new Date().toLocaleTimeString();
+  const logEntry = `[${timestamp}] ${message}\n${JSON.stringify(data, null, 2)}\n---\n`;
+  
+  // Log in console
+  console.log(message, data);
+  
+  // Salva nel nostro array
+  window.debugLogs.push({ timestamp, message, data });
+  
+  // Mostra nel pannello visuale
+  const panel = document.getElementById('mobile-debug-panel');
+  if (panel) {
+    panel.textContent += logEntry;
+    panel.scrollTop = panel.scrollHeight;
+  }
+}
+
+// Funzione per raccogliere info viewport
+function gatherViewportInfo(event = 'unknown') {
+  const info = {
+    evento: event,
+    timestamp: new Date().toLocaleTimeString(),
+    
+    // Dimensioni finestra
+    windowInner: `${window.innerWidth}x${window.innerHeight}`,
+    windowOuter: `${window.outerWidth}x${window.outerHeight}`,
+    screen: `${screen.width}x${screen.height}`,
+    
+    // Document
+    docClient: document.documentElement ? `${document.documentElement.clientWidth}x${document.documentElement.clientHeight}` : 'N/A',
+    
+    // Body
+    bodyClient: document.body ? `${document.body.clientWidth}x${document.body.clientHeight}` : 'N/A',
+    bodyScroll: document.body ? `${document.body.scrollWidth}x${document.body.scrollHeight}` : 'N/A',
+    
+    // Visual Viewport (iOS Safari)
+    visualViewport: window.visualViewport ? `${window.visualViewport.width}x${window.visualViewport.height}` : 'N/A',
+    
+    // Dashboard
+    dashboardHeight: (() => {
+      const el = document.querySelector('.dashboard-container');
+      return el ? el.offsetHeight : 'N/A';
+    })(),
+    
+    // Footer check
+    footerInfo: (() => {
+      const footer = document.querySelector('footer');
+      if (!footer) return 'Footer non trovato';
+      
+      const rect = footer.getBoundingClientRect();
+      return {
+        visible: rect.bottom <= window.innerHeight && rect.top >= 0,
+        position: `top:${Math.round(rect.top)} bottom:${Math.round(rect.bottom)}`,
+        windowHeight: window.innerHeight
+      };
+    })(),
+    
+    // Scroll
+    scroll: `x:${window.scrollX} y:${window.scrollY}`,
+    
+    // User agent
+    isMobile: navigator.userAgent.includes('Mobile'),
+    
+    // Safe areas (se supportate)
+    safeAreas: (() => {
+      if (CSS && CSS.supports && CSS.supports('top: env(safe-area-inset-top)')) {
+        const style = getComputedStyle(document.documentElement);
+        return {
+          top: style.getPropertyValue('env(safe-area-inset-top)') || '0px',
+          bottom: style.getPropertyValue('env(safe-area-inset-bottom)') || '0px'
+        };
+      }
+      return 'Non supportate';
+    })()
+  };
+  
+  mobileLog(`📱 VIEWPORT - ${event}`, info);
+  return info;
+}
+
+// Inizializza quando il DOM è pronto
+function initMobileDebug() {
+  createDebugPanel();
+  mobileLog('🚀 Debug mobile inizializzato');
+  gatherViewportInfo('init');
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  initMobileDebug();
+  gatherViewportInfo('dom-ready');
+});
+
+window.addEventListener('load', () => {
+  gatherViewportInfo('window-load');
+  
+  // Check ritardati
+  setTimeout(() => gatherViewportInfo('1sec-after-load'), 1000);
+  setTimeout(() => gatherViewportInfo('3sec-after-load'), 3000);
+});
+
+window.addEventListener('resize', () => {
+  gatherViewportInfo('resize');
+});
+
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => gatherViewportInfo('orientation-change'), 200);
+});
+
+// Scroll tracking con throttling
+let scrollTimeout;
+window.addEventListener('scroll', () => {
+  clearTimeout(scrollTimeout);
+  scrollTimeout = setTimeout(() => gatherViewportInfo('scroll-end'), 200);
+});
+
+// Visual Viewport API (importante per iOS)
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    gatherViewportInfo('visual-viewport-resize');
+  });
+}
+
+// Page show (refresh/cache)
+window.addEventListener('pageshow', (event) => {
+  const source = event.persisted ? 'cache' : 'fresh';
+  gatherViewportInfo(`pageshow-${source}`);
+});
+
+// Visibility change
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    gatherViewportInfo('visibility-visible');
+  }
+});
+
+// Funzioni globali per debug
+window.exportDebugData = function() {
+  const data = {
+    userAgent: navigator.userAgent,
+    timestamp: new Date().toISOString(),
+    logs: window.debugLogs
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `debug-mobile-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+window.emailDebugData = function() {
+  const data = window.debugLogs.map(log => 
+    `[${log.timestamp}] ${log.message}\n${JSON.stringify(log.data, null, 2)}`
+  ).join('\n\n');
+  
+  const subject = encodeURIComponent('Debug Viewport Mobile');
+  const body = encodeURIComponent(data);
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+};
+
+// Auto-start se il documento è già pronto
+if (document.readyState === 'loading') {
+  // Aspetta il DOMContentLoaded
+} else {
+  // Il DOM è già pronto
+  setTimeout(initMobileDebug, 100);
+}
+
+mobileLog('📱 Script debug mobile caricato');
