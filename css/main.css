@@ -394,25 +394,41 @@ footer {
   /* Layout mobile ottimizzato per occupare l'intera altezza evitando lo scroll verticale */
   html,
   body {
-    height: 100svh;
-    overflow: hidden;
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--nav-bar-height, 0px));
-  }
-
-  body {
+    height: 100vh !important;
+    height: 100svh !important;
+    max-height: 100vh !important;
+    max-height: 100svh !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
     align-items: stretch;
   }
 
   .dashboard-container {
-    display: flex;
-    flex-direction: column;
+
+    /* Impedisce di superare l'altezza del viewport */
+    max-height: 100vh !important;
+    max-height: 100svh !important;
+    
+    /* Forza l'altezza esatta del viewport per evitare crescita */
+    height: 100vh !important;
+    height: 100svh !important;
+    
+    /* Layout flex con overflow controllato */
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+
     padding: 0.45rem 0.5rem 0.35rem;
     gap: 0.25rem;
     min-height: 100svh;
     max-width: 100dvw;
     box-shadow: none;
     border-radius: 0;
-    padding-bottom: env(safe-area-inset-bottom, 0.35rem);
+    padding-bottom: 0.35rem;
+
+     box-sizing: border-box !important;
   }
 
   .row {
@@ -478,6 +494,7 @@ footer {
   }
 
   footer {
+    flex: 0 0 auto !important; /* Dimensione fissa, non cresce */
     font-size: 0.6rem;
     margin-bottom: max(env(safe-area-inset-bottom), 0.75rem);
     padding-bottom: 0.5rem;

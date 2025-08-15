@@ -368,18 +368,6 @@ function showToast(message, type = 'info', duration = 5000, silent = false) {
     }
 }
 
-
-// Esegue una stima (heuristic) solo se Android + aspect ratio verticale
-function estimateNavBar() {
-  const ua = navigator.userAgent.toLowerCase();
-  if (!ua.includes('android')) return 0;
-  // Heuristic: se innerHeight/outerHeight < 0.93 ipotizza nav bar 48px
-  const ratio = window.innerHeight / window.outerHeight;
-  return ratio < 0.93 ? 48 : 0;
-}
-document.documentElement.style.setProperty('--nav-bar-height', estimateNavBar() + 'px');
-
-
 document.addEventListener('DOMContentLoaded', function () {
     // Gestione badge offline
     const offlineBadge = document.getElementById('offline-badge');
