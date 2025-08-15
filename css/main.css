@@ -394,7 +394,7 @@ footer {
   /* Layout mobile ottimizzato per occupare l'intera altezza evitando lo scroll verticale */
   html,
   body {
-    height: 100dvh;
+    height: 100svh;
     overflow: hidden;
   }
 
@@ -407,10 +407,11 @@ footer {
     flex-direction: column;
     padding: 0.45rem 0.5rem 0.35rem;
     gap: 0.25rem;
-    min-height: 100dvh;
+    min-height: 100svh;
     max-width: 100dvw;
     box-shadow: none;
     border-radius: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0.35rem);
   }
 
   .row {
@@ -477,6 +478,8 @@ footer {
 
   footer {
     font-size: 0.6rem;
+    margin-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+    padding-bottom: 0.5rem;
   }
 }
 
