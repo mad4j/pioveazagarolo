@@ -34,6 +34,7 @@
   gap: 0.5rem;
   pointer-events: none;
 }
+
 .app-toast {
   background: linear-gradient(135deg, var(--primary-color), #1d2b36);
   color: #fff;
@@ -41,7 +42,7 @@
   border-radius: 8px;
   font-size: 0.75rem;
   line-height: 1.2;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -52,6 +53,7 @@
   position: relative;
   overflow: hidden;
 }
+
 .app-toast::before {
   content: "";
   position: absolute;
@@ -61,12 +63,31 @@
   width: 4px;
   background: var(--accent-color);
 }
-.app-toast.error { background: linear-gradient(135deg, #8b1e23, #5c0f13); }
-.app-toast.error::before { background:#e74c3c; }
-.app-toast.success { background: linear-gradient(135deg, #1e5c32, #134021); }
-.app-toast.success::before { background:#27ae60; }
-.app-toast.info { background: linear-gradient(135deg, #2c3e50, #22313f); }
-.app-toast.info::before { background:#3498db; }
+
+.app-toast.error {
+  background: linear-gradient(135deg, #8b1e23, #5c0f13);
+}
+
+.app-toast.error::before {
+  background: #e74c3c;
+}
+
+.app-toast.success {
+  background: linear-gradient(135deg, #1e5c32, #134021);
+}
+
+.app-toast.success::before {
+  background: #27ae60;
+}
+
+.app-toast.info {
+  background: linear-gradient(135deg, #2c3e50, #22313f);
+}
+
+.app-toast.info::before {
+  background: #3498db;
+}
+
 .icon-btn {
   width: 1.75rem;
   height: 1.75rem;
@@ -77,10 +98,26 @@
   border: none;
   font-size: 1.1rem;
 }
-#install-button, #update-button { color: #fff; }
-#install-button { background-color: var(--secondary-color); }
-#update-button { background-color: var(--accent-color); }
-#install-button:focus-visible, #update-button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+#install-button,
+#update-button {
+  color: #fff;
+}
+
+#install-button {
+  background-color: var(--secondary-color);
+}
+
+#update-button {
+  background-color: var(--accent-color);
+}
+
+#install-button:focus-visible,
+#update-button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 .toast-close {
   background: transparent;
   border: none;
@@ -92,12 +129,23 @@
   opacity: 0.8;
   transition: opacity .2s;
 }
-.toast-close:hover { opacity:1; }
-@keyframes toast-in {
-  to { opacity:1; transform: translateY(0) scale(1); }
+
+.toast-close:hover {
+  opacity: 1;
 }
+
+@keyframes toast-in {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes toast-out {
-  to { opacity:0; transform: translateY(-6px) scale(.96); }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(.96);
+  }
 }
 
 /* Offline badge */
@@ -114,14 +162,28 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
   z-index: 1100;
   animation: offline-in .35s ease;
   font-weight: 600;
 }
-@keyframes offline-in { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+
+@keyframes offline-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-color-scheme: dark) {
-  #offline-badge { background: linear-gradient(135deg, #4b565b, #3a4347); }
+  #offline-badge {
+    background: linear-gradient(135deg, #4b565b, #3a4347);
+  }
 }
 
 body {
@@ -328,9 +390,18 @@ footer {
 
 /* Layout switch form horizontal to vertical layout at 768px, but it is definied elsewhere */
 @media (max-width: 768px) {
+
   /* Layout mobile ottimizzato per occupare l'intera altezza evitando lo scroll verticale */
-  html, body { height: 100dvh; overflow: hidden; }
-  body { align-items: stretch; }
+  html,
+  body {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  body {
+    align-items: stretch;
+  }
+
   .dashboard-container {
     display: flex;
     flex-direction: column;
@@ -341,45 +412,69 @@ footer {
     box-shadow: none;
     border-radius: 0;
   }
+
   .row {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
   }
-  .col-md-4 { flex: 1 1 0; display: flex; margin: 0; min-height: 0;}
+
+  .col-md-4 {
+    flex: 1 1 0;
+    display: flex;
+    margin: 0;
+    min-height: 0;
+  }
+
   .forecast-card {
     flex: 1 1 0;
     display: flex;
     flex-direction: column;
     padding: 0.55rem 0.55rem 0.45rem;
   }
+
   .header h1 {
     font-size: 1.2rem;
   }
+
   .day-title {
     font-size: 1rem;
   }
+
   .rain-icon {
     font-size: 1.5rem;
   }
+
   .rain-percentage {
     font-size: 1.1rem;
   }
+
   .rain-mm {
     font-size: 0.7rem;
   }
-  .rain-info { margin: 0 0 0.25rem; }
+
+  .rain-info {
+    margin: 0 0 0.25rem;
+  }
+
   .temp-values {
     font-size: 0.7rem;
     margin-left: 0.5em;
   }
+
   /* Contenitore grafico elastico: sfrutta lo spazio residuo del card */
   .chart-container {
     flex: 1 1 auto;
     height: auto;
-    min-height: 0; /* Permette al flex container di ridursi su schermi molto bassi */
+    min-height: 0;
+    /* Permette al flex container di ridursi su schermi molto bassi */
   }
-  .chart-container canvas { height: 100% !important; width: 100% !important; }
+
+  .chart-container canvas {
+    height: 100% !important;
+    width: 100% !important;
+  }
+
   footer {
     font-size: 0.6rem;
   }
@@ -395,13 +490,37 @@ footer {
     --text-muted: #9aa0a6;
     --border-color: #3a3d40;
   }
-  body { background-color: var(--light-bg); }
-  .forecast-card { box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-  .header h1 { color: var(--secondary-color); }
-  .rain-percentage { color: var(--secondary-color); }
+
+  body {
+    background-color: var(--light-bg);
+  }
+
+  .forecast-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .header h1 {
+    color: var(--secondary-color);
+  }
+
+  .rain-percentage {
+    color: var(--secondary-color);
+  }
+
   /* Day titles (Oggi, Domani, Dopodomani) lighter for readability on dark bg */
-  .day-title { color: var(--text-primary); }
-  .high-chance { background-color: rgba(231,76,60,0.18); }
-  .medium-chance { background-color: rgba(241,196,15,0.18); }
-  .low-chance { background-color: rgba(46,204,113,0.18); }
+  .day-title {
+    color: var(--text-primary);
+  }
+
+  .high-chance {
+    background-color: rgba(231, 76, 60, 0.18);
+  }
+
+  .medium-chance {
+    background-color: rgba(241, 196, 15, 0.18);
+  }
+
+  .low-chance {
+    background-color: rgba(46, 204, 113, 0.18);
+  }
 }
