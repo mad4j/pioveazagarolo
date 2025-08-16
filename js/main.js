@@ -12,6 +12,36 @@ function isTouchDevice() {
 // Mappa grafici per eventuale aggiornamento futuro
 const chartInstances = {};
 
+// Helper function to get current hour (Europa/Rome timezone)
+function getCurrentHour() {
+    try {
+        const hour = parseInt(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Europe/Rome' }).format(new Date()), 10);
+        return Number.isNaN(hour) ? new Date().getHours() : hour;
+    } catch {
+        return new Date().getHours();
+    }
+}
+
+// Helper function to make a color transparent
+function makeColorTransparent(color, opacity = 0.3) {
+    // Convert rgb/rgba to rgba with specified opacity
+    if (color.startsWith('rgba(')) {
+        // Replace the alpha value
+        return color.replace(/,\s*[\d.]+\)$/, `, ${opacity})`);
+    } else if (color.startsWith('rgb(')) {
+        // Convert rgb to rgba
+        return color.replace('rgb(', 'rgba(').replace(')', `, ${opacity})`);
+    } else if (color.startsWith('#')) {
+        // Convert hex to rgba
+        const hex = color.slice(1);
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    return color; // Return as-is if format not recognized
+}
+
 // Plugin linea ora corrente (Europa/Rome) per il grafico di "Oggi"
 // La linea è calcolata solo al primo draw (cache) e non si aggiorna finché non si ricarica la pagina.
 const currentHourLinePlugin = {
@@ -21,12 +51,7 @@ const currentHourLinePlugin = {
         if (!opts) return;
         // Usa ora già cache oppure calcola e memorizza
         if (typeof opts._cachedHour !== 'number') {
-            try {
-                opts._cachedHour = parseInt(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Europe/Rome' }).format(new Date()), 10);
-                if (Number.isNaN(opts._cachedHour)) opts._cachedHour = new Date().getHours();
-            } catch {
-                opts._cachedHour = new Date().getHours();
-            }
+            opts._cachedHour = getCurrentHour();
         }
         const hour = opts._cachedHour;
         const xScale = chart.scales.x;
@@ -115,8 +140,24 @@ function buildChart(target, probabilityData, precipitationData) {
     if (chartInstances[target]) {
         chartInstances[target].destroy();
     }
+    
+    // Get current hour for transparency effect (only for today-chart)
+    const isToday = target === 'today-chart';
+    const currentHour = isToday ? getCurrentHour() : -1;
+    
+    // Generate colors with transparency for past data
+    const probabilityLineColor = 'rgb(41, 128, 185)';
+    const probabilityFillColor = 'rgba(52, 152, 219, 0.3)';
+    const precipitationColors = precipitationData.map(getPrecipitationBarColor);
+    
+    // For today chart, make past data transparent
+    const finalPrecipitationColors = isToday ? 
+        precipitationColors.map((color, hour) => 
+            hour < currentHour ? makeColorTransparent(color, 0.3) : color
+        ) : precipitationColors;
+    
     chartInstances[target] = new Chart(ctx, {
-    plugins: target === 'today-chart' ? [currentHourLinePlugin] : [],
+    plugins: isToday ? [currentHourLinePlugin] : [],
         data: {
             labels: [...Array(24).keys()].map(hour => `${hour}:00`),
             datasets: [
@@ -125,11 +166,20 @@ function buildChart(target, probabilityData, precipitationData) {
                     type: 'line',
                     fill: true,
                     lineTension: 0.4,
-                    backgroundColor: 'rgba(52, 152, 219, 0.3)',
-                    borderColor: 'rgb(41, 128, 185)',
+                    backgroundColor: isToday ? 
+                        Array.from({ length: 24 }, (_, hour) => 
+                            hour < currentHour ? makeColorTransparent(probabilityFillColor, 0.15) : probabilityFillColor
+                        ) : probabilityFillColor,
+                    borderColor: isToday ?
+                        Array.from({ length: 24 }, (_, hour) => 
+                            hour < currentHour ? makeColorTransparent(probabilityLineColor, 0.4) : probabilityLineColor
+                        ) : probabilityLineColor,
+                    pointBackgroundColor: isToday ?
+                        Array.from({ length: 24 }, (_, hour) => 
+                            hour < currentHour ? makeColorTransparent(probabilityLineColor, 0.4) : probabilityLineColor
+                        ) : probabilityLineColor,
                     borderWidth: 2,
                     data: probabilityData,
-                    pointBackgroundColor: 'rgb(41, 128, 185)',
                     pointRadius: 0,
                     pointHoverRadius: 4,
                     yAxisID: 'y',
@@ -137,8 +187,8 @@ function buildChart(target, probabilityData, precipitationData) {
                 {
                     label: 'Precipitazione (mm)',
                     type: 'bar',
-                    backgroundColor: precipitationData.map(getPrecipitationBarColor),
-                    borderColor: precipitationData.map(getPrecipitationBarColor),
+                    backgroundColor: finalPrecipitationColors,
+                    borderColor: finalPrecipitationColors,
                     borderWidth: 1,
                     data: precipitationData,
                     yAxisID: 'y1',
