@@ -406,7 +406,6 @@ footer {
   }
 
   .dashboard-container {
-
     /* Impedisce di superare l'altezza del viewport */
     max-height: 100vh !important;
     max-height: 100svh !important;

@@ -570,9 +570,44 @@ function createDebugPanel() {
 
 // Array per salvare tutti i log
 window.debugLogs = [];
+// Stato attivazione debug (pannello + pulsanti)
+window._debugActivated = false;
+
+// Attivatore debug: 3 click/tap rapidi sul titolo (h1) o elemento con data-debug-activator
+function setupDebugActivator() {
+    const activator = document.querySelector('[data-debug-activator]') || document.querySelector('h1');
+    if (!activator) return; // Nessun titolo trovato
+    // Aspetto interattivo + disabilita selezione testo durante i click rapidi
+    activator.style.cursor = 'pointer';
+    activator.style.userSelect = 'none';
+    activator.style.webkitUserSelect = 'none';
+    if (!activator.getAttribute('title')) activator.setAttribute('title', 'Triplo click per attivare il debug');
+    // Evita selezione accidentale su alcuni browser durante tripli tap
+    activator.addEventListener('selectstart', e => e.preventDefault());
+    let clickCount = 0;
+    let timer = null;
+    activator.addEventListener('click', () => {
+        if (window._debugActivated) return;
+        clickCount++;
+        if (timer) clearTimeout(timer);
+        // Finestra 1500ms per i 3 click
+        timer = setTimeout(() => { clickCount = 0; }, 1500);
+        if (clickCount >= 3) {
+            window._debugActivated = true;
+            clickCount = 0;
+            if (timer) { clearTimeout(timer); timer = null; }
+            // Feedback visivo leggero
+            activator.style.outline = '2px solid #27ae60';
+            setTimeout(() => { activator.style.outline = ''; }, 1200);
+            initMobileDebug();
+            gatherViewportInfo('debug-activated');
+        }
+    });
+}
 
 // Funzione per loggare con output sia console che visuale
 function mobileLog(message, data = {}) {
+    if (!window._debugActivated) return; // Non loggare prima dell'attivazione (mantiene la pagina pulita)
   const timestamp = new Date().toLocaleTimeString();
   const logEntry = `[${timestamp}] ${message}\n${JSON.stringify(data, null, 2)}\n---\n`;
   
@@ -592,6 +627,7 @@ function mobileLog(message, data = {}) {
 
 // Funzione per raccogliere info viewport
 function gatherViewportInfo(event = 'unknown') {
+    if (!window._debugActivated) return; // Ignora prima di attivazione
   const info = {
     evento: event,
     timestamp: new Date().toLocaleTimeString(),
@@ -655,23 +691,22 @@ function gatherViewportInfo(event = 'unknown') {
 
 // Inizializza quando il DOM è pronto
 function initMobileDebug() {
-  createDebugPanel();
-  mobileLog('🚀 Debug mobile inizializzato');
-  gatherViewportInfo('init');
+    if (document.getElementById('mobile-debug-panel')) return; // già creato
+    createDebugPanel();
+    // Mobile log/gather verranno eseguiti ora (debug attivo)
+    mobileLog('🚀 Debug mobile inizializzato');
+    gatherViewportInfo('init');
 }
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
-  initMobileDebug();
-  gatherViewportInfo('dom-ready');
+    setupDebugActivator();
 });
 
 window.addEventListener('load', () => {
-  gatherViewportInfo('window-load');
-  
-  // Check ritardati
-  setTimeout(() => gatherViewportInfo('1sec-after-load'), 1000);
-  setTimeout(() => gatherViewportInfo('3sec-after-load'), 3000);
+    // Eseguirà solo dopo attivazione
+    setTimeout(() => gatherViewportInfo('1sec-after-load'), 1000);
+    setTimeout(() => gatherViewportInfo('3sec-after-load'), 3000);
 });
 
 window.addEventListener('resize', () => {
@@ -737,11 +772,9 @@ window.emailDebugData = function() {
 };
 
 // Auto-start se il documento è già pronto
-if (document.readyState === 'loading') {
-  // Aspetta il DOMContentLoaded
-} else {
-  // Il DOM è già pronto
-  setTimeout(initMobileDebug, 100);
+if (document.readyState !== 'loading') {
+    setupDebugActivator();
 }
 
+// Log finale (rimane silente se non attivato)
 mobileLog('📱 Script debug mobile caricato');
