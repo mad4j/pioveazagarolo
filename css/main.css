@@ -495,7 +495,7 @@ footer {
   footer {
     flex: 0 0 auto !important; /* Dimensione fissa, non cresce */
     font-size: 0.6rem;
-    margin-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+    margin-bottom: 0rem;
     padding-bottom: 0.5rem;
   }
 }
