@@ -232,6 +232,34 @@ function getRainIconClass(weatherCode) {
 }
 
 function displayData(data) {
+    // Sezione condizioni attuali (se presenti nel JSON)
+    try {
+        if (data.current) {
+            const currCard = document.getElementById('current-conditions');
+            if (currCard) currCard.hidden = false;
+            const tempEl = document.getElementById('current-temp');
+            const rainEl = document.getElementById('current-rain');
+            const pressEl = document.getElementById('current-pressure');
+            const humEl = document.getElementById('current-humidity');
+            const iconEl = document.getElementById('current-icon');
+            const timeEl = document.getElementById('current-time');
+            if (tempEl && typeof data.current.temperature_2m === 'number') tempEl.textContent = `${Math.round(data.current.temperature_2m)}°C`;
+            if (rainEl && typeof data.current.rain === 'number') rainEl.textContent = `${data.current.rain.toFixed(1)} mm/h`;
+            if (pressEl && typeof data.current.surface_pressure === 'number') pressEl.textContent = `${Math.round(data.current.surface_pressure)} hPa`;
+            if (humEl && typeof data.current.relative_humidity_2m === 'number') humEl.textContent = `${Math.round(data.current.relative_humidity_2m)}%`;
+            if (iconEl && typeof data.current.weather_code === 'number') {
+                iconEl.className = getRainIconClass(data.current.weather_code);
+                iconEl.setAttribute('aria-label', `Condizioni attuali codice ${data.current.weather_code}`);
+            }
+            if (timeEl && data.current.time) {
+                try {
+                    const dt = new Date(data.current.time);
+                    timeEl.textContent = dt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                } catch { timeEl.textContent = '--:--'; }
+            }
+        }
+    } catch {}
+
     const todayData = getDaySlice(data.hourly.precipitation_probability, 0);
     const tomorrowData = getDaySlice(data.hourly.precipitation_probability, 1);
     const dayAfterTomorrowData = getDaySlice(data.hourly.precipitation_probability, 2);

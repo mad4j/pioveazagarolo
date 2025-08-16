@@ -30,6 +30,28 @@
       </button>
     </div>
 
+    <!-- Condizioni attuali compatte -->
+    <div id="current-conditions" class="current-conditions-card" aria-label="Condizioni meteo attuali" hidden>
+      <div class="current-main">
+        <i id="current-icon" class="wi wi-day-sunny" aria-hidden="true"></i>
+        <div class="current-temp" id="current-temp" aria-label="Temperatura attuale">--°C</div>
+      </div>
+      <div class="current-extra" aria-hidden="false">
+        <div class="metric" title="Pioggia attuale" aria-label="Pioggia attuale">
+          <i class="wi wi-raindrops" aria-hidden="true"></i><span id="current-rain">-- mm/h</span>
+        </div>
+        <div class="metric" title="Pressione" aria-label="Pressione">
+          <i class="wi wi-barometer" aria-hidden="true"></i><span id="current-pressure">-- hPa</span>
+        </div>
+        <div class="metric" title="Umidità relativa" aria-label="Umidità relativa">
+          <i class="wi wi-humidity" aria-hidden="true"></i><span id="current-humidity">--%</span>
+        </div>
+        <div class="metric" title="Aggiornato alle" aria-label="Ora rilevazione">
+          <i class="wi wi-time-1" aria-hidden="true"></i><span id="current-time">--:--</span>
+        </div>
+      </div>
+    </div>
+
   <!-- Live region nascosta per screen reader -->
   <div id="app-alert" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
   <!-- Container toasts -->

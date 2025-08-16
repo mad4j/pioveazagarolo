@@ -198,6 +198,34 @@ body {
   min-height: 100vh;
 }
 
+/* Condizioni attuali compatte */
+.current-conditions-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: linear-gradient(135deg, #ffffff, #f3f7fa);
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  margin: 0 0 0.6rem;
+  animation: fade-in .4s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .current-conditions-card { background: linear-gradient(135deg, #2a2d31, #26292d); }
+}
+
+.current-main { display:flex; align-items:center; gap:0.6rem; }
+.current-main i { font-size:1.3rem; color: var(--secondary-color); line-height:1; }
+.current-temp { font-size:1.3rem; font-weight:600; color: var(--primary-color); line-height:1; }
+.current-extra { display:flex; gap:0.9rem; flex-wrap:wrap; font-size:0.75rem; color: var(--text-secondary); }
+.current-extra .metric { display:flex; align-items:center; gap:0.25rem; font-weight:500; }
+.current-extra i { font-size:1rem; color: var(--secondary-color); }
+
+@keyframes fade-in { from { opacity:0; transform: translateY(-4px);} to { opacity:1; transform: translateY(0);} }
+
 .dashboard-container {
   max-width: 1000px;
   width: 96%;
@@ -453,6 +481,16 @@ footer {
   .header h1 {
     font-size: 1.5rem;
   }
+
+  .current-conditions-card {
+    padding: 0.45rem 0.55rem;
+    gap: 0.6rem;
+    margin-bottom: 0.2rem;
+  }
+  .current-main i { font-size:1.1rem; }
+  .current-temp { font-size:1.1rem; }
+  .current-extra { font-size:0.65rem; gap:0.55rem; }
+  .current-extra i { font-size:0.85rem; }
 
   .day-title {
     font-size: 1rem;
