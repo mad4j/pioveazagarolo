@@ -460,76 +460,69 @@ function createDebugPanel() {
   // Rimuovi pannello esistente se presente
   const existing = document.getElementById('mobile-debug-panel');
   if (existing) existing.remove();
+    // Inietta CSS una sola volta
+    if (!document.getElementById('debug-panel-styles')) {
+        const style = document.createElement('style');
+        style.id = 'debug-panel-styles';
+        style.textContent = `
+            .debug-btns-wrap { position: fixed; top: 10px; right: 10px; z-index: 10000; display: flex; gap: 6px; }
+            .debug-btn { width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; cursor: pointer; padding: 0; transition: background .2s, transform .15s; box-shadow: 0 2px 4px rgba(0,0,0,.25); }
+            .debug-btn:hover { background: #334155; }
+            .debug-btn:active { transform: translateY(1px); }
+            .debug-btn svg { width: 20px; height: 20px; stroke: currentColor; }
+            .debug-btn.debug-toggle-active { background: #0d9488; border-color: #0f766e; }
+            #mobile-debug-panel { backdrop-filter: blur(6px); }
+            @media (prefers-color-scheme: light) {
+                .debug-btn { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+                .debug-btn:hover { background: #e2e8f0; }
+                .debug-btn.debug-toggle-active { background: #14b8a6; color: #ffffff; border-color: #0d9488; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
   
   const panel = document.createElement('div');
   panel.id = 'mobile-debug-panel';
-  panel.style.cssText = `
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.9);
-    color: #00ff00;
-    font-family: 'Courier New', monospace;
-    font-size: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    z-index: 9999;
-    max-height: 200px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    display: none;
-  `;
+    panel.style.cssText = `
+        position: fixed; top: 58px; left: 10px; right: 10px; background: rgba(15,23,42,0.92); color: #a5f3fc; font-family: 'Courier New', monospace; font-size: 11px; padding: 12px 12px 16px; border-radius: 10px; z-index: 9999; max-height: 250px; overflow-y: auto; white-space: pre-wrap; display: none; border: 1px solid #334155; box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    `;
   
   // Aggiungi pulsanti di controllo
-  const controls = document.createElement('div');
-  controls.style.cssText = `
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 10000;
-  `;
+    const controls = document.createElement('div');
+    controls.className = 'debug-btns-wrap';
   
-  const toggleBtn = document.createElement('button');
-  toggleBtn.textContent = '🐛';
-  toggleBtn.style.cssText = `
-    width: 40px;
-    height: 40px;
-    background: #007acc;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    font-size: 18px;
-    cursor: pointer;
-    margin-right: 5px;
-  `;
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'debug-btn';
+    toggleBtn.type = 'button';
+    toggleBtn.setAttribute('aria-label', 'Mostra/Nascondi log debug');
+    toggleBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+            <circle cx="12" cy="12" r="3" />
+        </svg>`;
   
-  const copyBtn = document.createElement('button');
-  copyBtn.textContent = '📋';
-  copyBtn.style.cssText = `
-    width: 40px;
-    height: 40px;
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    font-size: 18px;
-    cursor: pointer;
-    margin-right: 5px;
-  `;
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'debug-btn';
+    copyBtn.type = 'button';
+    copyBtn.setAttribute('aria-label', 'Copia log');
+    copyBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>`;
   
-  const clearBtn = document.createElement('button');
-  clearBtn.textContent = '🗑️';
-  clearBtn.style.cssText = `
-    width: 40px;
-    height: 40px;
-    background: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    font-size: 18px;
-    cursor: pointer;
-  `;
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'debug-btn';
+    clearBtn.type = 'button';
+    clearBtn.setAttribute('aria-label', 'Svuota log');
+    clearBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18" />
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            <path d="M10 11v6" />
+            <path d="M14 11v6" />
+            <path d="M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14" />
+        </svg>`;
   
   controls.appendChild(toggleBtn);
   controls.appendChild(copyBtn);
@@ -539,26 +532,28 @@ function createDebugPanel() {
   document.body.appendChild(controls);
   
   // Event listeners
-  toggleBtn.addEventListener('click', () => {
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-  });
-  
-  copyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(panel.textContent).then(() => {
-      copyBtn.textContent = '✅';
-      setTimeout(() => copyBtn.textContent = '📋', 1000);
-    }).catch(() => {
-      // Fallback per browser che non supportano clipboard API
-      const textarea = document.createElement('textarea');
-      textarea.value = panel.textContent;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      copyBtn.textContent = '✅';
-      setTimeout(() => copyBtn.textContent = '📋', 1000);
+    toggleBtn.addEventListener('click', () => {
+        const show = panel.style.display === 'none';
+        panel.style.display = show ? 'block' : 'none';
+        toggleBtn.classList.toggle('debug-toggle-active', show);
     });
-  });
+  
+    copyBtn.addEventListener('click', () => {
+        const restore = copyBtn.innerHTML;
+        const setOk = () => {
+            copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"/></svg>';
+            setTimeout(() => copyBtn.innerHTML = restore, 1200);
+        };
+        navigator.clipboard.writeText(panel.textContent).then(setOk).catch(() => {
+            const textarea = document.createElement('textarea');
+            textarea.value = panel.textContent;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            setOk();
+        });
+    });
   
   clearBtn.addEventListener('click', () => {
     panel.textContent = '';
