@@ -17,6 +17,7 @@ Per pubblicare una nuova versione usa il workflow GitHub `Release` (Actions > Re
 5. Creazione della GitHub Release con il contenuto del file di note.
 
 ### Flusso Manuale (fallback)
+
 ```bash
 git commit -am "chore(release): prepare 1.4.0"   # Assicurati di aver aggiornato la versione
 git tag 1.4.0 -m "Release 1.4.0"
