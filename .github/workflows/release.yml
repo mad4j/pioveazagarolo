@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versione (SemVer) da rilasciare es. 1.4.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate version
+        run: |
+          if [[ ! "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Version non SemVer"; exit 1; fi
+          if git rev-parse -q --verify "refs/tags/${{ github.event.inputs.version }}" >/dev/null; then
+            echo "Tag già esistente"; exit 2; fi
+
+      - name: Bump version in package.json
+        run: |
+          node -e "const fs=require('fs');const f='package.json';let p=JSON.parse(fs.readFileSync(f,'utf8'));p.version='${{ github.event.inputs.version }}';fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n');"
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
+          git add package.json
+          git commit -m "chore(release): prepare ${{ github.event.inputs.version }}" || echo "No change"
+
+      - name: Create tag
+        run: |
+          git tag ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
+          git push origin HEAD:main --follow-tags
+
+      - name: Install deps & generate changelog
+        run: |
+          npm install --no-audit --no-fund
+          npm run generate-changelog || true
+          if ! git diff --quiet CHANGELOG.md; then
+            git add CHANGELOG.md
+            git commit -m "chore: auto-update CHANGELOG for ${{ github.event.inputs.version }}" || true
+            git push origin HEAD:main
+          fi
+
+      - name: Generate release notes file
+        run: |
+          node _scripts/create-release-notes.js ${{ github.event.inputs.version }}
+          if ! git diff --quiet RELEASE_NOTES_${{ github.event.inputs.version }}.md; then
+            git add RELEASE_NOTES_${{ github.event.inputs.version }}.md
+            git commit -m "docs: add release notes ${{ github.event.inputs.version }}" || true
+            git push origin HEAD:main || true
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          body_path: RELEASE_NOTES_${{ github.event.inputs.version }}.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

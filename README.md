@@ -6,18 +6,27 @@ Piove domani a Zagarolo?
 
 Tech Report: <https://deepwiki.com/mad4j/piovedomaniazagarolo>
 
-## Changelog Automatico
+## Changelog & Release Automatici
 
-Il file `CHANGELOG.md` viene generato automaticamente al push di un nuovo tag (`git tag 1.3.0 -m "Release 1.3.0" && git push origin 1.3.0`).
+Per pubblicare una nuova versione usa il workflow GitHub `Release` (Actions > Release > Run workflow) indicando la versione SemVer (es: `1.4.0`). Il workflow esegue automaticamente:
 
-Generazione manuale locale:
+1. Bump di `package.json`.
+2. Creazione e push del tag (es: `1.4.0`).
+3. Rigenerazione `CHANGELOG.md`.
+4. Generazione `RELEASE_NOTES_<version>.md` dalla relativa sezione del changelog.
+5. Creazione della GitHub Release con il contenuto del file di note.
 
+### Flusso Manuale (fallback)
 ```bash
-npm install
-npm run generate-changelog
+git commit -am "chore(release): prepare 1.4.0"   # Assicurati di aver aggiornato la versione
+git tag 1.4.0 -m "Release 1.4.0"
+git push origin main --follow-tags
+npm install && npm run generate-changelog
+git add CHANGELOG.md && git commit -m "docs(changelog): update for 1.4.0" && git push
+node _scripts/create-release-notes.js 1.4.0 && git add RELEASE_NOTES_1.4.0.md && git commit -m "docs: add release notes 1.4.0" && git push
 ```
 
-Poi crea/pusha il tag.
+Se usi il flusso manuale crea poi la Release dalla UI copiando il contenuto del file di note.
 
 ## TODO / Miglioramenti Futuri
 
