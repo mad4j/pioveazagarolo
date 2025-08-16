@@ -81,7 +81,10 @@ for (let i = tags.length - 1; i >= 0; i--) {
   pushCat('Tests', cats.tests);
   pushCat('Dependencies', cats.dependencies);
   pushCat('Security', cats.security);
-  pushCat('Data Updates', cats.data.length > 10 ? [ `${cats.data.length} commit di aggiornamento dati` ] : cats.data);
+  // Sempre e solo il conteggio degli aggiornamenti dati (richiesta workflow release)
+  if (cats.data.length) {
+    pushCat('Data Updates', [ `${cats.data.length} commit di aggiornamento dati` ]);
+  }
   pushCat('Other', cats.other);
   sections.push(section + '\n');
 }

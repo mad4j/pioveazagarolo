@@ -132,7 +132,7 @@ Generato da _scripts/generate-changelog.js
 ## [1.0.1] - 2025-05-20
 
 ### Data Updates
-- data updated (7be3e01)
+1 commit di aggiornamento dati
 
 ### Other
 - Update main.css (5794bfe)

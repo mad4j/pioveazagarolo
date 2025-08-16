@@ -16,7 +16,7 @@
 
 ## Contenuti & Dati
 
-- 967 commit di aggiornamento dati automatizzati ("data updated")
+- 967 commit di aggiornamento dati
 
 ## Varie
 
