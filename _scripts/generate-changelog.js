@@ -86,7 +86,7 @@ for (let i = tags.length - 1; i >= 0; i--) {
   sections.push(section + '\n');
 }
 
-let header = '# Changelog (Auto-Generato)\n\nGenerato da scripts/generate-changelog.js\n';
+let header = '# Changelog (Auto-Generato)\n\nGenerato da _scripts/generate-changelog.js\n';
 let existingManual = '';
 if (existsSync('CHANGELOG.md')) {
   const current = readFileSync('CHANGELOG.md', 'utf8');
