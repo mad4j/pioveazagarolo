@@ -2,6 +2,32 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.3.1] - 2025-08-16
+
+### Fix
+- fix(ui): reduced footer bottom padding (18acf10)
+- fix(ui): reduced fotter bottom margin (16a11ba)
+- fix(paw); added maskable icon (e08c715)
+
+### Docs
+- docs(changelog): update for 1.3.0 (c1d18e8)
+
+### CI
+- ci(release): add automated release workflow and script (5998922)
+
+### Data Updates
+- weather data updated (063168f)
+- weather data updated (88cf564)
+- weather data updated (faa9e62)
+- weather data updated (ec24f2c)
+- weather data updated (03b3e33)
+- weather data updated (8367125)
+
+### Other
+- chore(release): prepare 1.3.1 (6f1347a)
+- Update README.md (845cdef)
+- Update package-lock.json (c416848)
+
 ## [1.3.0] - 2025-08-16
 
 ### Features
