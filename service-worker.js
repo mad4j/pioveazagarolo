@@ -3,7 +3,8 @@
 // v5: migliorata la gestione del layout dinamico sugli schermi piccoli
 // v6: aggiunto sistema di debug su dispositivi mobili
 // v7: splitting file main.js in moduli
-const CACHE_NAME = "piove-a-zagarolo-cache-v7";
+// v8: aggiunto supporto icone giorno/notte in base a is_day
+const CACHE_NAME = "piove-a-zagarolo-cache-v8";
 const urlsToCache = [
   "./",
   "./index.html",
