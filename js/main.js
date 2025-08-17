@@ -12,6 +12,17 @@ function isTouchDevice() {
 // Mappa grafici per eventuale aggiornamento futuro
 const chartInstances = {};
 
+// Config giorno riusata (evita ricreazione ad ogni displayData)
+const DAY_CONFIGS = [
+    { key: 'today', index: 0, chartId: 'today-chart', cardId: 'today-card', iconId: 'today-icon' },
+    { key: 'tomorrow', index: 1, chartId: 'tomorrow-chart', cardId: 'tomorrow-card', iconId: 'tomorrow-icon' },
+    { key: 'dayaftertomorrow', index: 2, chartId: 'dayaftertomorrow-chart', cardId: 'dayaftertomorrow-card', iconId: 'dayaftertomorrow-icon' }
+];
+const ARIA_LABEL_DAY = ['oggi', 'domani', 'dopodomani'];
+
+// Helper DOM breve
+const $ = (id) => document.getElementById(id);
+
 // Plugin linea ora corrente (Europa/Rome) per il grafico di "Oggi"
 // La linea è calcolata solo al primo draw (cache) e non si aggiorna finché non si ricarica la pagina.
 const currentHourLinePlugin = {
@@ -115,6 +126,13 @@ function buildChart(target, probabilityData, precipitationData) {
     if (chartInstances[target]) {
         chartInstances[target].destroy();
     }
+    // Pre-calcolo colori (evita doppia map)
+    const precipColors = precipitationData.map(getPrecipitationBarColor);
+    const maxPrecip = (() => {
+        const m = Math.max(...precipitationData, 1);
+        if (m < 2) return 2; // scala minima
+        return Math.ceil(m);
+    })();
     chartInstances[target] = new Chart(ctx, {
     plugins: target === 'today-chart' ? [currentHourLinePlugin] : [],
         data: {
@@ -124,7 +142,8 @@ function buildChart(target, probabilityData, precipitationData) {
                     label: 'Probabilità (%)',
                     type: 'line',
                     fill: true,
-                    lineTension: 0.4,
+                    // Chart.js v4 usa "tension" (lineTension deprecated)
+                    tension: 0.4,
                     backgroundColor: 'rgba(52, 152, 219, 0.3)',
                     borderColor: 'rgb(41, 128, 185)',
                     borderWidth: 2,
@@ -137,8 +156,8 @@ function buildChart(target, probabilityData, precipitationData) {
                 {
                     label: 'Precipitazione (mm/h)',
                     type: 'bar',
-                    backgroundColor: precipitationData.map(getPrecipitationBarColor),
-                    borderColor: precipitationData.map(getPrecipitationBarColor),
+                    backgroundColor: precipColors,
+                    borderColor: precipColors,
                     borderWidth: 1,
                     data: precipitationData,
                     yAxisID: 'y1',
@@ -151,7 +170,7 @@ function buildChart(target, probabilityData, precipitationData) {
             maintainAspectRatio: false,
             layout: { padding: 5 },
             onHover: (event, activeElements, chart) => {
-                // Implementa timeout di 5 secondi per dispositivi touchscreen
+                // Implementa timeout di 3 secondi per dispositivi touchscreen
                 if (isTouchDevice() && activeElements.length > 0) {
                     // Cancella qualsiasi timeout precedente
                     if (chart._tooltipTimeout) {
@@ -175,7 +194,7 @@ function buildChart(target, probabilityData, precipitationData) {
                 },
                 y1: {
                     min: 0,
-                    max: Math.max(...precipitationData, 1) < 2 ? 2 : Math.ceil(Math.max(...precipitationData, 1)),
+                    max: maxPrecip,
                     position: 'right',
                     grid: { drawOnChartArea: false, drawTicks: false },
                     ticks: { display: false, font: { family: "'Montserrat', sans-serif", size: 10 } }
@@ -232,109 +251,78 @@ function getRainIconClass(weatherCode) {
 }
 
 function displayData(data) {
-    // Sezione condizioni attuali (se presenti nel JSON)
+    if (!data || !data.daily || !data.hourly) return; // robustezza
+    // Condizioni attuali
     try {
-        if (data.current) {
+        const { current } = data;
+        if (current) {
             const currCard = document.getElementById('current-conditions');
             if (currCard) currCard.hidden = false;
-            const tempEl = document.getElementById('current-temp');
-            const rainEl = document.getElementById('current-rain');
-            const pressEl = document.getElementById('current-pressure');
-            const humEl = document.getElementById('current-humidity');
-            const windEl = document.getElementById('current-wind');
-            const windDirIcon = document.getElementById('current-wind-dir-icon');
-            const iconEl = document.getElementById('current-icon');
-            const timeEl = document.getElementById('current-time');
-            if (tempEl && typeof data.current.temperature_2m === 'number') tempEl.textContent = `${Math.round(data.current.temperature_2m)}°`;
-            if (rainEl && typeof data.current.rain === 'number') rainEl.textContent = `${data.current.rain.toFixed(1)}  mm`;
-            if (pressEl && typeof data.current.surface_pressure === 'number') pressEl.textContent = `${Math.round(data.current.surface_pressure)} hPa`;
-            if (humEl && typeof data.current.relative_humidity_2m === 'number') humEl.textContent = `${Math.round(data.current.relative_humidity_2m)}%`;
-            if (windEl && typeof data.current.wind_speed_10m === 'number') {
-                windEl.textContent = `${Math.round(data.current.wind_speed_10m)} km/h`;
-            }
-            if (windDirIcon && typeof data.current.wind_direction_10m === 'number') {
-                // Rotazione: l'icona base punta verso l'alto (Nord). Ruotiamo verso la direzione da cui PROVIENE il vento.
-                const deg = Math.round(data.current.wind_direction_10m);
+            const tempEl = $('current-temp');
+            const rainEl = $('current-rain');
+            const pressEl = $('current-pressure');
+            const humEl = $('current-humidity');
+            const windEl = $('current-wind');
+            const windDirIcon = $('current-wind-dir-icon');
+            const iconEl = $('current-icon');
+            const timeEl = $('current-time');
+            if (tempEl && typeof current.temperature_2m === 'number') tempEl.textContent = `${Math.round(current.temperature_2m)}°`;
+            if (rainEl && typeof current.rain === 'number') rainEl.textContent = `${current.rain.toFixed(1)}  mm`;
+            if (pressEl && typeof current.surface_pressure === 'number') pressEl.textContent = `${Math.round(current.surface_pressure)} hPa`;
+            if (humEl && typeof current.relative_humidity_2m === 'number') humEl.textContent = `${Math.round(current.relative_humidity_2m)}%`;
+            if (windEl && typeof current.wind_speed_10m === 'number') windEl.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
+            if (windDirIcon && typeof current.wind_direction_10m === 'number') {
+                const deg = Math.round(current.wind_direction_10m);
                 windDirIcon.style.transform = `rotate(${deg}deg)`;
                 windDirIcon.setAttribute('aria-label', `Direzione vento ${deg}°`);
                 windDirIcon.title = `Direzione vento ${deg}°`;
             }
-            if (iconEl && typeof data.current.weather_code === 'number') {
-                iconEl.className = getRainIconClass(data.current.weather_code);
-                iconEl.setAttribute('aria-label', `Condizioni attuali codice ${data.current.weather_code}`);
+            if (iconEl && typeof current.weather_code === 'number') {
+                iconEl.className = getRainIconClass(current.weather_code);
+                iconEl.setAttribute('aria-label', `Condizioni attuali codice ${current.weather_code}`);
             }
-            if (timeEl && data.current.time) {
+            if (timeEl && current.time) {
                 try {
-                    const dt = new Date(data.current.time);
+                    const dt = new Date(current.time);
                     timeEl.textContent = dt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
                 } catch { timeEl.textContent = '--:--'; }
             }
         }
     } catch {}
 
-    const todayData = getDaySlice(data.hourly.precipitation_probability, 0);
-    const tomorrowData = getDaySlice(data.hourly.precipitation_probability, 1);
-    const dayAfterTomorrowData = getDaySlice(data.hourly.precipitation_probability, 2);
+    // Dati giornalieri (loop per eliminare ripetizioni)
+    const { daily, hourly } = data;
+    DAY_CONFIGS.forEach(cfg => {
+        const i = cfg.index;
+        // Icona
+        const iconEl = document.getElementById(cfg.iconId);
+        if (iconEl) {
+            iconEl.className = getRainIconClass(daily.weather_code[i]);
+            iconEl.setAttribute('aria-label', `Meteo ${ARIA_LABEL_DAY[i]} codice ${daily.weather_code[i]}`);
+        }
+        // Temperature
+        const maxEl = document.getElementById(`${cfg.key}-temp-max`);
+        const minEl = document.getElementById(`${cfg.key}-temp-min`);
+        if (maxEl) maxEl.textContent = `${Math.round(daily.temperature_2m_max[i])}°`;
+        if (minEl) minEl.textContent = `${Math.round(daily.temperature_2m_min[i])}°`;
+        // Probabilità e mm
+        const percEl = document.getElementById(`${cfg.key}-percentage`);
+        const mmEl = document.getElementById(`${cfg.key}-mm`);
+        if (percEl) percEl.textContent = `${daily.precipitation_probability_max[i]}%`;
+        if (mmEl) mmEl.textContent = `${daily.precipitation_sum[i].toFixed(1)} mm`;
+        // Data
+        const dateEl = document.getElementById(`${cfg.key}-date`);
+        if (dateEl) dateEl.textContent = formatDate(daily.time[i]);
+        // Classe card
+        updateCardClass(cfg.cardId, daily.precipitation_probability_max[i]);
+        // Grafici (usiamo getDaySlice + index)
+        const probSlice = getDaySlice(hourly.precipitation_probability, i);
+        const precipSlice = getDaySlice(hourly.precipitation, i);
+        buildChart(cfg.chartId, probSlice, precipSlice);
+    });
 
-    const todayPrecip = getDaySlice(data.hourly.precipitation, 0);
-    const tomorrowPrecip = getDaySlice(data.hourly.precipitation, 1);
-    const dayAfterTomorrowPrecip = getDaySlice(data.hourly.precipitation, 2);
-
-    const todayPercentage = data.daily.precipitation_probability_max[0];
-    const tomorrowPercentage = data.daily.precipitation_probability_max[1];
-    const dayAfterTomorrowPercentage = data.daily.precipitation_probability_max[2];
-
-    const precipitationToday = data.daily.precipitation_sum[0];
-    const precipitationTomorrow = data.daily.precipitation_sum[1];
-    const precipitationDayAfterTomorrow = data.daily.precipitation_sum[2];
-
-    // Cambia icona in base al weather_code
-    const todayIcon = document.getElementById('today-icon');
-    const tomorrowIcon = document.getElementById('tomorrow-icon');
-    const dayAfterTomorrowIcon = document.getElementById('dayaftertomorrow-icon');
-    if (todayIcon) {
-        todayIcon.className = getRainIconClass(data.daily.weather_code[0]);
-        todayIcon.setAttribute('aria-label', `Meteo oggi codice ${data.daily.weather_code[0]}`);
-    }
-    if (tomorrowIcon) {
-        tomorrowIcon.className = getRainIconClass(data.daily.weather_code[1]);
-        tomorrowIcon.setAttribute('aria-label', `Meteo domani codice ${data.daily.weather_code[1]}`);
-    }
-    if (dayAfterTomorrowIcon) {
-        dayAfterTomorrowIcon.className = getRainIconClass(data.daily.weather_code[2]);
-        dayAfterTomorrowIcon.setAttribute('aria-label', `Meteo dopodomani codice ${data.daily.weather_code[2]}`);
-    }
-
-    // Temperatura max/min accanto all'icona
-    document.getElementById('today-temp-max').textContent = `${Math.round(data.daily.temperature_2m_max[0])}°`;
-    document.getElementById('today-temp-min').textContent = `${Math.round(data.daily.temperature_2m_min[0])}°`;
-    document.getElementById('tomorrow-temp-max').textContent = `${Math.round(data.daily.temperature_2m_max[1])}°`;
-    document.getElementById('tomorrow-temp-min').textContent = `${Math.round(data.daily.temperature_2m_min[1])}°`;
-    document.getElementById('dayaftertomorrow-temp-max').textContent = `${Math.round(data.daily.temperature_2m_max[2])}°`;
-    document.getElementById('dayaftertomorrow-temp-min').textContent = `${Math.round(data.daily.temperature_2m_min[2])}°`;
-
-    document.getElementById("today-percentage").textContent = `${todayPercentage}%`;
-    document.getElementById("today-mm").textContent = `${precipitationToday.toFixed(1)} mm`;
-    document.getElementById("tomorrow-percentage").textContent = `${tomorrowPercentage}%`;
-    document.getElementById("tomorrow-mm").textContent = `${precipitationTomorrow.toFixed(1)} mm`;
-    document.getElementById("dayaftertomorrow-percentage").textContent = `${dayAfterTomorrowPercentage}%`;
-    document.getElementById("dayaftertomorrow-mm").textContent = `${precipitationDayAfterTomorrow.toFixed(1)} mm`;
-
-    document.getElementById("today-date").textContent = formatDate(data.daily.time[0]);
-    document.getElementById("tomorrow-date").textContent = formatDate(data.daily.time[1]);
-    document.getElementById("dayaftertomorrow-date").textContent = formatDate(data.daily.time[2]);
-
-    updateCardClass("today-card", todayPercentage);
-    updateCardClass("tomorrow-card", tomorrowPercentage);
-    updateCardClass("dayaftertomorrow-card", dayAfterTomorrowPercentage);
-
-    buildChart("today-chart", todayData, todayPrecip);
-    buildChart("tomorrow-chart", tomorrowData, tomorrowPrecip);
-    buildChart("dayaftertomorrow-chart", dayAfterTomorrowData, dayAfterTomorrowPrecip);
-
-    const lastUpdated = document.getElementById("last-updated");
+    const lastUpdated = document.getElementById('last-updated');
     if (lastUpdated) lastUpdated.textContent = data.last_update.trim();
-    // Nessun toast di aggiornamento per evitare rumore
 }
 
 async function retrieveData() {
@@ -344,7 +332,7 @@ async function retrieveData() {
         if (!response.ok) throw new Error('Errore nel caricamento dei dati meteo');
         const data = await response.json();
         displayData(data);
-        hideError();
+        // Nessun messaggio di successo: interfaccia silenziosa
         saveCachedData(data);
     // Messaggio success handler gestito in displayData quando proveniamo da cache
     } catch (error) {
@@ -354,21 +342,12 @@ async function retrieveData() {
             // Mostra dati cache senza notifiche
             displayData(cached.data);
         } else {
-            showError('Errore rete. Ritento fra 60 secondi...');
+            showToast('Errore rete. Ritento fra 60 secondi...', 'error');
         }
         setTimeout(retrieveData, 60_000);
     }
 }
-
-function showError(message) {
-    showToast(message, 'error');
-}
-
-function hideError() {
-    // Non serve più con i toast; eventuale implementazione futura
-}
-
-function announceUpdate(message) { /* disabilitato per evitare popup eccessivi */ }
+// showError/hideError/announceUpdate rimossi: logica accorpata in showToast / retrieveData
 
 // Sistema toast riutilizzabile
 function showToast(message, type = 'info', duration = 5000, silent = false) {
