@@ -241,12 +241,24 @@ function displayData(data) {
             const rainEl = document.getElementById('current-rain');
             const pressEl = document.getElementById('current-pressure');
             const humEl = document.getElementById('current-humidity');
+            const windEl = document.getElementById('current-wind');
+            const windDirIcon = document.getElementById('current-wind-dir-icon');
             const iconEl = document.getElementById('current-icon');
             const timeEl = document.getElementById('current-time');
             if (tempEl && typeof data.current.temperature_2m === 'number') tempEl.textContent = `${Math.round(data.current.temperature_2m)}°`;
             if (rainEl && typeof data.current.rain === 'number') rainEl.textContent = `${data.current.rain.toFixed(1)}  mm/h`;
             if (pressEl && typeof data.current.surface_pressure === 'number') pressEl.textContent = `${Math.round(data.current.surface_pressure)} hPa`;
             if (humEl && typeof data.current.relative_humidity_2m === 'number') humEl.textContent = `${Math.round(data.current.relative_humidity_2m)}%`;
+            if (windEl && typeof data.current.wind_speed_10m === 'number') {
+                windEl.textContent = `${Math.round(data.current.wind_speed_10m)} km/h`;
+            }
+            if (windDirIcon && typeof data.current.wind_direction_10m === 'number') {
+                // Rotazione: l'icona base punta verso l'alto (Nord). Ruotiamo verso la direzione da cui PROVIENE il vento.
+                const deg = Math.round(data.current.wind_direction_10m);
+                windDirIcon.style.transform = `rotate(${deg}deg)`;
+                windDirIcon.setAttribute('aria-label', `Direzione vento ${deg}°`);
+                windDirIcon.title = `Direzione vento ${deg}°`;
+            }
             if (iconEl && typeof data.current.weather_code === 'number') {
                 iconEl.className = getRainIconClass(data.current.weather_code);
                 iconEl.setAttribute('aria-label', `Condizioni attuali codice ${data.current.weather_code}`);
