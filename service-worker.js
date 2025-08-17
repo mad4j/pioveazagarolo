@@ -2,13 +2,20 @@
 // v4: aggiunto badge offline & aggiornamenti UI
 // v5: migliorata la gestione del layout dinamico sugli schermi piccoli
 // v6: aggiunto sistema di debug su dispositivi mobili
-const CACHE_NAME = "piove-a-zagarolo-cache-v5";
+// v7: splitting file main.js in moduli
+const CACHE_NAME = "piove-a-zagarolo-cache-v7";
 const urlsToCache = [
   "./",
   "./index.html",
   "./favicon.png",
   "./watermark-512x512.png",
   "./js/main.js",
+  "./js/modules/constants.js",
+  "./js/modules/cache.js",
+  "./js/modules/icons.js",
+  "./js/modules/charts.js",
+  "./js/modules/ui.js",
+  "./js/modules/debug-mobile.js",
   "./js/pwa-install.js",
   "./manifest.json",
   "./css/main.css",
