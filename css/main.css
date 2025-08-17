@@ -248,12 +248,6 @@ body {
   letter-spacing: 0.5px;
 }
 
-.header p {
-  color: var(--text-secondary);
-  margin-top: -0.25rem;
-  font-size: 1rem;
-}
-
 .forecast-card {
   background-color: var(--card-bg);
   border: none;
@@ -302,7 +296,7 @@ body {
   line-height: 1;
 }
 
-.rain-mm {
+.rain-mm { /* base style (mobile keeps same size so no override needed) */
   font-size: 0.7rem;
   color: var(--text-muted);
   display: flex;
@@ -349,7 +343,7 @@ footer {
   margin-top: 0;
 }
 
-/* Removed .forecast-section (unused in markup) */
+/* Nota: .forecast-section rimosso perché non presente nel markup */
 
 .high-chance {
   background-color: rgba(231, 76, 60, 0.1);
@@ -435,9 +429,7 @@ footer {
     font-size: 1.5rem;
   }
 
-  .rain-mm {
-    font-size: 0.7rem;
-  }
+  /* .rain-mm mantiene dimensioni dal desktop (nessuna dichiarazione duplicata) */
 
   .rain-info { margin:0 0 0.25rem; }
 
