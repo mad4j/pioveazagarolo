@@ -1,7 +1,7 @@
 {
   "latitude": 41.75,
   "longitude": 12.875,
-  "generationtime_ms": 0.12123584747314453,
+  "generationtime_ms": 0.13589859008789062,
   "utc_offset_seconds": 7200,
   "timezone": "Europe/Rome",
   "timezone_abbreviation": "GMT+2",
@@ -21,18 +21,18 @@
     "wind_direction_10m": "°"
   },
   "current": {
-    "time": "2025-08-17T11:30",
+    "time": "2025-08-17T12:15",
     "interval": 900,
-    "temperature_2m": 29.0,
+    "temperature_2m": 30.1,
     "rain": 0.00,
-    "weather_code": 2,
-    "surface_pressure": 978.6,
+    "weather_code": 1,
+    "surface_pressure": 978.7,
     "precipitation": 0.00,
-    "relative_humidity_2m": 51,
+    "relative_humidity_2m": 47,
     "is_day": 1,
-    "apparent_temperature": 30.7,
-    "wind_speed_10m": 10.3,
-    "wind_direction_10m": 205
+    "apparent_temperature": 32.0,
+    "wind_speed_10m": 13.8,
+    "wind_direction_10m": 208
   },
   "hourly_units": {
     "time": "iso8601",
@@ -131,8 +131,8 @@
       0.00,
       0.70,
       0.00,
-      0.50,
-      0.60,
+      0.10,
+      0.00,
       0.00,
       0.00,
       0.00,
@@ -153,35 +153,35 @@
       0.00,
       0.00,
       0.20,
+      0.00,
+      0.20,
+      0.50,
+      0.20,
+      0.30,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.10,
       0.10,
       0.10,
       0.40,
-      1.70,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.10,
-      0.00,
-      0.10,
-      0.10,
+      0.50,
+      0.60,
       0.00,
       0.00,
       0.00,
@@ -290,24 +290,24 @@
       "2025-08-19T20:02"
     ],
     "temperature_2m_max": [
-      29.5,
-      29.9,
-      28.7
+      30.2,
+      30.0,
+      28.6
     ],
     "temperature_2m_min": [
       19.7,
-      18.1,
-      18.1
+      18.5,
+      18.2
     ],
     "weather_code": [
       80,
       80,
-      45
+      80
     ],
     "precipitation_sum": [
-      1.80,
-      2.50,
-      0.30
+      0.80,
+      1.40,
+      1.80
     ],
     "precipitation_probability_max": [
       60,
@@ -315,5 +315,5 @@
       68
     ]
   },
-  "last_update": "2025-08-17 11:43"
+  "last_update": "2025-08-17 12:26"
 }
