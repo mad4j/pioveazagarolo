@@ -2,33 +2,83 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.4.0] - 2025-08-17
+
+### Features
+- en(ui): added zero-padding to hour labels. (9cab411)
+- feat(ui): replace footer text with clock icon (c1c6e22)
+- feat(ui): remove time from current bar and move to footer (596396b)
+- en(ui): add current wind speed and direction display (1b15d5c)
+- en(ci): add more fields to weather data retrieval (a6e7403)
+- feat(ui): aggiunge sezione condizioni attuali con temperatura, pioggia, pressione e umidità (a1b3233)
+- en(ci): added current humidity index (3032adb)
+- en(ci): added current weather data (c3979f1)
+
+### Fix
+- fix(ci): better precision on geographic coordinates (e11392f)
+- fix(ui): update precipitation unit from mm/h to mm (2c6ba0b)
+- fix(ui): aligned temperature units (4048841)
+- fix(ui): prevent mobile tap card movement with comprehensive CSS override (4898f9c)
+- fix(ui): disable card movement on focus/hover in vertical layout (dd1fbbd)
+- fix: make external links open in new window/tab (ea4fa69)
+
+### Refactor
+- en(ui): refactor rain probability UI for improved layout (8ab6a56)
+- en(ui): refactor rain probability layout for improved alignment (a5320bd)
+- en(code): refactor JS to ES modules and modularize codebase (1c204c2)
+- en(code): refactor displayData and chart logic for clarity and reuse (b732e64)
+
+### Docs
+- docs: complete comprehensive copilot instructions with final validation checklist (96be745)
+- docs: update copilot instructions with accurate file sizes, paths, and timing (bea333c)
+- docs: initial validation of copilot instructions requirements (76e9cd4)
+
+### Data Updates
+43 commit di aggiornamento dati
+
+### Other
+- chore(release): prepare 1.4.0 (eebd602)
+- en(ui): rename precipitation.json to data-precipitations.json (82743a7)
+- en(ci): change workflow schedule to run every 15 minutes (7b8bb64)
+- Ensure precipitation.json maintains exactly 24 values max (3fd58ba)
+- Implement effective precipitation values for past hours in Today chart (1ccb1ae)
+- Initial plan (df931e0)
+- Initial plan (6d24c49)
+- Implement day/night icon support based on is_day field (0669417)
+- Initial plan (03496f0)
+- Update main.css (6fe8d62)
+- Update main.css (a1ffb12)
+- en(ui): optimization of main.css (911449c)
+- en(ui): compacted current wind information (45cc9f4)
+- Update main.js (be93886)
+- Update index.html (5b9f165)
+- Use umbrella icon for current precipitation and display units as mm instead of mm/h (9188a78)
+- Replace precipitation icons with umbrella icons and update units to mm/h (6102690)
+- Initial plan (b52eae0)
+- Initial plan (20e4cdc)
+- Initial plan (6a40f7b)
+- Initial plan (353be08)
+- en(ci): update weather data every 30 min (3d04b3a)
+- en(ci): stored only the number of weather data updates (ec81c34)
+- chore: auto-update CHANGELOG for 1.3.1 (8545ed6)
+
 ## [1.3.1] - 2025-08-16
 
 ### Fix
-
 - fix(ui): reduced footer bottom padding (18acf10)
 - fix(ui): reduced fotter bottom margin (16a11ba)
 - fix(paw); added maskable icon (e08c715)
 
 ### Docs
-
 - docs(changelog): update for 1.3.0 (c1d18e8)
 
 ### CI
-
 - ci(release): add automated release workflow and script (5998922)
 
 ### Data Updates
-
-- weather data updated (063168f)
-- weather data updated (88cf564)
-- weather data updated (faa9e62)
-- weather data updated (ec24f2c)
-- weather data updated (03b3e33)
-- weather data updated (8367125)
+6 commit di aggiornamento dati
 
 ### Other
-
 - chore(release): prepare 1.3.1 (6f1347a)
 - Update README.md (845cdef)
 - Update package-lock.json (c416848)
@@ -36,7 +86,6 @@ Generato da _scripts/generate-changelog.js
 ## [1.3.0] - 2025-08-16
 
 ### Features
-
 - feat(responsive): ottimizza layout mobile per evitare lo scroll verticale (537e244)
 - ux: cursore standard sul titolo con tooltip build (9efd154)
 - feat(pwa): tooltip titolo con build date e commit (cfb916d)
@@ -47,7 +96,6 @@ Generato da _scripts/generate-changelog.js
 - ux(theme): migliora leggibilità titoli giorno in dark mode (144db49)
 
 ### Fix
-
 - fix(ui): restyling for vertical layout (dbebe79)
 - fix(ui): restyling for vertical layout (e694de2)
 - fix(debug): redesign debug panel UI and improve controls (1f044a4)
@@ -62,26 +110,21 @@ Generato da _scripts/generate-changelog.js
 - fix(chart): rimuovi highlight del pallino quando il tooltip scompare su dispositivi touch (66cd6ce)
 
 ### Refactor
-
 - refactor: sposta main.js, service-worker.js e pwa-install.js in js/ (ed88ff3)
 
 ### Docs
-
 - docs: add comprehensive copilot instructions (2b6d5d1)
 - docs: initialize copilot instructions task (7834468)
 - docs: add commit guidelines & enhance changelog categories (662d396)
 
 ### CI
-
 - ci: fix workflow indentation and build-info on push (f6aabf6)
 - ci: genera build-info in workflow schedulato (fa90f24)
 
 ### Data Updates
-
 35 commit di aggiornamento dati
 
 ### Other
-
 - chore(release): prepare 1.3.0 (version bump, notes) (f72e3c2)
 - Update index.html (5b7efc1)
 - Update service-worker.js (719f9c5)
@@ -107,7 +150,6 @@ Generato da _scripts/generate-changelog.js
 ## [1.2.0] - 2025-08-13
 
 ### Features
-
 - Add overlay to left of current hour line in chart (ff54d86)
 - Add current hour line plugin to today's chart (97e5923)
 - Add localStorage caching for weather data (44ee26b)
@@ -116,27 +158,21 @@ Generato da _scripts/generate-changelog.js
 - added Meteo API credits (ec542ac)
 
 ### Fix
-
-
 - Fixed Clear Sky codes (c9b7dba)
 - fixed weatherCode management (6b92635)
 - fixes (0a4a283)
 
 ### Refactor
-
 - Refactor install/update button styles and toast logic (5510037)
 
 ### Docs
-
 - docs: renumber release 0.2.0 -> 1.2.0 (e8ace24)
 - docs: add standalone release notes for 0.2.0 (1b4ff33)
 
 ### Data Updates
-
 967 commit di aggiornamento dati
 
 ### Other
-
 - chore: add CHANGELOG for 0.2.0 (166c494)
 - Update index.html (c828c86)
 - Update main.css (902f940)
@@ -145,19 +181,15 @@ Generato da _scripts/generate-changelog.js
 ## [1.1.0] - 2025-05-24
 
 ### Features
-
 - added temperature (447cef6)
 
 ### Fix
-
 - fixed dynamic layout (066e54e)
 
 ### Data Updates
-
 23 commit di aggiornamento dati
 
 ### Other
-
 - Update build.yml (757cf73)
 - Update build.yml (e008c42)
 - Update index.html (15819bd)
@@ -171,7 +203,6 @@ Generato da _scripts/generate-changelog.js
 ## [1.0.2] - 2025-05-22
 
 ### Data Updates
-
 25 commit di aggiornamento dati
 
 ### Other
@@ -182,18 +213,15 @@ Generato da _scripts/generate-changelog.js
 ## [1.0.1] - 2025-05-20
 
 ### Data Updates
-
 1 commit di aggiornamento dati
 
 ### Other
-
 - Update main.css (5794bfe)
 - more screen sizes (83ea561)
 
 ## [1.0.0] - 2025-05-20
 
 ### Features
-
 - added color to precipitations bars (5f0a6a1)
 - added last_update information directly in data.json file (533667a)
 - added layout profile for high-end mobiles (8de3564)
@@ -207,17 +235,14 @@ Generato da _scripts/generate-changelog.js
 - added favicon (968455b)
 
 ### Refactor
-
 - layout refactoring (5ab37bd)
 - project refactoring (38ee3f8)
 - refactoring (c691d4a)
 
 ### Data Updates
-
 3653 commit di aggiornamento dati
 
 ### Other
-
 - Update main.css (9d2ce50)
 - Update main.css (a8e36b5)
 - Update index.html (f05b1a8)
@@ -327,3 +352,4 @@ Generato da _scripts/generate-changelog.js
 - Update build.yml (0ec480e)
 - Create build.yml (e03cbff)
 - Initial commit (7ccd3a5)
+
