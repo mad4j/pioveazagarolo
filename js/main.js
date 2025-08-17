@@ -1,6 +1,7 @@
 // Entry point modulare principale
 import { displayData, showToast } from './modules/ui.js';
 import { loadCachedData, saveCachedData } from './modules/cache.js';
+import { precipitationManager } from './modules/precipitation.js';
 import './modules/debug-mobile.js';
 
 async function retrieveData() {
@@ -9,12 +10,18 @@ async function retrieveData() {
     const response = await fetch(`data.json${randomQuery}`);
     if (!response.ok) throw new Error('Errore nel caricamento dei dati meteo');
     const data = await response.json();
+    
+    // Load actual precipitation data
+    await precipitationManager.loadActualData();
+    
     displayData(data);
     saveCachedData(data);
   } catch (e) {
     console.error('Errore:', e);
     const cached = loadCachedData();
     if (cached) {
+      // Try to load precipitation data even from cache
+      await precipitationManager.loadActualData();
       displayData(cached.data);
     } else {
       showToast('Errore rete. Ritento fra 60 secondi...', 'error');
@@ -29,7 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('online', () => { updateOfflineBadge(); showToast('Connessione ripristinata', 'success', 3000, true); retrieveData(); });
   window.addEventListener('offline', () => { updateOfflineBadge(); showToast('Sei offline: dati da cache', 'info', 4000, true); });
   updateOfflineBadge();
-  const cached = loadCachedData(); if (cached) displayData(cached.data);
+  const cached = loadCachedData(); 
+  if (cached) {
+    // Load precipitation data and then display
+    precipitationManager.loadActualData().then(() => {
+      displayData(cached.data);
+    });
+  }
   retrieveData();
   setInterval(retrieveData, 30 * 60 * 1000);
 });

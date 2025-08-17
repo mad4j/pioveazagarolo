@@ -35,6 +35,11 @@ jobs:
           # TZ="Europe/Rome" date +"%F %R" > lastupdate.txt
           LAST_UPDATE=$(TZ="Europe/Rome" date +"%F %R")
           jq --arg update "$LAST_UPDATE" '. += {"last_update": $update}' data.json > temp.json && mv temp.json data.json
+
+      # Update actual precipitation data
+      - name: Update actual precipitation data
+        run: |
+          node _scripts/update-precipitation.js
      
       # commit changes
       - uses: stefanzweifel/git-auto-commit-action@v5
