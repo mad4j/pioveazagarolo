@@ -331,58 +331,46 @@ body {
 
 .probability-container {
   display: flex;
-  align-items: flex-end;
-  gap: 0.4em;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 4.8rem;
+  flex-direction: row-reverse; /* icona ombrello a destra dello stack */
 }
 
-/* Stack for umbrella icon above mm value */
-.umbrella-stack {
+.rain-stats {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  line-height: 1;
-  margin-left: 0.2em;
-}
-
-.umbrella-stack .drop-icon {
-  margin-right: 0; /* override previous spacing */
-  font-size: 1.5rem;
-  align-items: center;
-}
-
-.drop-icon {
-  font-size: 1.5rem;
-  color: var(--secondary-color);
-  margin-right: 0.2em;
-  display: flex;
   align-items: flex-end;
   line-height: 1;
+  gap: 0.15rem;
+  min-width: 4.2rem; /* garantisce larghezza sufficiente per allineamento destro dei mm */
+  text-align: right;
 }
 
-.drop-icon i {
+.rain-percentage {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  display: block;
+  line-height: 1;
+  text-align: right;
+}
+
+/* mm value text */
+.rain-mm { font-size: 0.65rem; color: var(--text-muted); line-height: 1; text-align: right; align-self: stretch; }
+
+.umbrella-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  color: var(--secondary-color);
   background: linear-gradient(to bottom, #3498db, #2980b9);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.rain-percentage {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary-color);
-  display: flex;
-  align-items: flex-end;
-  line-height: 1;
-}
-
-.rain-mm {
-  /* base style (mobile keeps same size so no override needed) */
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  display: flex;
-  align-items: flex-start;
-  margin-top: 0.15rem;
-  line-height: 1;
+@media (max-width: 768px) {
+  .umbrella-icon { font-size: 2rem; }
 }
 
 .day-info {
