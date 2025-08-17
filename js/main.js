@@ -244,7 +244,7 @@ function displayData(data) {
             const iconEl = document.getElementById('current-icon');
             const timeEl = document.getElementById('current-time');
             if (tempEl && typeof data.current.temperature_2m === 'number') tempEl.textContent = `${Math.round(data.current.temperature_2m)}°C`;
-            if (rainEl && typeof data.current.rain === 'number') rainEl.textContent = `${data.current.rain.toFixed(1)} mm/h`;
+            if (rainEl && typeof data.current.rain === 'number') rainEl.textContent = `${data.current.rain.toFixed(1)} mm`;
             if (pressEl && typeof data.current.surface_pressure === 'number') pressEl.textContent = `${Math.round(data.current.surface_pressure)} hPa`;
             if (humEl && typeof data.current.relative_humidity_2m === 'number') humEl.textContent = `${Math.round(data.current.relative_humidity_2m)}%`;
             if (iconEl && typeof data.current.weather_code === 'number') {
