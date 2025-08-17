@@ -4,7 +4,8 @@
 // v6: aggiunto sistema di debug su dispositivi mobili
 // v7: splitting file main.js in moduli
 // v8: aggiunto supporto icone giorno/notte in base a is_day
-const CACHE_NAME = "piove-a-zagarolo-cache-v8";
+// v9: rimossa visualizzazione ora dalle condizioni attuali e spostata nel footer
+const CACHE_NAME = "piove-a-zagarolo-cache-v9";
 const urlsToCache = [
   "./",
   "./index.html",

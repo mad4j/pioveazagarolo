@@ -43,7 +43,7 @@ export function displayData(data){
     const { current } = data;
     if (current) {
       const currCard = $('current-conditions'); if (currCard) currCard.hidden = false;
-      const tempEl=$('current-temp'), rainEl=$('current-rain'), pressEl=$('current-pressure'), humEl=$('current-humidity'), windEl=$('current-wind'), windDirIcon=$('current-wind-dir-icon'), iconEl=$('current-icon'), timeEl=$('current-time');
+      const tempEl=$('current-temp'), rainEl=$('current-rain'), pressEl=$('current-pressure'), humEl=$('current-humidity'), windEl=$('current-wind'), windDirIcon=$('current-wind-dir-icon'), iconEl=$('current-icon');
       if (tempEl && typeof current.temperature_2m==='number') tempEl.textContent = `${Math.round(current.temperature_2m)}°`;
       if (rainEl && typeof current.rain==='number') rainEl.textContent = `${current.rain.toFixed(1)}  mm`;
       if (pressEl && typeof current.surface_pressure==='number') pressEl.textContent = `${Math.round(current.surface_pressure)} hPa`;
@@ -51,7 +51,6 @@ export function displayData(data){
       if (windEl && typeof current.wind_speed_10m==='number') windEl.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
       if (windDirIcon && typeof current.wind_direction_10m==='number') { const deg=Math.round(current.wind_direction_10m); windDirIcon.style.transform=`rotate(${deg}deg)`; windDirIcon.setAttribute('aria-label',`Direzione vento ${deg}°`); windDirIcon.title=`Direzione vento ${deg}°`; }
       if (iconEl && typeof current.weather_code==='number') { iconEl.className = getRainIconClass(current.weather_code, current.is_day); iconEl.setAttribute('aria-label',`Condizioni attuali codice ${current.weather_code}`);} 
-      if (timeEl && current.time) { try { const dt=new Date(current.time); timeEl.textContent = dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});} catch { timeEl.textContent='--:--'; } }
     }
   } catch {}
   const { daily, hourly } = data;
@@ -69,5 +68,18 @@ export function displayData(data){
     const precipSlice = getDaySlice(hourly.precipitation, i);
     buildChart(cfg.chartId, probSlice, precipSlice);
   });
-  const lastUpdated = $('last-updated'); if (lastUpdated) lastUpdated.textContent = data.last_update.trim();
+  const lastUpdated = $('last-updated'); 
+  if (lastUpdated) {
+    try {
+      if (data.current && data.current.time) {
+        const dt = new Date(data.current.time);
+        const formattedTime = dt.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+        lastUpdated.textContent = formattedTime;
+      } else {
+        lastUpdated.textContent = data.last_update.trim();
+      }
+    } catch {
+      lastUpdated.textContent = data.last_update.trim();
+    }
+  }
 }
