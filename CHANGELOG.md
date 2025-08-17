@@ -5,17 +5,21 @@ Generato da _scripts/generate-changelog.js
 ## [1.3.1] - 2025-08-16
 
 ### Fix
+
 - fix(ui): reduced footer bottom padding (18acf10)
 - fix(ui): reduced fotter bottom margin (16a11ba)
 - fix(paw); added maskable icon (e08c715)
 
 ### Docs
+
 - docs(changelog): update for 1.3.0 (c1d18e8)
 
 ### CI
+
 - ci(release): add automated release workflow and script (5998922)
 
 ### Data Updates
+
 - weather data updated (063168f)
 - weather data updated (88cf564)
 - weather data updated (faa9e62)
@@ -24,6 +28,7 @@ Generato da _scripts/generate-changelog.js
 - weather data updated (8367125)
 
 ### Other
+
 - chore(release): prepare 1.3.1 (6f1347a)
 - Update README.md (845cdef)
 - Update package-lock.json (c416848)
@@ -31,6 +36,7 @@ Generato da _scripts/generate-changelog.js
 ## [1.3.0] - 2025-08-16
 
 ### Features
+
 - feat(responsive): ottimizza layout mobile per evitare lo scroll verticale (537e244)
 - ux: cursore standard sul titolo con tooltip build (9efd154)
 - feat(pwa): tooltip titolo con build date e commit (cfb916d)
@@ -41,6 +47,7 @@ Generato da _scripts/generate-changelog.js
 - ux(theme): migliora leggibilità titoli giorno in dark mode (144db49)
 
 ### Fix
+
 - fix(ui): restyling for vertical layout (dbebe79)
 - fix(ui): restyling for vertical layout (e694de2)
 - fix(debug): redesign debug panel UI and improve controls (1f044a4)
@@ -55,21 +62,26 @@ Generato da _scripts/generate-changelog.js
 - fix(chart): rimuovi highlight del pallino quando il tooltip scompare su dispositivi touch (66cd6ce)
 
 ### Refactor
+
 - refactor: sposta main.js, service-worker.js e pwa-install.js in js/ (ed88ff3)
 
 ### Docs
+
 - docs: add comprehensive copilot instructions (2b6d5d1)
 - docs: initialize copilot instructions task (7834468)
 - docs: add commit guidelines & enhance changelog categories (662d396)
 
 ### CI
+
 - ci: fix workflow indentation and build-info on push (f6aabf6)
 - ci: genera build-info in workflow schedulato (fa90f24)
 
 ### Data Updates
+
 35 commit di aggiornamento dati
 
 ### Other
+
 - chore(release): prepare 1.3.0 (version bump, notes) (f72e3c2)
 - Update index.html (5b7efc1)
 - Update service-worker.js (719f9c5)
@@ -95,6 +107,7 @@ Generato da _scripts/generate-changelog.js
 ## [1.2.0] - 2025-08-13
 
 ### Features
+
 - Add overlay to left of current hour line in chart (ff54d86)
 - Add current hour line plugin to today's chart (97e5923)
 - Add localStorage caching for weather data (44ee26b)
@@ -103,21 +116,27 @@ Generato da _scripts/generate-changelog.js
 - added Meteo API credits (ec542ac)
 
 ### Fix
+
+
 - Fixed Clear Sky codes (c9b7dba)
 - fixed weatherCode management (6b92635)
 - fixes (0a4a283)
 
 ### Refactor
+
 - Refactor install/update button styles and toast logic (5510037)
 
 ### Docs
+
 - docs: renumber release 0.2.0 -> 1.2.0 (e8ace24)
 - docs: add standalone release notes for 0.2.0 (1b4ff33)
 
 ### Data Updates
+
 967 commit di aggiornamento dati
 
 ### Other
+
 - chore: add CHANGELOG for 0.2.0 (166c494)
 - Update index.html (c828c86)
 - Update main.css (902f940)
@@ -126,15 +145,19 @@ Generato da _scripts/generate-changelog.js
 ## [1.1.0] - 2025-05-24
 
 ### Features
+
 - added temperature (447cef6)
 
 ### Fix
+
 - fixed dynamic layout (066e54e)
 
 ### Data Updates
+
 23 commit di aggiornamento dati
 
 ### Other
+
 - Update build.yml (757cf73)
 - Update build.yml (e008c42)
 - Update index.html (15819bd)
@@ -148,6 +171,7 @@ Generato da _scripts/generate-changelog.js
 ## [1.0.2] - 2025-05-22
 
 ### Data Updates
+
 25 commit di aggiornamento dati
 
 ### Other
@@ -158,15 +182,18 @@ Generato da _scripts/generate-changelog.js
 ## [1.0.1] - 2025-05-20
 
 ### Data Updates
+
 1 commit di aggiornamento dati
 
 ### Other
+
 - Update main.css (5794bfe)
 - more screen sizes (83ea561)
 
 ## [1.0.0] - 2025-05-20
 
 ### Features
+
 - added color to precipitations bars (5f0a6a1)
 - added last_update information directly in data.json file (533667a)
 - added layout profile for high-end mobiles (8de3564)
@@ -180,14 +207,17 @@ Generato da _scripts/generate-changelog.js
 - added favicon (968455b)
 
 ### Refactor
+
 - layout refactoring (5ab37bd)
 - project refactoring (38ee3f8)
 - refactoring (c691d4a)
 
 ### Data Updates
+
 3653 commit di aggiornamento dati
 
 ### Other
+
 - Update main.css (9d2ce50)
 - Update main.css (a8e36b5)
 - Update index.html (f05b1a8)
@@ -297,4 +327,3 @@ Generato da _scripts/generate-changelog.js
 - Update build.yml (0ec480e)
 - Create build.yml (e03cbff)
 - Initial commit (7ccd3a5)
-

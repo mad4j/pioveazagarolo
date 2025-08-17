@@ -6,7 +6,8 @@
 // v8: aggiunto supporto icone giorno/notte in base a is_day
 // v9: rimossa visualizzazione ora dalle condizioni attuali e spostata nel footer
 // v10: aggiunto supporto precipitation.json e modulo precipitation
-const CACHE_NAME = "piove-a-zagarolo-cache-v10";
+// v11: rinominato precipitation.json in data-precipitations.json
+const CACHE_NAME = "piove-a-zagarolo-cache-v11";
 const urlsToCache = [
   "./",
   "./index.html",
@@ -57,8 +58,8 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // API dinamica data.json e precipitation.json: Stale-While-Revalidate
-  if (request.url.includes('data.json') || request.url.includes('precipitation.json')) {
+  // API dinamica data.json e data-precipitations.json: Stale-While-Revalidate
+  if (request.url.includes('data.json') || request.url.includes('data-precipitations.json')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async cache => {
         const cached = await cache.match(request);

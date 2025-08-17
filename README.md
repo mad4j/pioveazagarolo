@@ -6,6 +6,11 @@ Piove domani a Zagarolo?
 
 Tech Report: <https://deepwiki.com/mad4j/piovedomaniazagarolo>
 
+## File Dati Principali
+
+- `data.json`: previsioni e condizioni attuali (aggiornato ogni 15/30 min dal workflow)
+- `data-precipitations.json`: precipitazione reale oraria del giorno corrente (build incrementale via `_scripts/update-precipitation.js`, max 24 valori, resettato a cambio giorno). Usato per fondere dati effettivi con la previsione nel grafico di oggi.
+
 ## Changelog & Release Automatici
 
 Per pubblicare una nuova versione usa il workflow GitHub `Release` (Actions > Release > Run workflow) indicando la versione SemVer (es: `1.4.0`). Il workflow esegue automaticamente:

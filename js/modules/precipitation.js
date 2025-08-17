@@ -5,21 +5,21 @@ export class PrecipitationManager {
   }
 
   /**
-   * Load actual precipitation data from precipitation.json
+   * Load actual precipitation data from data-precipitations.json
    */
   async loadActualData() {
     try {
       const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
-      const response = await fetch(`precipitation.json${randomQuery}`);
+      const response = await fetch(`data-precipitations.json${randomQuery}`);
       if (!response.ok) {
-        console.warn('Could not load precipitation.json, using forecast data only');
+        console.warn('Could not load data-precipitations.json, using forecast data only');
         return false;
       }
       this.actualData = await response.json();
       console.log('Loaded actual precipitation data:', this.actualData);
       return true;
     } catch (error) {
-      console.warn('Error loading precipitation.json:', error);
+      console.warn('Error loading data-precipitations.json:', error);
       this.actualData = null;
       return false;
     }

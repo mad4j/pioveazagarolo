@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Updates precipitation.json with current actual precipitation data
+ * Updates data-precipitations.json with current actual precipitation data
  * Reads from data.json and updates the actual precipitation history
  * 
  * Behavior:
@@ -16,7 +16,7 @@ const path = require('path');
  */
 
 const dataPath = path.join(__dirname, '..', 'data.json');
-const precipPath = path.join(__dirname, '..', 'precipitation.json');
+const precipPath = path.join(__dirname, '..', 'data-precipitations.json');
 
 try {
   // Load current weather data
@@ -111,7 +111,7 @@ try {
   // Write updated precipitation data
   fs.writeFileSync(precipPath, JSON.stringify(precipData, null, 2));
   
-  console.log(`Updated precipitation.json with ${precipData.hourly_actual.time.length} hours of data`);
+  console.log(`Updated data-precipitations.json with ${precipData.hourly_actual.time.length} hours of data`);
   console.log(`Current hour ${currentHour}: ${currentPrecipitation} mm`);
 
 } catch (error) {

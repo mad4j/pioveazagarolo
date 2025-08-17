@@ -40,6 +40,12 @@ jobs:
       - name: Update actual precipitation data
         run: |
           node _scripts/update-precipitation.js
+      
+      # Validate renamed precipitation data file
+      - name: Validate data-precipitations.json
+        run: |
+          if [ ! -f data-precipitations.json ]; then echo "data-precipitations.json missing"; exit 1; fi
+          jq '.' data-precipitations.json > /dev/null || (echo "Invalid JSON in data-precipitations.json" && exit 2)
      
       # commit changes
       - uses: stefanzweifel/git-auto-commit-action@v5
