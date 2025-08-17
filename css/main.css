@@ -208,23 +208,67 @@ body {
   border: 1px solid var(--border-color);
   padding: 0.6rem 0.9rem;
   border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   margin: 0 0 0.6rem;
   animation: fade-in .4s ease;
 }
 
 @media (prefers-color-scheme: dark) {
-  .current-conditions-card { background: linear-gradient(135deg, #2a2d31, #26292d); }
+  .current-conditions-card {
+    background: linear-gradient(135deg, #2a2d31, #26292d);
+  }
 }
 
-.current-main { display:flex; align-items:center; gap:0.6rem; }
-.current-main i { font-size:1.3rem; color: var(--secondary-color); line-height:1; }
-.current-temp { font-size:1.3rem; font-weight:600; color: var(--primary-color); line-height:1; }
-.current-extra { display:flex; gap:0.9rem; flex-wrap:wrap; font-size:0.75rem; color: var(--text-secondary); }
-.current-extra .metric { display:flex; align-items:center; gap:0.25rem; font-weight:500; }
-.current-extra i { font-size:1rem; color: var(--secondary-color); }
+.current-main {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
 
-@keyframes fade-in { from { opacity:0; transform: translateY(-4px);} to { opacity:1; transform: translateY(0);} }
+.current-main i {
+  font-size: 1.3rem;
+  color: var(--secondary-color);
+  line-height: 1;
+}
+
+.current-temp {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.current-extra {
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.current-extra .metric {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 500;
+}
+
+.current-extra i {
+  font-size: 1rem;
+  color: var(--secondary-color);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 .dashboard-container {
   max-width: 1000px;
@@ -258,7 +302,10 @@ body {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.forecast-card:hover { transform: translateY(-5px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+.forecast-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
 
 .day-title {
   font-weight: 600;
@@ -274,11 +321,28 @@ body {
   margin-bottom: 1rem;
 }
 
-.rain-icon { font-size:2.5rem; color:var(--secondary-color); margin-right:0.5rem; display:flex; align-items:center; }
+.rain-icon {
+  font-size: 2.5rem;
+  color: var(--secondary-color);
+  margin-right: 0.5rem;
+  display: flex;
+  align-items: center;
+}
 
-.probability-container { display:flex; align-items:flex-end; gap:0.2em; }
+.probability-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.2em;
+}
 
-.drop-icon { font-size:1.5rem; color:var(--secondary-color); margin-right:0.2em; display:flex; align-items:flex-end; line-height:1; }
+.drop-icon {
+  font-size: 1.5rem;
+  color: var(--secondary-color);
+  margin-right: 0.2em;
+  display: flex;
+  align-items: flex-end;
+  line-height: 1;
+}
 
 .drop-icon i {
   background: linear-gradient(to bottom, #3498db, #2980b9);
@@ -296,7 +360,8 @@ body {
   line-height: 1;
 }
 
-.rain-mm { /* base style (mobile keeps same size so no override needed) */
+.rain-mm {
+  /* base style (mobile keeps same size so no override needed) */
   font-size: 0.7rem;
   color: var(--text-muted);
   display: flex;
@@ -305,7 +370,11 @@ body {
   line-height: 1;
 }
 
-.day-info { display:flex; align-items:center; justify-content:space-between; }
+.day-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
 .day-date {
   font-size: 0.7rem;
@@ -314,7 +383,11 @@ body {
   text-align: right;
 }
 
-.chart-container { height:150px; position:relative; margin-top:0.5rem; }
+.chart-container {
+  height: 150px;
+  position: relative;
+  margin-top: 0.5rem;
+}
 
 footer {
   text-align: center;
@@ -381,9 +454,31 @@ footer {
 @media (max-width: 768px) {
 
   /* Layout mobile ottimizzato per occupare l'intera altezza evitando lo scroll verticale */
-  html, body { height:100svh !important; max-height:100svh !important; overflow:hidden !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important; align-items:stretch; }
+  html,
+  body {
+    height: 100svh !important;
+    max-height: 100svh !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    align-items: stretch;
+  }
 
-  .dashboard-container { max-height:100svh !important; height:100svh !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; padding:0.45rem 0.5rem 0.35rem; gap:0.25rem; min-height:100svh; max-width:100dvw; box-shadow:none; border-radius:0; box-sizing:border-box !important; }
+  .dashboard-container {
+    max-height: 100svh !important;
+    height: 100svh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 0.45rem 0.5rem 0.35rem;
+    gap: 0.25rem;
+    min-height: 100svh;
+    max-width: 100dvw;
+    box-shadow: none;
+    border-radius: 0;
+    box-sizing: border-box !important;
+  }
 
   .row {
     flex: 1 1 auto;
@@ -405,17 +500,37 @@ footer {
     padding: 0.55rem 0.55rem 0.45rem;
   }
 
-  .forecast-card:hover, .forecast-card:active { transform:none !important; }
+  .forecast-card:hover,
+  .forecast-card:active {
+    transform: none !important;
+  }
 
   .header h1 {
     font-size: 1.5rem;
   }
 
-  .current-conditions-card { padding:0.45rem 0.55rem; gap:0.6rem; margin-bottom:0.2rem; }
-  .current-main i { font-size:1.1rem; }
-  .current-temp { font-size:1.1rem; }
-  .current-extra { font-size:0.65rem; gap:0.55rem; }
-  .current-extra i { font-size:0.85rem; }
+  .current-conditions-card {
+    padding: 0.45rem 0.55rem;
+    gap: 0.6rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .current-main i {
+    font-size: 1.1rem;
+  }
+
+  .current-temp {
+    font-size: 1.1rem;
+  }
+
+  .current-extra {
+    font-size: 0.65rem;
+    gap: 0.55rem;
+  }
+
+  .current-extra i {
+    font-size: 0.85rem;
+  }
 
   .day-title {
     font-size: 1rem;
@@ -431,7 +546,9 @@ footer {
 
   /* .rain-mm mantiene dimensioni dal desktop (nessuna dichiarazione duplicata) */
 
-  .rain-info { margin:0 0 0.25rem; }
+  .rain-info {
+    margin: 0 0 0.25rem;
+  }
 
   .temp-values {
     font-size: 0.7rem;
@@ -439,14 +556,23 @@ footer {
   }
 
   /* Contenitore grafico elastico: sfrutta lo spazio residuo del card */
-  .chart-container { flex:1 1 auto; height:auto; min-height:0; }
+  .chart-container {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
 
   .chart-container canvas {
     height: 100% !important;
     width: 100% !important;
   }
 
-  footer { flex:0 0 auto !important; font-size:0.6rem; margin-bottom:0; padding-bottom:0.25rem; }
+  footer {
+    flex: 0 0 auto !important;
+    font-size: 0.6rem;
+    margin-bottom: 0;
+    padding-bottom: 0.25rem;
+  }
 }
 
 /* Dark mode */
