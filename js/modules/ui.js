@@ -1,6 +1,7 @@
 import { DAY_CONFIGS, ARIA_LABEL_DAY, dayFormatter, $ } from './constants.js';
 import { getRainIconClass } from './icons.js';
 import { buildChart, getDaySlice } from './charts.js';
+import { precipitationManager } from './precipitation.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
 
@@ -65,7 +66,13 @@ export function displayData(data){
     const dateEl = $(`${cfg.key}-date`); if (dateEl) dateEl.textContent = formatDate(daily.time[i]);
     updateCardClass(cfg.cardId, daily.precipitation_probability_max[i]);
     const probSlice = getDaySlice(hourly.precipitation_probability, i);
-    const precipSlice = getDaySlice(hourly.precipitation, i);
+    let precipSlice = getDaySlice(hourly.precipitation, i);
+    
+    // For today's chart (index 0), blend actual and forecast precipitation
+    if (i === 0 && precipitationManager.isDataValid()) {
+      precipSlice = precipitationManager.blendTodayPrecipitation(precipSlice);
+    }
+    
     buildChart(cfg.chartId, probSlice, precipSlice);
   });
   const lastUpdated = $('last-updated'); 

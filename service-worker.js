@@ -5,7 +5,8 @@
 // v7: splitting file main.js in moduli
 // v8: aggiunto supporto icone giorno/notte in base a is_day
 // v9: rimossa visualizzazione ora dalle condizioni attuali e spostata nel footer
-const CACHE_NAME = "piove-a-zagarolo-cache-v9";
+// v10: aggiunto supporto precipitation.json e modulo precipitation
+const CACHE_NAME = "piove-a-zagarolo-cache-v10";
 const urlsToCache = [
   "./",
   "./index.html",
@@ -17,6 +18,7 @@ const urlsToCache = [
   "./js/modules/icons.js",
   "./js/modules/charts.js",
   "./js/modules/ui.js",
+  "./js/modules/precipitation.js",
   "./js/modules/debug-mobile.js",
   "./js/pwa-install.js",
   "./manifest.json",
@@ -55,8 +57,8 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // API dinamica data.json: Stale-While-Revalidate
-  if (request.url.includes('data.json')) {
+  // API dinamica data.json e precipitation.json: Stale-While-Revalidate
+  if (request.url.includes('data.json') || request.url.includes('precipitation.json')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async cache => {
         const cached = await cache.match(request);

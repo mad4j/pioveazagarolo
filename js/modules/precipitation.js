@@ -1,0 +1,115 @@
+// Module for handling actual vs forecast precipitation data
+export class PrecipitationManager {
+  constructor() {
+    this.actualData = null;
+  }
+
+  /**
+   * Load actual precipitation data from precipitation.json
+   */
+  async loadActualData() {
+    try {
+      const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
+      const response = await fetch(`precipitation.json${randomQuery}`);
+      if (!response.ok) {
+        console.warn('Could not load precipitation.json, using forecast data only');
+        return false;
+      }
+      this.actualData = await response.json();
+      console.log('Loaded actual precipitation data:', this.actualData);
+      return true;
+    } catch (error) {
+      console.warn('Error loading precipitation.json:', error);
+      this.actualData = null;
+      return false;
+    }
+  }
+
+  /**
+   * Get current hour in Rome timezone
+   */
+  getCurrentHourRome() {
+    try {
+      const now = new Date();
+      const hour = parseInt(new Intl.DateTimeFormat('en-GB', { 
+        hour: 'numeric', 
+        hour12: false, 
+        timeZone: 'Europe/Rome' 
+      }).format(now), 10);
+      return Number.isNaN(hour) ? new Date().getHours() : hour;
+    } catch {
+      return new Date().getHours();
+    }
+  }
+
+  /**
+   * Get current date in Rome timezone (YYYY-MM-DD format)
+   */
+  getCurrentDateRome() {
+    try {
+      const now = new Date();
+      return new Intl.DateTimeFormat('sv-SE', {
+        timeZone: 'Europe/Rome',
+        year: 'numeric',
+        month: '2-digit', 
+        day: '2-digit'
+      }).format(now);
+    } catch {
+      return new Date().toISOString().split('T')[0];
+    }
+  }
+
+  /**
+   * Blend actual precipitation data with forecast data for today's chart
+   * @param {Array} forecastPrecipitation - 24-hour forecast precipitation array
+   * @returns {Array} - Blended precipitation array (actual for past hours, forecast for future)
+   */
+  blendTodayPrecipitation(forecastPrecipitation) {
+    if (!this.actualData || !forecastPrecipitation || forecastPrecipitation.length !== 24) {
+      return forecastPrecipitation;
+    }
+
+    const currentDate = this.getCurrentDateRome();
+    const currentHour = this.getCurrentHourRome();
+
+    // Check if actual data is for today
+    if (this.actualData.date !== currentDate) {
+      console.log(`Actual data is for ${this.actualData.date}, today is ${currentDate}. Using forecast only.`);
+      return forecastPrecipitation;
+    }
+
+    // Create blended array starting with forecast values
+    const blended = [...forecastPrecipitation];
+
+    // Replace past hours with actual data
+    if (this.actualData.hourly_actual && this.actualData.hourly_actual.time) {
+      this.actualData.hourly_actual.time.forEach((timeStr, index) => {
+        const hour = parseInt(timeStr.split('T')[1].split(':')[0]);
+        
+        // Only use actual data for hours that have passed (including current hour)
+        if (hour <= currentHour && hour >= 0 && hour < 24) {
+          const actualValue = this.actualData.hourly_actual.precipitation[index];
+          if (typeof actualValue === 'number') {
+            blended[hour] = actualValue;
+          }
+        }
+      });
+    }
+
+    console.log(`Blended precipitation data: ${blended.slice(0, currentHour + 1).length} actual hours, ${24 - currentHour - 1} forecast hours`);
+    return blended;
+  }
+
+  /**
+   * Check if precipitation data is available and up to date
+   */
+  isDataValid() {
+    if (!this.actualData) return false;
+    
+    const currentDate = this.getCurrentDateRome();
+    return this.actualData.date === currentDate;
+  }
+}
+
+// Create singleton instance
+export const precipitationManager = new PrecipitationManager();

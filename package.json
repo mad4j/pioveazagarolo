@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "generate-changelog": "node _scripts/generate-changelog.js",
-    "build-info": "node _scripts/write-build-info.js"
+    "build-info": "node _scripts/write-build-info.js",
+    "update-precipitation": "node _scripts/update-precipitation.js"
   }
 }
