@@ -68,7 +68,7 @@ export function buildChart(target, probabilityData, precipitationData) {
   chartInstances[target] = new Chart(ctx, {
     plugins: target === 'today-chart' ? [currentHourLinePlugin] : [],
     data: {
-      labels: [...Array(24).keys()].map(h => `${h}:00`),
+      labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
       datasets: [
         {
           label: 'Probabilità (%)',
