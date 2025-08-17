@@ -120,9 +120,15 @@ function getRainIconClass(weatherCode) {
 - Stale-while-revalidate for data.json
 
 ### Chart Configuration
-- Three charts: Today (with current hour line), Tomorrow, Day After Tomorrow
+- Three charts: Today (with current hour line), Tomorrow, Day After Tomorrow  
 - Custom Chart.js plugin for current hour overlay
 - Responsive design with precipitation probability and intensity
+- Charts render automatically when data loads (confirmed working)
+
+### Mobile Debug Features
+- Built-in mobile debugging panel available in `js/main.js`
+- Console logs show "🔍 DEBUG MOBILE - Script caricato" when loaded
+- Debug functions: `window.exportDebugData()` and `window.emailDebugData()`
 
 ## Common Tasks
 
@@ -265,3 +271,46 @@ python3 -c "import json; json.load(open('manifest.json'))"  # Validate JSON
 - Chart canvas rendering: Immediate (confirmed with hasContent check)
 - Service Worker activation: < 100ms
 - Offline mode: Works perfectly (tested by stopping server)
+
+## Final Validation Checklist
+
+Run this complete checklist to verify everything works:
+
+```bash
+# 1. Setup and Dependencies
+cd /path/to/pioveazagarolo
+npm install                    # Should complete in ~0.3s
+
+# 2. Test all scripts
+npm run build-info            # Should complete in ~0.2s
+npm run generate-changelog    # Should complete in ~0.2s
+
+# 3. Validate JSON files
+python3 -c "import json; json.load(open('data.json')); print('data.json valid')"
+python3 -c "import json; json.load(open('manifest.json')); print('manifest.json valid')"
+
+# 4. Start development server
+python3 -m http.server 8080
+
+# 5. Open http://localhost:8080 and verify:
+#    - Weather cards display (Today/Tomorrow/Day After Tomorrow)
+#    - Charts render in each card
+#    - Current conditions show (temperature, humidity, pressure)
+#    - Weather icons display correctly
+#    - PWA install button appears
+
+# 6. Test mobile responsive (browser dev tools):
+#    - Switch to mobile viewport (375x667px)
+#    - Verify layout adapts correctly
+
+# 7. Test offline functionality:
+#    - Stop server (Ctrl+C)
+#    - Refresh browser page
+#    - App should still load completely from Service Worker cache
+
+# 8. Test Service Worker:
+#    - Check browser console for "Service Worker registrato con successo"
+#    - No JavaScript errors should appear
+```
+
+**Everything should work flawlessly if you follow these instructions exactly.**
