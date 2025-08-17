@@ -478,8 +478,9 @@ footer {
     padding: 0.55rem 0.55rem 0.45rem;
   }
 
-  .forecast-card:hover {
-    transform: none;
+  .forecast-card:hover,
+  .forecast-card:active {
+    transform: none !important;
   }
 
   .header h1 {
