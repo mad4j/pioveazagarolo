@@ -207,7 +207,7 @@ function buildChart(target, probabilityData, precipitationData) {
                             if (context.datasetIndex === 0) {
                                 return `Probabilità: ${context.parsed.y}%`;
                             } else {
-                                return `Precipitazione: ${context.parsed.y} mm/h`;
+                                return `Precipitazione: ${context.parsed.y} mm`;
                             }
                         }
                     }
@@ -246,7 +246,7 @@ function displayData(data) {
             const iconEl = document.getElementById('current-icon');
             const timeEl = document.getElementById('current-time');
             if (tempEl && typeof data.current.temperature_2m === 'number') tempEl.textContent = `${Math.round(data.current.temperature_2m)}°`;
-            if (rainEl && typeof data.current.rain === 'number') rainEl.textContent = `${data.current.rain.toFixed(1)}  mm/h`;
+            if (rainEl && typeof data.current.rain === 'number') rainEl.textContent = `${data.current.rain.toFixed(1)}  mm`;
             if (pressEl && typeof data.current.surface_pressure === 'number') pressEl.textContent = `${Math.round(data.current.surface_pressure)} hPa`;
             if (humEl && typeof data.current.relative_humidity_2m === 'number') humEl.textContent = `${Math.round(data.current.relative_humidity_2m)}%`;
             if (windEl && typeof data.current.wind_speed_10m === 'number') {
@@ -314,11 +314,11 @@ function displayData(data) {
     document.getElementById('dayaftertomorrow-temp-min').textContent = `${Math.round(data.daily.temperature_2m_min[2])}°`;
 
     document.getElementById("today-percentage").textContent = `${todayPercentage}%`;
-    document.getElementById("today-mm").textContent = `${precipitationToday.toFixed(1)} mm/h`;
+    document.getElementById("today-mm").textContent = `${precipitationToday.toFixed(1)} mm`;
     document.getElementById("tomorrow-percentage").textContent = `${tomorrowPercentage}%`;
-    document.getElementById("tomorrow-mm").textContent = `${precipitationTomorrow.toFixed(1)} mm/h`;
+    document.getElementById("tomorrow-mm").textContent = `${precipitationTomorrow.toFixed(1)} mm`;
     document.getElementById("dayaftertomorrow-percentage").textContent = `${dayAfterTomorrowPercentage}%`;
-    document.getElementById("dayaftertomorrow-mm").textContent = `${precipitationDayAfterTomorrow.toFixed(1)} mm/h`;
+    document.getElementById("dayaftertomorrow-mm").textContent = `${precipitationDayAfterTomorrow.toFixed(1)} mm`;
 
     document.getElementById("today-date").textContent = formatDate(data.daily.time[0]);
     document.getElementById("tomorrow-date").textContent = formatDate(data.daily.time[1]);
