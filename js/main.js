@@ -156,45 +156,80 @@ function buildChart(target, probabilityData, precipitationData) {
             hour < currentHour ? makeColorTransparent(color, 0.3) : color
         ) : precipitationColors;
     
+    // Build datasets - split line chart for today to show transparency
+    const datasets = [];
+    
+    if (isToday) {
+        // Past data (transparent)
+        const pastData = probabilityData.map((value, hour) => hour < currentHour ? value : null);
+        const futureData = probabilityData.map((value, hour) => hour >= currentHour ? value : null);
+        
+        datasets.push({
+            label: 'Probabilità (%) - Passato',
+            type: 'line',
+            fill: true,
+            lineTension: 0.4,
+            backgroundColor: makeColorTransparent(probabilityFillColor, 0.15),
+            borderColor: makeColorTransparent(probabilityLineColor, 0.4),
+            pointBackgroundColor: makeColorTransparent(probabilityLineColor, 0.4),
+            borderWidth: 2,
+            data: pastData,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            yAxisID: 'y',
+            spanGaps: false,
+        });
+        
+        datasets.push({
+            label: 'Probabilità (%) - Futuro',
+            type: 'line',
+            fill: true,
+            lineTension: 0.4,
+            backgroundColor: probabilityFillColor,
+            borderColor: probabilityLineColor,
+            pointBackgroundColor: probabilityLineColor,
+            borderWidth: 2,
+            data: futureData,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            yAxisID: 'y',
+            spanGaps: false,
+        });
+    } else {
+        // Normal single dataset for non-today charts
+        datasets.push({
+            label: 'Probabilità (%)',
+            type: 'line',
+            fill: true,
+            lineTension: 0.4,
+            backgroundColor: probabilityFillColor,
+            borderColor: probabilityLineColor,
+            pointBackgroundColor: probabilityLineColor,
+            borderWidth: 2,
+            data: probabilityData,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            yAxisID: 'y',
+        });
+    }
+    
+    // Add precipitation bars
+    datasets.push({
+        label: 'Precipitazione (mm)',
+        type: 'bar',
+        backgroundColor: finalPrecipitationColors,
+        borderColor: finalPrecipitationColors,
+        borderWidth: 1,
+        data: precipitationData,
+        yAxisID: 'y1',
+        order: 2,
+    });
+    
     chartInstances[target] = new Chart(ctx, {
-    plugins: isToday ? [currentHourLinePlugin] : [],
+        plugins: isToday ? [currentHourLinePlugin] : [],
         data: {
             labels: [...Array(24).keys()].map(hour => `${hour}:00`),
-            datasets: [
-                {
-                    label: 'Probabilità (%)',
-                    type: 'line',
-                    fill: true,
-                    lineTension: 0.4,
-                    backgroundColor: isToday ? 
-                        Array.from({ length: 24 }, (_, hour) => 
-                            hour < currentHour ? makeColorTransparent(probabilityFillColor, 0.15) : probabilityFillColor
-                        ) : probabilityFillColor,
-                    borderColor: isToday ?
-                        Array.from({ length: 24 }, (_, hour) => 
-                            hour < currentHour ? makeColorTransparent(probabilityLineColor, 0.4) : probabilityLineColor
-                        ) : probabilityLineColor,
-                    pointBackgroundColor: isToday ?
-                        Array.from({ length: 24 }, (_, hour) => 
-                            hour < currentHour ? makeColorTransparent(probabilityLineColor, 0.4) : probabilityLineColor
-                        ) : probabilityLineColor,
-                    borderWidth: 2,
-                    data: probabilityData,
-                    pointRadius: 0,
-                    pointHoverRadius: 4,
-                    yAxisID: 'y',
-                },
-                {
-                    label: 'Precipitazione (mm)',
-                    type: 'bar',
-                    backgroundColor: finalPrecipitationColors,
-                    borderColor: finalPrecipitationColors,
-                    borderWidth: 1,
-                    data: precipitationData,
-                    yAxisID: 'y1',
-                    order: 2,
-                }
-            ]
+            datasets: datasets
         },
         options: {
             responsive: true,
