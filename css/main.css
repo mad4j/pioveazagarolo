@@ -419,6 +419,19 @@ footer {
   margin-top: 0;
 }
 
+/* Stile orario aggiornamento (icona + testo) coerente con metriche barra corrente */
+.last-updated i {
+  color: var(--secondary-color);
+  margin-right: 0.25rem; /* spazio simile a gap metriche */
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Assicura allineamento verticale del valore tempo accanto all'icona */
+.last-updated i + span#last-updated {
+  vertical-align: middle;
+}
+
 /* Nota: .forecast-section rimosso perché non presente nel markup */
 
 .high-chance {
