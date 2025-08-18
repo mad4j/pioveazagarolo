@@ -1,7 +1,7 @@
 {
   "latitude": 41.8125,
   "longitude": 12.8125,
-  "generationtime_ms": 0.16927719116210938,
+  "generationtime_ms": 0.12481212615966797,
   "utc_offset_seconds": 7200,
   "timezone": "Europe/Rome",
   "timezone_abbreviation": "GMT+2",
@@ -21,18 +21,18 @@
     "wind_direction_10m": "°"
   },
   "current": {
-    "time": "2025-08-18T13:45",
+    "time": "2025-08-18T14:30",
     "interval": 900,
-    "temperature_2m": 30.8,
+    "temperature_2m": 30.5,
     "rain": 0.00,
-    "weather_code": 1,
-    "surface_pressure": 980.3,
+    "weather_code": 2,
+    "surface_pressure": 980.5,
     "precipitation": 0.00,
-    "relative_humidity_2m": 37,
+    "relative_humidity_2m": 42,
     "is_day": 1,
-    "apparent_temperature": 31.7,
-    "wind_speed_10m": 11.2,
-    "wind_direction_10m": 237
+    "apparent_temperature": 31.6,
+    "wind_speed_10m": 11.7,
+    "wind_direction_10m": 236
   },
   "hourly_units": {
     "time": "iso8601",
@@ -130,31 +130,31 @@
       0.00,
       0.00,
       0.00,
-      0.10,
-      0.10,
-      0.00,
-      0.50,
-      0.10,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
       0.20,
+      0.00,
+      0.00,
+      1.30,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.10,
+      0.10,
       0.10,
       0.00,
       0.00,
@@ -290,13 +290,13 @@
       "2025-08-20T20:01"
     ],
     "temperature_2m_max": [
-      30.8,
-      29.7,
+      30.9,
+      29.6,
       29.7
     ],
     "temperature_2m_min": [
       18.5,
-      19.0,
+      18.9,
       19.5
     ],
     "weather_code": [
@@ -305,7 +305,7 @@
       45
     ],
     "precipitation_sum": [
-      0.80,
+      1.50,
       0.70,
       0.00
     ],
@@ -315,5 +315,5 @@
       5
     ]
   },
-  "last_update": "2025-08-18 13:49"
+  "last_update": "2025-08-18 14:34"
 }
