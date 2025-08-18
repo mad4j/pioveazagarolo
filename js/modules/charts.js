@@ -100,36 +100,35 @@ function formatTime(timeString) {
   }
 }
 
-// Helper function to draw sun icon
+// Helper function to draw arrow icon for sunrise/sunset
 function drawSunIcon(ctx, xScale, chartArea, hour, type) {
   const x = xScale.getPixelForValue(hour);
-  const y = chartArea.top + 15; // Position near top of chart
+  const y = chartArea.bottom - 5; // Position at x-axis level
   
   // Only draw if within chart bounds
   if (x < chartArea.left || x > chartArea.right) return;
   
   ctx.fillStyle = type === 'sunrise' ? '#f39c12' : '#e67e22';
   ctx.strokeStyle = type === 'sunrise' ? '#e67e22' : '#d35400';
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 2;
   
-  // Draw sun circle
+  // Draw arrow pointing up (sunrise) or down (sunset)
   ctx.beginPath();
-  ctx.arc(x, y, 6, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.stroke();
   
-  // Draw sun rays
-  ctx.beginPath();
-  for (let i = 0; i < 8; i++) {
-    const angle = (i * Math.PI) / 4;
-    const x1 = x + Math.cos(angle) * 8;
-    const y1 = y + Math.sin(angle) * 8;
-    const x2 = x + Math.cos(angle) * 12;
-    const y2 = y + Math.sin(angle) * 12;
-    
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+  if (type === 'sunrise') {
+    // Up arrow for sunrise
+    ctx.moveTo(x, y - 8);      // tip
+    ctx.lineTo(x - 4, y - 2);  // left side
+    ctx.lineTo(x + 4, y - 2);  // right side
+  } else {
+    // Down arrow for sunset
+    ctx.moveTo(x, y + 8);      // tip
+    ctx.lineTo(x - 4, y + 2);  // left side
+    ctx.lineTo(x + 4, y + 2);  // right side
   }
+  
+  ctx.closePath();
+  ctx.fill();
   ctx.stroke();
 }
 
@@ -236,7 +235,7 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
                     additionalInfo.push(`☀️ Alba: ${formatTime(sunriseTime)}`);
                     additionalInfo.push(`⏱️ Ore di luce: ${daylightHours.toFixed(1)}h`);
                   } else if (Math.abs(currentHour - sunset) < 1) {
-                    additionalInfo.push(`🌅 Tramonto: ${formatTime(sunsetTime)}`);
+                    additionalInfo.push(`☀️ Tramonto: ${formatTime(sunsetTime)}`);
                     additionalInfo.push(`⏱️ Ore di luce: ${daylightHours.toFixed(1)}h`);
                   }
                   
