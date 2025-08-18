@@ -116,10 +116,10 @@ function drawSunIcon(ctx, xScale, chartArea, hour, type) {
   ctx.beginPath();
   
   if (type === 'sunrise') {
-    // Up arrow for sunrise
-    ctx.moveTo(x, y - 8);      // tip
-    ctx.lineTo(x - 4, y - 2);  // left side
-    ctx.lineTo(x + 4, y - 2);  // right side
+    // Up arrow for sunrise (aligned at sunset height)
+    ctx.moveTo(x, y + 2);      // tip
+    ctx.lineTo(x - 4, y + 8);  // left side
+    ctx.lineTo(x + 4, y + 8);  // right side
   } else {
     // Down arrow for sunset
     ctx.moveTo(x, y + 8);      // tip
