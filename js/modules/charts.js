@@ -217,28 +217,43 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
           backgroundColor: 'rgba(44,62,80,0.9)', 
           callbacks: { 
             title: (items) => `Ore ${items[0].label}`, 
-            label: (ctx) => ctx.datasetIndex === 0 ? `Probabilità: ${ctx.parsed.y}%` : `Precipitazione: ${ctx.parsed.y} mm/h`,
-            afterBody: (tooltipItems) => {
-              // Add sunrise/sunset info to tooltip when hovering near those times
-              if (sunriseTime && sunsetTime && tooltipItems.length > 0) {
-                const currentHour = parseFloat(tooltipItems[0].label.split(':')[0]);
-                const sunrise = timeStringToHours(sunriseTime);
-                const sunset = timeStringToHours(sunsetTime);
-                
-                if (sunrise && sunset) {
-                  const daylightHours = sunset - sunrise;
-                  const additionalInfo = [];
-                  
-                  if (Math.abs(currentHour - sunrise) < 1) {
-                    additionalInfo.push(`☀️ Alba: ${formatTime(sunriseTime)}`);
-                    additionalInfo.push(`⏱️ Ore di luce: ${daylightHours.toFixed(1)}h`);
-                  } else if (Math.abs(currentHour - sunset) < 1) {
-                    additionalInfo.push(`☀️ Tramonto: ${formatTime(sunsetTime)}`);
-                    additionalInfo.push(`⏱️ Ore di luce: ${daylightHours.toFixed(1)}h`);
+            label: (ctx) => {
+              if (ctx.datasetIndex === 0) {
+                // Probability dataset - show based on chart type and time
+                if (target === 'today-chart') {
+                  let currentHour;
+                  try {
+                    currentHour = parseInt(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Europe/Rome' }).format(new Date()), 10);
+                  } catch {
+                    currentHour = new Date().getHours();
                   }
                   
-                  return additionalInfo;
+                  const hoveredHour = parseFloat(ctx.label.split(':')[0]);
+                  const isFutureHour = hoveredHour > currentHour;
+                  
+                  // Only show probability for future hours on today's chart
+                  if (isFutureHour) {
+                    return `Probabilità: ${ctx.parsed.y}%`;
+                  } else {
+                    // For past hours, don't show probability line
+                    return undefined;
+                  }
+                } else {
+                  // For tomorrow and day after tomorrow, always show probability
+                  return `Probabilità: ${ctx.parsed.y}%`;
                 }
+              } else {
+                // Precipitation dataset - always show mm/h
+                return `Precipitazione: ${ctx.parsed.y} mm/h`;
+              }
+            },
+            afterBody: (tooltipItems) => {
+              // Always show sunrise/sunset info if present (without icons)
+              if (sunriseTime && sunsetTime) {
+                const additionalInfo = [];
+                additionalInfo.push(`Alba: ${formatTime(sunriseTime)}`);
+                additionalInfo.push(`Tramonto: ${formatTime(sunsetTime)}`);
+                return additionalInfo;
               }
               return [];
             }
