@@ -351,9 +351,23 @@ body {
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--primary-color);
-  display: block;
+  display: flex; /* per allineare numero e simbolo */
+  align-items: flex-start; /* allinea in alto per portare il % verso la cima */
+  justify-content: flex-end; /* allineamento a destra */
+  gap: 2px;
   line-height: 1;
   text-align: right;
+}
+
+/* Numero principale */
+.rain-percentage .value { line-height: 1; }
+/* Simbolo percentuale leggermente più piccolo ma leggibile e allineato in basso */
+.rain-percentage .percent-symbol {
+  font-size: 0.6em; /* ~60% della dimensione numero */
+  line-height: 1;
+  position: relative;
+  top: 0.05em; /* piccolo abbassamento per centratura ottica sotto il bordo superiore del numero */
+  margin-left: 1px;
 }
 
 /* mm value text */
@@ -556,9 +570,8 @@ footer {
     font-size: 2rem;
   }
 
-  .rain-percentage {
-    font-size: 1.5rem;
-  }
+  .rain-percentage { font-size: 1.5rem; }
+  .rain-percentage .percent-symbol { top: 0.04em; }
 
   /* .rain-mm mantiene dimensioni dal desktop (nessuna dichiarazione duplicata) */
 

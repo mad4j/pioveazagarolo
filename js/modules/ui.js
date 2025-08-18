@@ -64,7 +64,16 @@ export function displayData(data){
     if (iconEl){ iconEl.className = getRainIconClass(daily.weather_code[i]); iconEl.setAttribute('aria-label',`Meteo ${ARIA_LABEL_DAY[i]} codice ${daily.weather_code[i]}`);}    
     const maxEl = $(`${cfg.key}-temp-max`); if (maxEl) maxEl.textContent = `${Math.round(daily.temperature_2m_max[i])}°`;
     const minEl = $(`${cfg.key}-temp-min`); if (minEl) minEl.textContent = `${Math.round(daily.temperature_2m_min[i])}°`;
-    const percEl = $(`${cfg.key}-percentage`); if (percEl) percEl.textContent = `${daily.precipitation_probability_max[i]}%`;
+    const percEl = $(`${cfg.key}-percentage`);
+    if (percEl) {
+      const val = daily.precipitation_probability_max[i];
+      // Avoid duplicating wrapping if displayData is called multiple times
+      if (!percEl.dataset.enhanced || percEl.dataset.value !== String(val)) {
+        percEl.innerHTML = `<span class="value">${val}</span><span class="percent-symbol" aria-hidden="true">%</span>`;
+        percEl.dataset.enhanced = 'true';
+        percEl.dataset.value = String(val);
+      }
+    }
     const mmEl = $(`${cfg.key}-mm`); if (mmEl) { const v = daily.precipitation_sum[i]; mmEl.textContent = `${v===0 ? '0' : v.toFixed(1)} mm`; }
     const dateEl = $(`${cfg.key}-date`); if (dateEl) dateEl.textContent = formatDate(daily.time[i]);
     updateCardClass(cfg.cardId, daily.precipitation_probability_max[i]);
