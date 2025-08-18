@@ -9,8 +9,7 @@
   "theme_color": "#2c3e50",
   "orientation": "portrait",
   "icons": [
-    { "src": "watermark-512x512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "watermark-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "watermark-512x512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
     
   ],
   "categories": ["weather", "utilities"]
