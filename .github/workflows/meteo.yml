@@ -65,14 +65,14 @@ jobs:
           print("Bollettino generato in bollettino.txt")
           EOF
 
-      - name: Bulleting dump
+      - name: Bulletin dump
         run: |
-          echo "Generated bulleting:"
+          echo "Generated bulletin:"
           echo "---------------------"
           cat bollettino.txt
           echo "---------------------"
           
-      - name: Commit bollettino
+      - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: added meteo bulletin
