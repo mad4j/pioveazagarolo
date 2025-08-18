@@ -101,6 +101,30 @@ export class PrecipitationManager {
   }
 
   /**
+   * Clear precipitation probability for past hours in today's chart
+   * @param {Array} forecastProbability - 24-hour forecast probability array
+   * @returns {Array} - Probability array with past hours set to 0
+   */
+  blendTodayProbability(forecastProbability) {
+    if (!forecastProbability || forecastProbability.length !== 24) {
+      return forecastProbability;
+    }
+
+    const currentHour = this.getCurrentHourRome();
+    
+    // Create blended array starting with forecast values
+    const blended = [...forecastProbability];
+
+    // Set probability to 0 for all past hours (excluding current hour)
+    for (let hour = 0; hour < currentHour; hour++) {
+      blended[hour] = 0;
+    }
+
+    console.log(`Blended probability data: ${currentHour} past hours cleared, ${24 - currentHour} forecast hours maintained`);
+    return blended;
+  }
+
+  /**
    * Check if precipitation data is available and up to date
    */
   isDataValid() {
