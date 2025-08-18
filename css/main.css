@@ -605,6 +605,10 @@ footer {
     color: var(--secondary-color);
   }
 
+  .current-temp {
+    color: var(--secondary-color);
+  }
+
   /* Day titles (Oggi, Domani, Dopodomani) lighter for readability on dark bg */
   .day-title {
     color: var(--text-primary);
