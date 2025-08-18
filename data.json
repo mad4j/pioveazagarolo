@@ -1,7 +1,7 @@
 {
   "latitude": 41.8125,
   "longitude": 12.8125,
-  "generationtime_ms": 0.12290477752685547,
+  "generationtime_ms": 0.16927719116210938,
   "utc_offset_seconds": 7200,
   "timezone": "Europe/Rome",
   "timezone_abbreviation": "GMT+2",
@@ -21,18 +21,18 @@
     "wind_direction_10m": "°"
   },
   "current": {
-    "time": "2025-08-18T11:45",
+    "time": "2025-08-18T13:45",
     "interval": 900,
-    "temperature_2m": 29.6,
+    "temperature_2m": 30.8,
     "rain": 0.00,
     "weather_code": 1,
-    "surface_pressure": 980.9,
+    "surface_pressure": 980.3,
     "precipitation": 0.00,
-    "relative_humidity_2m": 36,
+    "relative_humidity_2m": 37,
     "is_day": 1,
     "apparent_temperature": 31.7,
-    "wind_speed_10m": 3.3,
-    "wind_direction_10m": 186
+    "wind_speed_10m": 11.2,
+    "wind_direction_10m": 237
   },
   "hourly_units": {
     "time": "iso8601",
@@ -132,9 +132,9 @@
       0.00,
       0.10,
       0.10,
-      0.50,
-      1.50,
       0.00,
+      0.50,
+      0.10,
       0.00,
       0.00,
       0.00,
@@ -156,10 +156,10 @@
       0.00,
       0.20,
       0.10,
-      0.60,
-      2.20,
-      1.10,
       0.00,
+      0.00,
+      0.10,
+      0.30,
       0.00,
       0.00,
       0.00,
@@ -291,8 +291,8 @@
     ],
     "temperature_2m_max": [
       30.8,
-      29.6,
-      29.0
+      29.7,
+      29.7
     ],
     "temperature_2m_min": [
       18.5,
@@ -301,12 +301,12 @@
     ],
     "weather_code": [
       80,
-      96,
+      80,
       45
     ],
     "precipitation_sum": [
-      2.20,
-      4.20,
+      0.80,
+      0.70,
       0.00
     ],
     "precipitation_probability_max": [
@@ -315,5 +315,5 @@
       5
     ]
   },
-  "last_update": "2025-08-18 11:45"
+  "last_update": "2025-08-18 13:49"
 }
