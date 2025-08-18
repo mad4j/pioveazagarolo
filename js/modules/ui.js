@@ -76,7 +76,7 @@ export function displayData(data){
       precipSlice = precipitationManager.blendTodayPrecipitation(precipSlice);
     }
     
-    buildChart(cfg.chartId, probSlice, precipSlice);
+    buildChart(cfg.chartId, probSlice, precipSlice, daily.sunrise[i], daily.sunset[i]);
   });
   const lastUpdated = $('last-updated'); 
   if (lastUpdated) {
