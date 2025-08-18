@@ -46,7 +46,7 @@ export function displayData(data){
       const currCard = $('current-conditions'); if (currCard) currCard.hidden = false;
       const tempEl=$('current-temp'), rainEl=$('current-rain'), pressEl=$('current-pressure'), humEl=$('current-humidity'), windEl=$('current-wind'), windDirIcon=$('current-wind-dir-icon'), iconEl=$('current-icon');
       if (tempEl && typeof current.temperature_2m==='number') tempEl.textContent = `${Math.round(current.temperature_2m)}°`;
-      if (rainEl && typeof current.rain==='number') rainEl.textContent = `${current.rain.toFixed(1)}  mm`;
+      if (rainEl && typeof current.rain==='number') rainEl.textContent = `${current.rain.toFixed(1)}  mm/h`;
       if (pressEl && typeof current.surface_pressure==='number') pressEl.textContent = `${Math.round(current.surface_pressure)} hPa`;
       if (humEl && typeof current.relative_humidity_2m==='number') humEl.textContent = `${Math.round(current.relative_humidity_2m)}%`;
       if (windEl && typeof current.wind_speed_10m==='number') windEl.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
@@ -62,7 +62,7 @@ export function displayData(data){
     const maxEl = $(`${cfg.key}-temp-max`); if (maxEl) maxEl.textContent = `${Math.round(daily.temperature_2m_max[i])}°`;
     const minEl = $(`${cfg.key}-temp-min`); if (minEl) minEl.textContent = `${Math.round(daily.temperature_2m_min[i])}°`;
     const percEl = $(`${cfg.key}-percentage`); if (percEl) percEl.textContent = `${daily.precipitation_probability_max[i]}%`;
-    const mmEl = $(`${cfg.key}-mm`); if (mmEl) mmEl.textContent = `${daily.precipitation_sum[i].toFixed(1)} mm`;
+    const mmEl = $(`${cfg.key}-mm`); if (mmEl) mmEl.textContent = `${daily.precipitation_sum[i].toFixed(1)} mm/h`;
     const dateEl = $(`${cfg.key}-date`); if (dateEl) dateEl.textContent = formatDate(daily.time[i]);
     updateCardClass(cfg.cardId, daily.precipitation_probability_max[i]);
     const probSlice = getDaySlice(hourly.precipitation_probability, i);

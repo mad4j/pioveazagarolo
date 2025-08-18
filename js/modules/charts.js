@@ -115,7 +115,7 @@ export function buildChart(target, probabilityData, precipitationData) {
         y1: { min: 0, max: maxPrecip, position: 'right', grid: { drawOnChartArea: false, drawTicks: false }, ticks: { display: false } },
         x: { grid: { display: false }, ticks: { maxRotation: 0, minRotation: 0, autoSkip: true, maxTicksLimit: 6, color: '#7f8c8d' } }
       },
-      plugins: { currentHourLine: { color: '#27ae60', overlayColor: 'rgba(128,128,128,0.18)' }, legend: { display: false }, tooltip: { backgroundColor: 'rgba(44,62,80,0.9)', callbacks: { title: (items) => `Ore ${items[0].label}`, label: (ctx) => ctx.datasetIndex === 0 ? `Probabilità: ${ctx.parsed.y}%` : `Precipitazione: ${ctx.parsed.y} mm` } } },
+      plugins: { currentHourLine: { color: '#27ae60', overlayColor: 'rgba(128,128,128,0.18)' }, legend: { display: false }, tooltip: { backgroundColor: 'rgba(44,62,80,0.9)', callbacks: { title: (items) => `Ore ${items[0].label}`, label: (ctx) => ctx.datasetIndex === 0 ? `Probabilità: ${ctx.parsed.y}%` : `Precipitazione: ${ctx.parsed.y} mm/h` } } },
       interaction: { mode: 'index', intersect: false }
     }
   });

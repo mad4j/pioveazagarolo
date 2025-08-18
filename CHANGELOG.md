@@ -117,7 +117,6 @@ Generato da _scripts/generate-changelog.js
 
 ### Fix
 
-
 - Fixed Clear Sky codes (c9b7dba)
 - fixed weatherCode management (6b92635)
 - fixes (0a4a283)
@@ -175,6 +174,7 @@ Generato da _scripts/generate-changelog.js
 25 commit di aggiornamento dati
 
 ### Other
+
 - Update manifest.json (fa3b3fd)
 - Update main.css (b175d98)
 - Update main.css (50d72b5)
