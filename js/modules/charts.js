@@ -108,9 +108,8 @@ function drawSunIcon(ctx, xScale, chartArea, hour, type) {
   // Only draw if within chart bounds
   if (x < chartArea.left || x > chartArea.right) return;
   
-  ctx.fillStyle = type === 'sunrise' ? '#f39c12' : '#e67e22';
-  ctx.strokeStyle = type === 'sunrise' ? '#e67e22' : '#d35400';
-  ctx.lineWidth = 2;
+  // Colori senza bordo: alba arancione, tramonto rosso
+  ctx.fillStyle = type === 'sunrise' ? '#f39c12' : '#ff3b30';
   
   // Draw arrow pointing up (sunrise) or down (sunset)
   ctx.beginPath();
@@ -128,8 +127,7 @@ function drawSunIcon(ctx, xScale, chartArea, hour, type) {
   }
   
   ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+  ctx.fill(); // Nessun stroke per rimuovere il bordo
 }
 
 export function getPrecipitationBarColor(value) {
