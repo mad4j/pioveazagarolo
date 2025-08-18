@@ -77,12 +77,18 @@ export function displayData(data){
     const mmEl = $(`${cfg.key}-mm`); if (mmEl) { const v = daily.precipitation_sum[i]; mmEl.textContent = `${v===0 ? '0' : v.toFixed(1)} mm`; }
     const dateEl = $(`${cfg.key}-date`); if (dateEl) dateEl.textContent = formatDate(daily.time[i]);
     updateCardClass(cfg.cardId, daily.precipitation_probability_max[i]);
-    const probSlice = getDaySlice(hourly.precipitation_probability, i);
+    let probSlice = getDaySlice(hourly.precipitation_probability, i);
     let precipSlice = getDaySlice(hourly.precipitation, i);
     
-    // For today's chart (index 0), blend actual and forecast precipitation
-    if (i === 0 && precipitationManager.isDataValid()) {
-      precipSlice = precipitationManager.blendTodayPrecipitation(precipSlice);
+    // For today's chart (index 0), blend actual and forecast data
+    if (i === 0) {
+      // Clear probability for past hours  
+      probSlice = precipitationManager.blendTodayProbability(probSlice);
+      
+      // Blend actual and forecast precipitation if data is available
+      if (precipitationManager.isDataValid()) {
+        precipSlice = precipitationManager.blendTodayPrecipitation(precipSlice);
+      }
     }
     
     buildChart(cfg.chartId, probSlice, precipSlice, daily.sunrise[i], daily.sunset[i]);
