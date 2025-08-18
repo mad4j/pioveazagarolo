@@ -3,6 +3,9 @@ name: Genera bollettino meteo
 on:
   workflow_dispatch:  # esegui manualmente dal tab Actions
 
+permissions:
+  contents: write
+
 jobs:
   bollettino:
     runs-on: ubuntu-latest
