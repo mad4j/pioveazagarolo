@@ -3,11 +3,13 @@
   "timezone": "Europe/Rome",
   "hourly_actual": {
     "time": [
-      "2025-08-19T00:00"
+      "2025-08-19T00:00",
+      "2025-08-19T01:00"
     ],
     "precipitation": [
+      0,
       0
     ]
   },
-  "last_update": "2025-08-19 00:49"
+  "last_update": "2025-08-19 01:14"
 }
