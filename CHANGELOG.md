@@ -2,6 +2,17 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.6.2] - 2025-08-20
+
+### Fix
+- fix(pwa): update service worker to cache package.json (8f46cd9)
+
+### Data Updates
+1 commit di aggiornamento dati
+
+### Other
+- chore: auto-update CHANGELOG for 1.6.1 (3c2e532)
+
 ## [1.6.1] - 2025-08-20
 
 ### Other
