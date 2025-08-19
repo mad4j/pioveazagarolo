@@ -1,5 +1,7 @@
 {
-  "buildDate": "2025-08-18T21:21:41.899Z",
-  "commitHash": "005a10b",
-  "commitDate": "2025-08-18T21:14:07Z"
+  "buildDate": "2025-08-19T15:27:04.284Z",
+  "commitHash": "f6ecd5b",
+  "commitDate": "2025-08-19T15:24:49Z",
+  "version": "1.5.0-rc1",
+  "buildNumber": 1
 }

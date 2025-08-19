@@ -107,4 +107,24 @@ export function displayData(data){
       lastUpdated.textContent = data.last_update.trim();
     }
   }
+  
+  // Load and display version information
+  loadVersionInfo();
+}
+
+// Load version information from build-info.json
+async function loadVersionInfo() {
+  try {
+    const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
+    const response = await fetch(`build-info.json${randomQuery}`);
+    if (!response.ok) return;
+    const buildInfo = await response.json();
+    
+    const versionEl = $('app-version');
+    if (versionEl && buildInfo.version) {
+      versionEl.textContent = buildInfo.version;
+    }
+  } catch (error) {
+    console.warn('Could not load version info:', error.message);
+  }
 }

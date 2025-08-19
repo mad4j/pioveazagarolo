@@ -7,6 +7,8 @@
   "scripts": {
     "generate-changelog": "node _scripts/generate-changelog.js",
     "build-info": "node _scripts/write-build-info.js",
-    "update-precipitation": "node _scripts/update-precipitation.js"
+    "update-precipitation": "node _scripts/update-precipitation.js",
+    "manage-version": "node _scripts/manage-version.js",
+    "build": "npm run manage-version && npm run build-info"
   }
 }
