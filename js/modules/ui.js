@@ -89,6 +89,36 @@ export function displayData(data){
       if (precipitationManager.isDataValid()) {
         precipSlice = precipitationManager.blendTodayPrecipitation(precipSlice);
       }
+
+      // Recalculate summary (percentage + mm) using ONLY future hours (including current hour)
+      try {
+        const currentHour = precipitationManager.getCurrentHourRome();
+        const futureProb = probSlice.slice(currentHour); // already zeroed past hours
+        const futurePrecip = precipSlice.slice(currentHour);
+        let maxProb = 0;
+        for (const v of futureProb) if (typeof v === 'number' && v > maxProb) maxProb = v;
+        const sumPrecip = futurePrecip.reduce((acc, v) => acc + (typeof v === 'number' ? v : 0), 0);
+
+        // Update percentage element for today (oggi)
+        const percToday = $('today-percentage');
+        if (percToday) {
+          if (!percToday.dataset.enhanced || percToday.dataset.value !== String(maxProb)) {
+            percToday.innerHTML = `<span class="value">${maxProb}</span><span class="percent-symbol" aria-hidden="true">%</span>`;
+            percToday.dataset.enhanced = 'true';
+            percToday.dataset.value = String(maxProb);
+          }
+          updateCardClass('today-card', maxProb);
+        }
+
+        // Update mm element for today
+        const mmToday = $('today-mm');
+        if (mmToday) {
+          const formatted = sumPrecip === 0 ? '0' : sumPrecip.toFixed(1);
+            mmToday.textContent = `${formatted} mm`;
+        }
+      } catch (err) {
+        console.warn('Errore ricalcolo dati ore future oggi:', err);
+      }
     }
     
     buildChart(cfg.chartId, probSlice, precipSlice, daily.sunrise[i], daily.sunset[i]);
