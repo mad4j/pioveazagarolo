@@ -423,6 +423,12 @@ footer {
   flex-wrap: wrap;
 }
 
+/* Version info slightly smaller than rest of footer text */
+.version-info, .version-info #app-version { 
+  font-size: 0.55rem; /* smaller than base footer text */
+  letter-spacing: 0.3px;
+}
+
 .footer-link {
   color: var(--secondary-color);
   text-decoration: none;
@@ -601,6 +607,8 @@ footer {
     margin-bottom: 0;
     padding-bottom: 0.25rem;
   }
+  /* Mobile: keep version text proportionally smaller */
+  .version-info, .version-info #app-version { font-size: 0.5rem; }
 }
 
 /* Dark mode */
