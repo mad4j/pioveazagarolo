@@ -25,7 +25,9 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history needed for amend + force push
 
       # Runs a single command using the runners shell
       - name: Retrieve Weather Data from external site
@@ -47,7 +49,24 @@ jobs:
           if [ ! -f data-precipitations.json ]; then echo "data-precipitations.json missing"; exit 1; fi
           jq '.' data-precipitations.json > /dev/null || (echo "Invalid JSON in data-precipitations.json" && exit 2)
      
-      # commit changes
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: weather data updated
+      # Commit changes rewriting (amending) last commit to avoid growing history
+      - name: Commit updated weather data (rolling amend)
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Add only the generated data files (extend if more files are produced)
+          git add data.json data-precipitations.json || true
+          # If nothing staged, exit gracefully
+          if git diff --cached --quiet; then
+            echo "No data changes to commit";
+            exit 0;
+          fi
+          # If repository already has at least one commit, amend it; otherwise create initial commit
+          if git rev-parse --verify HEAD >/dev/null 2>&1; then
+            git commit --amend -m "chore: aggiornamento dati meteo (rolling)"
+          else
+            git commit -m "chore: primo commit dati meteo"
+          fi
+          # Force push with lease to safely update remote (requires force-push allowed on branch)
+          git push --force-with-lease
