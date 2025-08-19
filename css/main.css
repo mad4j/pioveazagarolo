@@ -528,7 +528,7 @@ footer {
     flex: 1 1 0;
     display: flex;
     flex-direction: column;
-    padding: 0.55rem 0.55rem 0.45rem;
+    padding: 0.55rem;
   }
 
   .forecast-card:hover,
