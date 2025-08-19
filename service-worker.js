@@ -24,7 +24,9 @@ const urlsToCache = [
   "./font/weathericons-regular-webfont.svg",
   "./font/weathericons-regular-webfont.woff",
   "./font/weathericons-regular-webfont.woff2",
-  
+  "./data.json",
+  "./data-precipitations.json",
+  "./version.json"
 ];
 
 self.addEventListener("install", event => {

@@ -39,18 +39,6 @@ jobs:
           git add package.json
           git commit -m "chore(release): prepare ${{ github.event.inputs.version }}" || echo "No change"
 
-      - name: Allinea version.json e build-info + incrementa CACHE_NAME
-        run: |
-          npm install --no-audit --no-fund
-          # Forza versione base in version.json senza rc e azzera buildNumber
-          node -e "const fs=require('fs');const v='${{ github.event.inputs.version }}';fs.writeFileSync('version.json',JSON.stringify({version:v,buildNumber:0},null,2)+'\n');"
-          # Rigenera build-info (userà la versione appena scritta)
-          npm run build-info
-          # Incrementa CACHE_NAME del service worker (versione cache separata, ma tracciata per release)
-          node _scripts/bump-cache.js ${{ github.event.inputs.version }}
-          git add version.json build-info.json service-worker.js
-          git commit -m "chore(release): sync version.json & cache bump for ${{ github.event.inputs.version }}" || echo "No change"
-
       - name: Create tag
         run: |
           git tag ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
