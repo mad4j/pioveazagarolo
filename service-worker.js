@@ -7,7 +7,8 @@
 // v9: rimossa visualizzazione ora dalle condizioni attuali e spostata nel footer
 // v10: aggiunto supporto precipitation.json e modulo precipitation
 // v11: rinominato precipitation.json in data-precipitations.json
-const CACHE_NAME = "piove-a-zagarolo-cache-v11";
+// v12: riorganizzazione del laout, miglioramenti UI e bugfix
+const CACHE_NAME = "piove-a-zagarolo-cache-v12";
 const urlsToCache = [
   "./",
   "./index.html",
