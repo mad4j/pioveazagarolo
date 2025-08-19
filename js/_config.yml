@@ -1,0 +1,13 @@
+exclude:
+  - _scripts
+  - _resources
+  - .github
+  - package.json
+  - package-lock.json
+  - node_modules
+  - CHANGELOG.md
+  - README.md
+  - build-info.json
+  - .vscode
+  - *.yml
+  - *.md
