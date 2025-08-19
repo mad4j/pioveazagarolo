@@ -2,6 +2,13 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.6.1] - 2025-08-20
+
+### Other
+- Update package.json (fc1ead1)
+- Create update-precipitation.js (f993591)
+- chore: auto-update CHANGELOG for 1.6.0 (66f1774)
+
 ## [1.6.0] - 2025-08-20
 
 ### Other
