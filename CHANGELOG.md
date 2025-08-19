@@ -2,6 +2,56 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.5.2] - 2025-08-19
+
+### Data Updates
+2 commit di aggiornamento dati
+
+### Other
+- chore(release): prepare 1.5.2 (e713a7d)
+- Update version to 1.5.2 and adjust version info usage (b9f6f40)
+- Remove unused version info CSS and update footer markup (226a89d)
+- removed unused files (01af19f)
+
+## [1.5.1] - 2025-08-19
+
+### Data Updates
+6 commit di aggiornamento dati
+
+### Other
+- chore(release): prepare 1.5.1 (9444c77)
+- Update build-info.json (01f5480)
+- Update service-worker.js (9da9428)
+- Update version.json (f6bd7e5)
+- Update version.json (2db0d96)
+- Update build.yml (0318495)
+
+## [1.5.0] - 2025-08-19
+
+### Features
+- feat: implement automatic version management system (f6ecd5b)
+- en(ui); improve chart sunrise/sunset icons and code clarity (fed8f3e)
+
+### Build
+- build(pages): add Jekyll exclude config to skip tooling and meta files (cd14216)
+
+### Tests
+- test: complete version management system validation (498f34b)
+
+### Data Updates
+25 commit di aggiornamento dati
+
+### Other
+- chore(release): prepare 1.5.0 (d3976df)
+- en(ui): display version without patch if patch is zero (b0e0ee5)
+- en(ci): automate version sync and cache bump in release workflow (2e5a461)
+- chore: test hook (35d61b4)
+- update (2a06b9b)
+- Initial plan for automatic version management (b260fc5)
+- Initial plan (e858a9a)
+- en(ui): minify and optimize chart module code (7ff75d2)
+- chore: auto-update CHANGELOG for 1.4.1 (22263a2)
+
 ## [1.4.1] - 2025-08-19
 
 ### Features
