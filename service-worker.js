@@ -1,5 +1,5 @@
 // Incrementare CACHE_NAME per forzare l'installazione di un nuovo Service Worker
-const CACHE_NAME = "piove-a-zagarolo-cache-v13";
+const CACHE_NAME = "piove-a-zagarolo-cache-v14";
 const urlsToCache = [
   "./",
   "./index.html",
@@ -26,7 +26,7 @@ const urlsToCache = [
   "./font/weathericons-regular-webfont.woff2",
   "./data.json",
   "./data-precipitations.json",
-  "./version.json"
+  "./package.json"
 ];
 
 self.addEventListener("install", event => {
