@@ -1,7 +1,7 @@
 {
   "name": "piovedomaniazagarolo",
   "private": true,
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Sito meteo - generazione automatica CHANGELOG",
   "license": "MIT",
   "scripts": {
@@ -9,8 +9,8 @@
     "build-info": "node _scripts/write-build-info.js",
     "update-precipitation": "node _scripts/update-precipitation.js",
     "manage-version": "node _scripts/manage-version.js",
-  "build": "npm run manage-version && npm run build-info",
-  "setup-hooks": "node _scripts/setup-hooks.js",
-  "prepare": "npm run setup-hooks"
+    "build": "npm run manage-version && npm run build-info",
+    "setup-hooks": "node _scripts/setup-hooks.js",
+    "prepare": "npm run setup-hooks"
   }
 }
