@@ -1,7 +1,7 @@
 {
   "name": "piovedomaniazagarolo",
   "private": true,
-  "version": "1.5.3",
+  "version": "1.5.3p",
   "description": "Sito meteo - generazione automatica CHANGELOG",
   "license": "MIT",
   "scripts": {

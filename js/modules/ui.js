@@ -116,7 +116,7 @@ export function displayData(data){
 async function loadVersionInfo() {
   try {
     const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
-    const response = await fetch(`version.json${randomQuery}`);
+    const response = await fetch(`package.json${randomQuery}`);
     if (!response.ok) return;
     const buildInfo = await response.json();
     
