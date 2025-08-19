@@ -122,7 +122,17 @@ async function loadVersionInfo() {
     
     const versionEl = $('app-version');
     if (versionEl && buildInfo.version) {
-      versionEl.textContent = buildInfo.version;
+      const rawVersion = buildInfo.version.trim();
+      // Mostra senza patch solo se patch=0 e non ci sono suffissi (es. -rc)
+      const m = rawVersion.match(/^(\d+)\.(\d+)\.(\d+)(?:([-][A-Za-z0-9.]+))?$/);
+      let display = rawVersion;
+      if (m) {
+        const [, maj, min, patch, suffix] = m;
+        if (patch === '0' && !suffix) {
+          display = `${maj}.${min}`;
+        }
+      }
+      versionEl.textContent = display;
     }
   } catch (error) {
     console.warn('Could not load version info:', error.message);
