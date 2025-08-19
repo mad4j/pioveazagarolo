@@ -2,6 +2,12 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.6.0] - 2025-08-20
+
+### Other
+- en(ui): enhance today's precipitation summary to use future hours (7ab176a)
+- chore: auto-update CHANGELOG for 1.5.4 (b7e4b14)
+
 ## [1.5.4] - 2025-08-19
 
 ### Other
