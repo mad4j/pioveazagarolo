@@ -9,6 +9,8 @@
     "build-info": "node _scripts/write-build-info.js",
     "update-precipitation": "node _scripts/update-precipitation.js",
     "manage-version": "node _scripts/manage-version.js",
-    "build": "npm run manage-version && npm run build-info"
+  "build": "npm run manage-version && npm run build-info",
+  "setup-hooks": "node _scripts/setup-hooks.js",
+  "prepare": "npm run setup-hooks"
   }
 }
