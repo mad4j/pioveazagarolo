@@ -47,15 +47,6 @@ jobs:
           if [ ! -f data-precipitations.json ]; then echo "data-precipitations.json missing"; exit 1; fi
           jq '.' data-precipitations.json > /dev/null || (echo "Invalid JSON in data-precipitations.json" && exit 2)
      
-      # Update version and build info for each automated data refresh
-      - name: Version & build info
-        run: |
-          npm ci
-          npm run manage-version
-          npm run build-info
-          echo 'version.json:' && cat version.json
-          echo 'build-info.json:' && cat build-info.json
-     
       # commit changes
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
