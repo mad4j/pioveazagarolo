@@ -215,28 +215,39 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
         legend: { display: false }, 
         tooltip: { 
           backgroundColor: 'rgba(44,62,80,0.9)', 
+          displayColors: false,
           callbacks: { 
             title: (items) => `Ore ${items[0].label}`, 
-            label: (ctx) => ctx.datasetIndex === 0 ? `Probabilità: ${ctx.parsed.y}%` : `Precipitazione: ${ctx.parsed.y} mm/h`,
+            label: (ctx) => {
+              // Mostriamo una sola riga per l'insieme dei dataset (solo quando datasetIndex === 0)
+              if (ctx.datasetIndex !== 0) return '';
+              const chart = ctx.chart;
+              const idx = ctx.dataIndex;
+              const prob = Math.round(ctx.parsed.y);
+              let precipVal = 0;
+              if (chart.data.datasets[1] && chart.data.datasets[1].data) {
+                const raw = chart.data.datasets[1].data[idx];
+                if (raw !== undefined && raw !== null) {
+                  precipVal = raw;
+                }
+              }
+              const precipStr = precipVal < 1 && precipVal > 0 ? precipVal.toFixed(1) : Math.round(precipVal);
+              return `Pioggia: ${precipStr}mm/h (${prob}%)`;
+            },
             afterBody: (tooltipItems) => {
-              // Add sunrise/sunset info to tooltip when hovering near those times
+              // Informazioni aggiuntive Alba/Tramonto vicino alle ore di riferimento
               if (sunriseTime && sunsetTime && tooltipItems.length > 0) {
                 const currentHour = parseFloat(tooltipItems[0].label.split(':')[0]);
                 const sunrise = timeStringToHours(sunriseTime);
                 const sunset = timeStringToHours(sunsetTime);
-                
                 if (sunrise && sunset) {
                   const daylightHours = sunset - sunrise;
                   const additionalInfo = [];
-                  
                   if (Math.abs(currentHour - sunrise) < 1) {
-                    additionalInfo.push(`☀️Alba: ${formatTime(sunriseTime)}`);
-                    additionalInfo.push(`⏱️Ore di luce: ${daylightHours.toFixed(1)}h`);
+                    additionalInfo.push(`Alba: ${formatTime(sunriseTime)} (${daylightHours.toFixed(1)}h di luce)`);                    
                   } else if (Math.abs(currentHour - sunset) < 1) {
-                    additionalInfo.push(`☀️Tramonto: ${formatTime(sunsetTime)}`);
-                    additionalInfo.push(`⏱️Ore di luce: ${daylightHours.toFixed(1)}h`);
+                    additionalInfo.push(`Tramonto: ${formatTime(sunsetTime)} (${daylightHours.toFixed(1)}h di luce)`);      
                   }
-                  
                   return additionalInfo;
                 }
               }

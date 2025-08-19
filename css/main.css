@@ -318,7 +318,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0rem;
 }
 
 .rain-icon {
@@ -579,12 +579,6 @@ footer {
 
   .rain-percentage { font-size: 1.5rem; }
   .rain-percentage .percent-symbol { top: 0.04em; }
-
-  /* .rain-mm mantiene dimensioni dal desktop (nessuna dichiarazione duplicata) */
-
-  .rain-info {
-    margin: 0 0 0.25rem;
-  }
 
   .temp-values {
     font-size: 0.7rem;
