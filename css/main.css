@@ -311,7 +311,7 @@ body {
   font-weight: 600;
   color: var(--primary-color);
   font-size: 1.25rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0rem;
 }
 
 .rain-info {
@@ -391,6 +391,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 0.2rem;
 }
 
 .day-date {
