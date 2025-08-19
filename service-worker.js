@@ -1,14 +1,5 @@
 // Incrementare CACHE_NAME per forzare l'installazione di un nuovo Service Worker
-// v4: aggiunto badge offline & aggiornamenti UI
-// v5: migliorata la gestione del layout dinamico sugli schermi piccoli
-// v6: aggiunto sistema di debug su dispositivi mobili
-// v7: splitting file main.js in moduli
-// v8: aggiunto supporto icone giorno/notte in base a is_day
-// v9: rimossa visualizzazione ora dalle condizioni attuali e spostata nel footer
-// v10: aggiunto supporto precipitation.json e modulo precipitation
-// v11: rinominato precipitation.json in data-precipitations.json
-// v12: riorganizzazione del laout, miglioramenti UI e bugfix
-const CACHE_NAME = "piove-a-zagarolo-cache-v12";
+const CACHE_NAME = "piove-a-zagarolo-cache-v13";
 const urlsToCache = [
   "./",
   "./index.html",
