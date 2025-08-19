@@ -2,6 +2,14 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.5.4] - 2025-08-19
+
+### Other
+- chore(release): prepare 1.5.4 (b6d1373)
+- en(ci): remove version/build info files and update version handling (7e23ece)
+- en(ui): style version info text in footer (ae704f5)
+- chore: auto-update CHANGELOG for 1.5.3 (d9c5faf)
+
 ## [1.5.3] - 2025-08-19
 
 ### Data Updates
