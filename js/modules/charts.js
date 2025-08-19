@@ -190,7 +190,7 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: 5 },
+      layout: { padding: 2 },
       onHover: (event, activeElements, chart) => {
         if (isTouchDevice() && activeElements.length > 0) {
           if (chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout);
@@ -230,11 +230,11 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
                   const additionalInfo = [];
                   
                   if (Math.abs(currentHour - sunrise) < 1) {
-                    additionalInfo.push(`☀️ Alba: ${formatTime(sunriseTime)}`);
-                    additionalInfo.push(`⏱️ Ore di luce: ${daylightHours.toFixed(1)}h`);
+                    additionalInfo.push(`☀️Alba: ${formatTime(sunriseTime)}`);
+                    additionalInfo.push(`⏱️Ore di luce: ${daylightHours.toFixed(1)}h`);
                   } else if (Math.abs(currentHour - sunset) < 1) {
-                    additionalInfo.push(`☀️ Tramonto: ${formatTime(sunsetTime)}`);
-                    additionalInfo.push(`⏱️ Ore di luce: ${daylightHours.toFixed(1)}h`);
+                    additionalInfo.push(`☀️Tramonto: ${formatTime(sunsetTime)}`);
+                    additionalInfo.push(`⏱️Ore di luce: ${daylightHours.toFixed(1)}h`);
                   }
                   
                   return additionalInfo;
