@@ -2,6 +2,55 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.4.1] - 2025-08-19
+
+### Features
+- en(ui): improve chart tooltip and adjust rain info styles (95e79da)
+- en(ui): improve day-info alignment and spacing in CSS (c657286)
+- added meteo bulletin (437f2c1)
+- feat(ci): generation of meteo bulletin (bb65e87)
+- en(ui): improve rain percentage display with better alignment (4d80ff8)
+- en(pwa): remove duplicate icon entry from manifest.json (74dd8dd)
+- Add sunrise and sunset information to weather charts (69fd834)
+- feat: Add sunrise/sunset icons to weather charts (1b566b7)
+- Initial analysis: Add sunrise/sunset feature planning (b418280)
+- en(ci): added sunraise and sunset information (62dbab2)
+
+### Fix
+- Update debug-mobile.js (216b7ba)
+- fix(ci): added bulletin dump (fd7c580)
+- fix(ci): added write permissions to meteo.yml (f7eaefa)
+- en(ui): fixed footer last-update style (af2bb7a)
+- fix(ci): fixed OpenMeteo API curl command for sunraise and sunset. (e3cbb2c)
+- en(ui): fix rain unit display and reorder rain percentage in UI (6bc8798)
+
+### Docs
+- docs: validate and confirm GitHub Copilot instructions are comprehensive and accurate (9d94e05)
+
+### Data Updates
+78 commit di aggiornamento dati
+
+### Other
+- chore(release): prepare 1.4.1 (1a69394)
+- Update service-worker.js (a3e8f10)
+- Update main.css (1ef5d07)
+- Update main.css (e71c9f7)
+- en(ui): more space for diagrams (dcbb5f0)
+- Update main.css (e986e7e)
+- Implement precipitation probability clearing for past hours in Today chart (1ced176)
+- Initial plan (005a10b)
+- Initial plan (f8b59a8)
+- Update meteo.yml (4990e43)
+- en(ui): sunraise and sunset icon colors (6529599)
+- en(ui): better readability of current temp in dark mode (e1d26c7)
+- Align sunrise and sunset arrows at same height level (714aed6)
+- Update sunrise/sunset icons to use simple arrows positioned at x-axis (4854053)
+- Initial plan (5b9600b)
+- removed obsolete files (5e889d6)
+- en(ui): better visualization of 0 values (09b9d20)
+- en(ui): update precipitation units to mm/h in UI and tooltips (f92dd8a)
+- chore: auto-update CHANGELOG for 1.4.0 (51f82c9)
+
 ## [1.4.0] - 2025-08-17
 
 ### Features
