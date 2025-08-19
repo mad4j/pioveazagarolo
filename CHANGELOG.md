@@ -2,6 +2,17 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.5.3] - 2025-08-19
+
+### Data Updates
+1 commit di aggiornamento dati
+
+### Other
+- chore(release): prepare 1.5.3 (2bf736b)
+- chore: test release (51a4eaf)
+- chore: auto-update CHANGELOG (623de1c)
+- Remove custom versioning and build scripts (a064782)
+
 ## [1.5.2] - 2025-08-19
 
 ### Data Updates
