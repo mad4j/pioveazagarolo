@@ -4,6 +4,7 @@
  */
 const { execSync } = require('child_process');
 const { writeFileSync } = require('fs');
+const { readVersionFile } = require('./manage-version.js');
 
 function run(cmd) {
   return execSync(cmd, { encoding: 'utf8' }).trim();
@@ -19,6 +20,13 @@ try {
 }
 
 const buildDate = new Date().toISOString();
-const payload = { buildDate, commitHash, commitDate };
+const versionData = readVersionFile();
+const payload = { 
+  buildDate, 
+  commitHash, 
+  commitDate,
+  version: versionData.version,
+  buildNumber: versionData.buildNumber
+};
 writeFileSync('build-info.json', JSON.stringify(payload, null, 2));
 console.log('Generated build-info.json:', payload);

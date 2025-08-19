@@ -453,6 +453,14 @@ footer {
   vertical-align: middle;
 }
 
+/* Version info styling */
+.version-info {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  text-align: right;
+  opacity: 0.8;
+}
+
 /* Nota: .forecast-section rimosso perché non presente nel markup */
 
 .high-chance {
