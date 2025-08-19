@@ -1,7 +1,7 @@
 {
   "latitude": 41.8125,
   "longitude": 12.8125,
-  "generationtime_ms": 0.13518333435058594,
+  "generationtime_ms": 0.15664100646972656,
   "utc_offset_seconds": 7200,
   "timezone": "Europe/Rome",
   "timezone_abbreviation": "GMT+2",
@@ -21,18 +21,18 @@
     "wind_direction_10m": "°"
   },
   "current": {
-    "time": "2025-08-19T17:30",
+    "time": "2025-08-19T17:45",
     "interval": 900,
-    "temperature_2m": 27.9,
+    "temperature_2m": 27.5,
     "rain": 0.00,
     "weather_code": 2,
-    "surface_pressure": 980.4,
+    "surface_pressure": 980.8,
     "precipitation": 0.00,
-    "relative_humidity_2m": 55,
+    "relative_humidity_2m": 57,
     "is_day": 1,
-    "apparent_temperature": 29.4,
-    "wind_speed_10m": 9.4,
-    "wind_direction_10m": 252
+    "apparent_temperature": 29.3,
+    "wind_speed_10m": 8.6,
+    "wind_direction_10m": 255
   },
   "hourly_units": {
     "time": "iso8601",
@@ -148,35 +148,35 @@
       0.00,
       0.00,
       0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
-      0.00,
       0.10,
-      0.40,
       0.00,
       0.00,
       0.00,
       0.00,
-      0.50,
-      1.30,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
       0.00,
       0.20,
-      0.10,
+      1.40,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.00,
+      0.20,
+      0.30,
+      0.20,
       0.10,
       0.00,
       0.00,
@@ -291,23 +291,23 @@
     ],
     "temperature_2m_max": [
       29.8,
-      29.3,
-      26.8
+      29.1,
+      26.7
     ],
     "temperature_2m_min": [
       18.7,
-      19.8,
-      20.8
+      19.9,
+      21.0
     ],
     "weather_code": [
       3,
       45,
-      95
+      80
     ],
     "precipitation_sum": [
       0.20,
-      0.00,
-      2.70
+      0.10,
+      2.40
     ],
     "precipitation_probability_max": [
       68,
@@ -315,5 +315,5 @@
       38
     ]
   },
-  "last_update": "2025-08-19 17:37"
+  "last_update": "2025-08-19 17:49"
 }
