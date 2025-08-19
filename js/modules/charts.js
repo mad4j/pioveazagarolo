@@ -4,18 +4,55 @@ export const chartInstances = {};
 
 export function getDaySlice(array, dayIndex) { const start = dayIndex * 24; return array.slice(start, start + 24); }
 
+// Plugin linea ora corrente
 export const currentHourLinePlugin = { id:'currentHourLine', afterDraw(chart, args, opts) {
   if (chart.config?.data?.labels?.length !== 24) return; if (!opts) return;
-  if (typeof opts._cachedHour !== 'number') { try { opts._cachedHour = parseInt(new Intl.DateTimeFormat('en-GB',{hour:'numeric',hour12:false,timeZone:'Europe/Rome'}).format(new Date()),10); if (Number.isNaN(opts._cachedHour)) opts._cachedHour = new Date().getHours(); } catch { opts._cachedHour = new Date().getHours(); } }
-  const hour = opts._cachedHour; const xScale = chart.scales.x; if (!xScale) return; const x = xScale.getPixelForValue(hour); const { top, bottom, left } = chart.chartArea; const ctx = chart.ctx; ctx.save();
+  if (typeof opts._cachedHour !== 'number') {
+    try { opts._cachedHour = parseInt(new Intl.DateTimeFormat('en-GB',{hour:'numeric',hour12:false,timeZone:'Europe/Rome'}).format(new Date()),10); if (Number.isNaN(opts._cachedHour)) opts._cachedHour = new Date().getHours(); }
+    catch { opts._cachedHour = new Date().getHours(); }
+  }
+  const hour = opts._cachedHour;
+  const xScale = chart.scales.x; if (!xScale) return;
+  const x = xScale.getPixelForValue(hour);
+  const { top, bottom, left } = chart.chartArea;
+  const ctx = chart.ctx; ctx.save();
   try { if (x > left) { ctx.fillStyle = opts.overlayColor || 'rgba(120,120,120,0.15)'; ctx.fillRect(left, top, x-left, bottom-top); } } catch {}
-  ctx.strokeStyle = opts.color || '#27ae60'; ctx.lineWidth = 1; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(x,top); ctx.lineTo(x,bottom); ctx.stroke(); ctx.restore(); } };
+  ctx.strokeStyle = opts.color || '#27ae60'; ctx.lineWidth = 1; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(x,top); ctx.lineTo(x,bottom); ctx.stroke(); ctx.restore();
+} };
 
-export const sunriseSunsetPlugin = { id:'sunriseSunset', afterDraw(chart, a, opts) { if (!opts||!opts.sunrise||!opts.sunset) return; const xScale=chart.scales.x; if(!xScale)return; const {ctx,chartArea}=chart; ctx.save(); const sr=timeStringToHours(opts.sunrise); const ss=timeStringToHours(opts.sunset); if(sr!==null) drawSunIcon(ctx,xScale,chartArea,sr,'sunrise'); if(ss!==null) drawSunIcon(ctx,xScale,chartArea,ss,'sunset'); ctx.restore(); } };
+// Plugin icone alba/tramonto
+export const sunriseSunsetPlugin = { id:'sunriseSunset', afterDraw(chart, a, opts) {
+  if (!opts || !opts.sunrise || !opts.sunset) return;
+  const xScale = chart.scales.x; if (!xScale) return;
+  const { ctx, chartArea } = chart; ctx.save();
+  const sr = timeStringToHours(opts.sunrise); const ss = timeStringToHours(opts.sunset);
+  if (sr !== null) drawSunIcon(ctx, xScale, chartArea, sr, 'sunrise');
+  if (ss !== null) drawSunIcon(ctx, xScale, chartArea, ss, 'sunset');
+  ctx.restore();
+} };
 
 function timeStringToHours(str){ try{ const t=str.split('T')[1]; if(!t)return null; const [h,m]=t.split(':').map(Number); return h+m/60;}catch{return null;} }
 function formatTime(str){ try{ const t=str.split('T')[1]; return t? t.substring(0,5):str;}catch{return str;} }
-function drawSunIcon(ctx,xScale,area,h,type){ const x=xScale.getPixelForValue(h); const y=area.bottom-5; if(x<area.left||x>area.right)return; ctx.fillStyle= type==='sunrise'? '#f39c12':'#ff3b30'; ctx.beginPath(); if(type==='sunrise'){ctx.moveTo(x,y+2);ctx.lineTo(x-4,y+8);ctx.lineTo(x+4,y+8);} else {ctx.moveTo(x,y+8);ctx.lineTo(x-4,y+2);ctx.lineTo(x+4,y+2);} ctx.closePath(); ctx.fill(); }
+function drawSunIcon(ctx,xScale,area,h,type){
+  const x=xScale.getPixelForValue(h);
+  if(x<area.left||x>area.right)return;
+  // Real glyph characters (not double-escaped) so canvas renders icon instead of literal code
+  const glyph = type==='sunrise' ? '\uf051' : '\uf052';
+  ctx.save();
+  // Font-face dichiara font-family: 'weathericons' (minuscolo). Riduciamo dimensione.
+  ctx.font='16px weathericons';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillStyle= type==='sunrise'? '#dd8f11ff':'#ff3b30';
+  // Posizioniamo più in basso (sovrapposto alla linea dell'asse X)
+  const y = area.bottom +2; //  +/- sposta leggermente
+  try { ctx.fillText(glyph, x, y); }
+  catch { // Fallback: small triangle if font not ready
+    ctx.beginPath();
+    if(type==='sunrise'){ctx.moveTo(x,y+4);ctx.lineTo(x-5,y+10);ctx.lineTo(x+5,y+10);} else {ctx.moveTo(x,y+10);ctx.lineTo(x-5,y+4);ctx.lineTo(x+5,y+4);} ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+}
 
 export function getPrecipitationBarColor(v){ if(v>30)return'#6c3483'; if(v>10)return'#b03a2e'; if(v>6)return'#e74c3c'; if(v>4)return'#f39c12'; if(v>2)return'#27ae60'; if(v>1)return'#3498db'; return'#85c1e9'; }
 function isTouchDevice(){ return 'ontouchstart' in window||navigator.maxTouchPoints>0||navigator.msMaxTouchPoints>0; }
@@ -24,4 +61,9 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
   const el=document.getElementById(target); if(!el)return; if(chartInstances[target]) chartInstances[target].destroy();
   const precipColors=precipitationData.map(getPrecipitationBarColor); const m=Math.max(...precipitationData,1); const maxPrecip=m<2?2:Math.ceil(m);
   const plugins=[sunriseSunsetPlugin]; if(target==='today-chart') plugins.push(currentHourLinePlugin);
-  chartInstances[target]=new Chart(el,{ plugins, data:{ labels:[...Array(24).keys()].map(h=>`${h}:00`.padStart(5,'0')), datasets:[ {label:'Probabilità (%)',type:'line',fill:true,tension:0.4,backgroundColor:'rgba(52,152,219,0.30)',borderColor:'rgb(41,128,185)',borderWidth:2,data:probabilityData,pointBackgroundColor:'rgb(41,128,185)',pointRadius:0,pointHoverRadius:4,yAxisID:'y'}, {label:'Precipitazione (mm/h)',type:'bar',backgroundColor:precipColors,borderColor:precipColors,borderWidth:1,data:precipitationData,yAxisID:'y1',order:2} ]}, options:{ responsive:true, maintainAspectRatio:false, layout:{padding:2}, onHover:(e,a,chart)=>{ if(isTouchDevice()&&a.length){ if(chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout); chart._tooltipTimeout=setTimeout(()=>{chart.tooltip.setActiveElements([],{x:0,y:0}); chart.setActiveElements([]); chart.update('none');},3000);} }, scales:{ y:{min:0,max:100,position:'left',grid:{drawOnChartArea:true,color:'rgba(200,200,200,0.2)',drawTicks:false},ticks:{display:false}}, y1:{min:0,max:maxPrecip,position:'right',grid:{drawOnChartArea:false,drawTicks:false},ticks:{display:false}}, x:{grid:{display:false},ticks:{maxRotation:0,minRotation:0,autoSkip:true,maxTicksLimit:6,color:'#7f8c8d'}} }, plugins:{ currentHourLine:{color:'#27ae60',overlayColor:'rgba(128,128,128,0.18)'}, sunriseSunset:{sunrise:sunriseTime,sunset:sunsetTime}, legend:{display:false}, tooltip:{ enabled:false, external:({chart,tooltip})=>{ let tip=document.getElementById('chartjs-tooltip-'+target); if(!tip){ tip=document.createElement('div'); tip.id='chartjs-tooltip-'+target; Object.assign(tip.style,{position:'absolute',pointerEvents:'none',transition:'all .08s ease',zIndex:30}); document.body.appendChild(tip);} if(!tooltip||tooltip.opacity===0){ tip.style.opacity=0; return; } const rows=[]; if(tooltip.dataPoints?.length){ const dp=tooltip.dataPoints[0]; const idx=dp.dataIndex; const prob=Math.round(dp.parsed.y); const ds2=chart.data.datasets[1]; let mm=0; if(ds2&&ds2.data&&ds2.data[idx]!=null) mm=ds2.data[idx]; const precipStr= mm<1 && mm>0 ? mm.toFixed(1):Math.round(mm); rows.push({k:'rain',t:`Pioggia: ${precipStr}mm (${prob}%)`}); if(sunriseTime&&sunsetTime){ const hour=parseFloat(dp.label.split(':')[0]); const sr=timeStringToHours(sunriseTime); const ss=timeStringToHours(sunsetTime); if(sr&&ss){ const daylight=ss-sr; if(Math.abs(hour-sr)<1) rows.push({k:'sunrise',t:`Alba: ${formatTime(sunriseTime)} (${daylight.toFixed(1)}h di luce)`}); else if(Math.abs(hour-ss)<1) rows.push({k:'sunset',t:`Tramonto: ${formatTime(sunsetTime)} (${daylight.toFixed(1)}h di luce)`}); } } } const title=tooltip.title?.[0]?`Ore ${tooltip.title[0]}`:''; let html=`<div style="font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;">`; if(title) html+=`<div style=\"font-weight:600; margin-bottom:4px;\">${title}</div>`; html+='<div style="display:flex; flex-direction:column; gap:2px;">'; rows.forEach(r=>{ let icon=''; if(r.k==='rain') icon='<i class="wi wi-umbrella" style="margin-right:4px; color:#3498db;"></i>'; else if(r.k==='sunrise') icon='<span style="display:inline-block; width:14px; text-align:center; margin-right:4px; color:#f39c12;">▲</span>'; else if(r.k==='sunset') icon='<span style="display:inline-block; width:14px; text-align:center; margin-right:4px; color:#ff3b30;">▼</span>'; html+=`<div style=\"display:flex; align-items:center; font-size:12px; line-height:1.2;\">${icon}<span>${r.t}</span></div>`; }); html+='</div></div>'; tip.innerHTML=html; const rect=chart.canvas.getBoundingClientRect(); const bodyRect=document.body.getBoundingClientRect(); const left=rect.left + window.pageXOffset + tooltip.caretX + 10; const top=rect.top + window.pageYOffset + tooltip.caretY - 10; tip.style.left=Math.min(left, bodyRect.width-260)+'px'; tip.style.top=top+'px'; tip.style.opacity=1; } } }, interaction:{mode:'index',intersect:false} } }); }
+  chartInstances[target]=new Chart(el,{ plugins, data:{ labels:[...Array(24).keys()].map(h=>`${h}:00`.padStart(5,'0')), datasets:[ {label:'Probabilità (%)',type:'line',fill:true,tension:0.4,backgroundColor:'rgba(52,152,219,0.30)',borderColor:'rgb(41,128,185)',borderWidth:2,data:probabilityData,pointBackgroundColor:'rgb(41,128,185)',pointRadius:0,pointHoverRadius:4,yAxisID:'y'}, {label:'Precipitazione (mm/h)',type:'bar',backgroundColor:precipColors,borderColor:precipColors,borderWidth:1,data:precipitationData,yAxisID:'y1',order:2} ]}, options:{ responsive:true, maintainAspectRatio:false, layout:{padding:2}, onHover:(e,a,chart)=>{ if(isTouchDevice()&&a.length){ if(chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout); chart._tooltipTimeout=setTimeout(()=>{chart.tooltip.setActiveElements([],{x:0,y:0}); chart.setActiveElements([]); chart.update('none');},3000);} }, scales:{ y:{min:0,max:100,position:'left',grid:{drawOnChartArea:true,color:'rgba(200,200,200,0.2)',drawTicks:false},ticks:{display:false}}, y1:{min:0,max:maxPrecip,position:'right',grid:{drawOnChartArea:false,drawTicks:false},ticks:{display:false}}, x:{grid:{display:false},ticks:{maxRotation:0,minRotation:0,autoSkip:true,maxTicksLimit:6,color:'#7f8c8d'}} }, plugins:{ currentHourLine:{color:'#27ae60',overlayColor:'rgba(128,128,128,0.18)'}, sunriseSunset:{sunrise:sunriseTime,sunset:sunsetTime}, legend:{display:false}, tooltip:{ enabled:false, external:({chart,tooltip})=>{ let tip=document.getElementById('chartjs-tooltip-'+target); if(!tip){ tip=document.createElement('div'); tip.id='chartjs-tooltip-'+target; Object.assign(tip.style,{position:'absolute',pointerEvents:'none',transition:'all .08s ease',zIndex:30}); document.body.appendChild(tip);} if(!tooltip||tooltip.opacity===0){ tip.style.opacity=0; return; } const rows=[]; if(tooltip.dataPoints?.length){ const dp=tooltip.dataPoints[0]; const idx=dp.dataIndex; const prob=Math.round(dp.parsed.y); const ds2=chart.data.datasets[1]; let mm=0; if(ds2&&ds2.data&&ds2.data[idx]!=null) mm=ds2.data[idx]; const precipStr= mm<1 && mm>0 ? mm.toFixed(1):Math.round(mm); rows.push({k:'rain',t:`Pioggia: ${precipStr}mm (${prob}%)`}); if(sunriseTime&&sunsetTime){ const hour=parseFloat(dp.label.split(':')[0]); const sr=timeStringToHours(sunriseTime); const ss=timeStringToHours(sunsetTime); if(sr&&ss){ const daylight=ss-sr; if(Math.abs(hour-sr)<1) rows.push({k:'sunrise',t:`Alba: ${formatTime(sunriseTime)} (${daylight.toFixed(1)}h di luce)`}); else if(Math.abs(hour-ss)<1) rows.push({k:'sunset',t:`Tramonto: ${formatTime(sunsetTime)} (${daylight.toFixed(1)}h di luce)`}); } } } const title=tooltip.title?.[0]?`Ore ${tooltip.title[0]}`:''; let html=`<div style=\"font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;\">`; if(title) html+=`<div style=\\"font-weight:600; margin-bottom:4px;\\">${title}</div>`; html+='<div style=\"display:flex; flex-direction:column; gap:2px;\">'; rows.forEach(r=>{ let icon=''; if(r.k==='rain') icon='<i class=\"wi wi-umbrella\" style=\"margin-right:4px; color:#3498db;\"></i>'; else if(r.k==='sunrise') icon='<i class=\"wi wi-sunrise\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if(r.k==='sunset') icon='<i class=\"wi wi-sunset\" style=\"margin-right:4px; color:#ff3b30;\"></i>'; html+=`<div style=\\"display:flex; align-items:center; font-size:12px; line-height:1.2;\\">${icon}<span>${r.t}</span></div>`; }); html+='</div></div>'; tip.innerHTML=html; const rect=chart.canvas.getBoundingClientRect(); const bodyRect=document.body.getBoundingClientRect(); const left=rect.left + window.pageXOffset + tooltip.caretX + 10; const top=rect.top + window.pageYOffset + tooltip.caretY - 10; tip.style.left=Math.min(left, bodyRect.width-260)+'px'; tip.style.top=top+'px'; tip.style.opacity=1; } } }, interaction:{mode:'index',intersect:false} } });
+  // Force redraw once fonts are ready (prevents seeing raw unicode if font loads late)
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(()=>{ try{ chartInstances[target].update(); }catch{} });
+  }
+}
