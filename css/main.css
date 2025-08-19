@@ -389,7 +389,7 @@ body {
 
 .day-info {
   display: flex;
-  align-items: flex-end; /* allinea titolo e data sul fondo */
+  align-items: baseline; /* allinea davvero sulle baseline del testo */
   justify-content: space-between;
   gap: .5rem;
   padding-bottom: .35rem; /* spazio prima della linea */
@@ -397,8 +397,8 @@ body {
   margin-bottom: .55rem; /* spazio dopo la linea */
 }
 
-/* Micro‑allineamento ottico: la data è più piccola e sembrerebbe più alta */
-.day-info .day-date { line-height:1; position: relative; top:1px; }
+/* Baseline alignment: rimosso offset artificiale */
+.day-info .day-title, .day-info .day-date { line-height:1; }
 
 .day-date {
   font-size: 0.7rem;
