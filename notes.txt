@@ -1,0 +1,2 @@
+https://api.open-meteo.com/v1/forecast?latitude=41.837610&longitude=12.831867&hourly=precipitation,precipitation_probability&timezone=auto&past_days=0&forecast_days=1
+
