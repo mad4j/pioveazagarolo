@@ -2,6 +2,14 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.6.4] - 2025-08-21
+
+### Other
+- chore(release): prepare 1.6.4 (af6c269)
+- fic(ui): comment out precipitation blending and summary logic (ea83e28)
+- chore: aggiornamento dati meteo (rolling) (6a21126)
+- chore: aggiornamento dati meteo (rolling) (cec7919)
+
 ## [1.6.3] - 2025-08-20
 
 ### Fix
