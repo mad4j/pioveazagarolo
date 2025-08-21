@@ -2,6 +2,25 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.6.3] - 2025-08-20
+
+### Fix
+- fix(ci): switch to rolling amend for weather data commits (885c578)
+- fix(ci): removed unused file (a043138)
+
+### Data Updates
+1 commit di aggiornamento dati
+
+### Other
+- chore(release): prepare 1.6.3 (ef523fc)
+- chore: aggiornamento dati meteo (rolling) (1994c0c)
+- chore: aggiornamento dati meteo (rolling) (cb92d7d)
+- chore: aggiornamento dati meteo (rolling) (1c04766)
+- en(ci): update workflow schedule to run every 15 minutes (dd0e0e1)
+- chore: aggiornamento dati meteo (rolling) (6a245df)
+- chore: aggiornamento dati meteo (rolling) (71904c1)
+- chore: auto-update CHANGELOG for 1.6.2 (021b3fd)
+
 ## [1.6.2] - 2025-08-20
 
 ### Fix
