@@ -4,9 +4,9 @@ name: Update Weather Data
 
 # Controls when the workflow will run
 on:
-  # Run every 15 minutes
+  # Run every 30 minutes
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/30 * * * *'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
