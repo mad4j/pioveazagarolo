@@ -61,23 +61,15 @@ export function createAirQualityIcon(cardId, eaqiValue, dayKey) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     background-color: ${level.color};
-    color: white;
-    font-size: 9px;
-    font-weight: bold;
     cursor: pointer;
     margin-left: 8px;
-    border: 1px solid rgba(255,255,255,0.8);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
     user-select: none;
     flex-shrink: 0;
-  `;
-  
-  // Usa icona appropriata
-  airIcon.innerHTML = '🌬️'; 
+  `; 
   airIcon.setAttribute('aria-label', `Qualità dell'aria: ${level.label} (EAQI ${eaqiValue})`);
   airIcon.setAttribute('title', 'Clicca per dettagli qualità dell\'aria');
   airIcon.dataset.eaqi = eaqiValue;
@@ -123,9 +115,6 @@ export function showAirQualityTooltip(iconElement, eaqiValue, level) {
   `;
   
   tooltip.innerHTML = `
-    <div style="font-weight: bold; margin-bottom: 4px; color: ${level.color};">
-      Qualità dell'aria: ${level.label}
-    </div>
     <div style="margin-bottom: 4px;">
       <strong>EAQI:</strong> ${eaqiValue}
     </div>
