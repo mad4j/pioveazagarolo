@@ -2,6 +2,25 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.7.2] - 2025-08-31
+
+### Features
+- feat: enhance air quality icons with thicker lines and 270-degree arc (1779a39)
+
+### Fix
+- Implement air quality gauge restyling: thicker arc, fixed needle color, -45° rotation (85e0e36)
+- fix: correct air quality arc to properly display 270-degree range (8a898ff)
+
+### Other
+- chore(release): prepare 1.7.2 (ed4d8b2)
+- chore: aggiornamento dati meteo (rolling) (a83c74d)
+- Initial plan (7236eed)
+- Initial plan (d99ab4b)
+- Replace air quality circular icons with gauge-style icons (19caecb)
+- Initial analysis of air quality icon replacement task (ce6c093)
+- Initial plan (6d11816)
+- chore: aggiornamento dati meteo (rolling) (eaec1bd)
+
 ## [1.7.1] - 2025-08-31
 
 ### Fix
