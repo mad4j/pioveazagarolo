@@ -55,6 +55,9 @@ function createAirQualityGauge(eaqiValue, level) {
   const needleX = centerX + needleLength * Math.cos(needleAngle * Math.PI / 180);
   const needleY = centerY + needleLength * Math.sin(needleAngle * Math.PI / 180);
   
+  // Ottieni il colore dell'ago dalle CSS custom properties
+  const needleColor = getComputedStyle(document.documentElement).getPropertyValue('--air-quality-needle').trim() || '#2c3e50';
+  
   // Definisci i segmenti basati sui livelli EAQI reali (270 gradi diviso in 6 segmenti = 45 gradi ciascuno)
   // Ruota tutti i segmenti di -45°
   const segments = [
@@ -96,11 +99,11 @@ function createAirQualityGauge(eaqiValue, level) {
             fill="none" stroke="#e0e0e0" stroke-width="2" opacity="0.3"/>
       <!-- Segmenti colorati -->
       ${segmentPaths}
-      <!-- Ago dell'indicatore con colore fisso -->
+      <!-- Ago dell'indicatore con colore adattivo per modalità chiara/scura -->
       <line x1="${centerX}" y1="${centerY}" x2="${needleX}" y2="${needleY}" 
-            stroke="#2c3e50" stroke-width="2" stroke-linecap="round"/>
+            stroke="${needleColor}" stroke-width="2" stroke-linecap="round"/>
       <!-- Centro dell'ago -->
-      <circle cx="${centerX}" cy="${centerY}" r="1.5" fill="#2c3e50"/>
+      <circle cx="${centerX}" cy="${centerY}" r="1.5" fill="${needleColor}"/>
     </svg>
   `;
 }
