@@ -2,6 +2,7 @@ import { DAY_CONFIGS, ARIA_LABEL_DAY, dayFormatter, $ } from './constants.js';
 import { getRainIconClass } from './icons.js';
 import { buildChart, getDaySlice } from './charts.js';
 import { precipitationManager } from './precipitation.js';
+import { updateAirQualityDisplay } from './air-quality.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
 
@@ -143,6 +144,12 @@ export function displayData(data){
     } catch {
       lastUpdated.textContent = data.last_update.trim();
     }
+  }
+  
+  // Aggiorna display qualità dell'aria (EAQI) se disponibile
+  // Questa funzione gestisce la visualizzazione delle icone colorate per l'indice europeo di qualità dell'aria
+  if (data.air_quality) {
+    updateAirQualityDisplay(data.air_quality);
   }
   
   // Load and display version information
