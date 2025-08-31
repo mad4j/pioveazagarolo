@@ -33,6 +33,72 @@ export function getEAQILevel(eaqiValue) {
 }
 
 /**
+ * Crea SVG gauge per l'icona della qualità dell'aria
+ * @param {number} eaqiValue - Valore EAQI corrente
+ * @param {Object} level - Oggetto livello EAQI
+ * @returns {string} SVG markup per il gauge
+ */
+function createAirQualityGauge(eaqiValue, level) {
+  const size = 20;
+  const strokeWidth = 2;
+  const radius = (size - strokeWidth) / 2;
+  const centerX = size / 2;
+  const centerY = size / 2;
+  
+  // Calcola l'angolo per il valore (0-180 gradi per un semi-cerchio)
+  const maxValue = 120; // Scala fino a 120 per coprire tutti i livelli EAQI
+  const angle = Math.min((eaqiValue / maxValue) * 180, 180);
+  const needleAngle = angle - 90; // Converti in radianti partendo da sinistra
+  
+  // Coordinate della punta dell'ago
+  const needleLength = radius - 1;
+  const needleX = centerX + needleLength * Math.cos(needleAngle * Math.PI / 180);
+  const needleY = centerY + needleLength * Math.sin(needleAngle * Math.PI / 180);
+  
+  // Definisci i segmenti basati sui livelli EAQI reali
+  const segments = [
+    { startAngle: -90, endAngle: -60, color: '#50f0e6' },  // Good (0-20)
+    { startAngle: -60, endAngle: -30, color: '#50ccaa' },  // Fair (21-40) 
+    { startAngle: -30, endAngle: 0, color: '#f0e641' },    // Moderate (41-60)
+    { startAngle: 0, endAngle: 30, color: '#ff5050' },     // Poor (61-80)
+    { startAngle: 30, endAngle: 60, color: '#960032' },    // Very Poor (81-100)
+    { startAngle: 60, endAngle: 90, color: '#7d2181' }     // Extremely Poor (101+)
+  ];
+  
+  let segmentPaths = '';
+  
+  segments.forEach(segment => {
+    const startX = centerX + radius * Math.cos(segment.startAngle * Math.PI / 180);
+    const startY = centerY + radius * Math.sin(segment.startAngle * Math.PI / 180);
+    const endX = centerX + radius * Math.cos(segment.endAngle * Math.PI / 180);
+    const endY = centerY + radius * Math.sin(segment.endAngle * Math.PI / 180);
+    
+    const largeArcFlag = (segment.endAngle - segment.startAngle) > 90 ? 1 : 0;
+    
+    segmentPaths += `
+      <path d="M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}" 
+            fill="none" stroke="${segment.color}" stroke-width="${strokeWidth}" 
+            stroke-linecap="round" opacity="0.7"/>
+    `;
+  });
+  
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+      <!-- Sfondo semicircolare -->
+      <path d="M 1 ${centerY} A ${radius} ${radius} 0 0 1 ${size-1} ${centerY}" 
+            fill="none" stroke="#e0e0e0" stroke-width="1" opacity="0.3"/>
+      <!-- Segmenti colorati -->
+      ${segmentPaths}
+      <!-- Ago dell'indicatore -->
+      <line x1="${centerX}" y1="${centerY}" x2="${needleX}" y2="${needleY}" 
+            stroke="${level.color}" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Centro dell'ago -->
+      <circle cx="${centerX}" cy="${centerY}" r="1" fill="${level.color}"/>
+    </svg>
+  `;
+}
+
+/**
  * Crea e visualizza l'icona della qualità dell'aria per una carta meteo
  * @param {string} cardId - ID della carta contenitore
  * @param {number} eaqiValue - Valore EAQI corrente
@@ -54,22 +120,24 @@ export function createAirQualityIcon(cardId, eaqiValue, dayKey) {
 
   const level = getEAQILevel(eaqiValue);
   
-  // Crea elemento icona qualità dell'aria
+  // Crea elemento icona qualità dell'aria con gauge
   const airIcon = document.createElement('div');
   airIcon.className = 'air-quality-icon';
   airIcon.style.cssText = `
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: ${level.color};
+    width: 20px;
+    height: 20px;
     cursor: pointer;
     margin-left: 8px;
     user-select: none;
     flex-shrink: 0;
   `; 
+  
+  // Inserisci il gauge SVG
+  airIcon.innerHTML = createAirQualityGauge(eaqiValue, level);
+  
   airIcon.setAttribute('aria-label', `Qualità dell'aria: ${level.label} (EAQI ${eaqiValue})`);
   airIcon.setAttribute('title', 'Clicca per dettagli qualità dell\'aria');
   airIcon.dataset.eaqi = eaqiValue;
