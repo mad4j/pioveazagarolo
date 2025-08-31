@@ -6,6 +6,81 @@ import { updateAirQualityDisplay } from './air-quality.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
 
+/**
+ * Mostra tooltip temporaneo con temperatura percepita
+ * @param {HTMLElement} tempElement - Elemento temperatura che ha scatenato il tooltip
+ * @param {number} apparentTemp - Valore temperatura percepita
+ */
+export function showApparentTemperatureTooltip(tempElement, apparentTemp) {
+  // Rimuovi tooltip esistenti
+  document.querySelectorAll('.apparent-temp-tooltip').forEach(t => t.remove());
+  
+  const tooltip = document.createElement('div');
+  tooltip.className = 'apparent-temp-tooltip';
+  tooltip.style.cssText = `
+    position: absolute;
+    z-index: 1000;
+    font: 12px 'Helvetica Neue', Arial;
+    color: #ecf0f1;
+    background: rgba(44,62,80,0.92);
+    padding: 6px 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.35);
+    max-width: 240px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  `;
+  
+  tooltip.innerHTML = `
+    <div style="font-weight: 600; margin-bottom: 4px;">
+      Temperatura percepita
+    </div>
+    <div style="font-size: 12px; line-height: 1.2;">
+      ${Math.round(apparentTemp)}°C
+    </div>
+  `;
+  
+  document.body.appendChild(tooltip);
+  
+  // Posiziona tooltip vicino all'elemento
+  const tempRect = tempElement.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  
+  let left = tempRect.left + tempRect.width / 2 - tooltipRect.width / 2;
+  let top = tempRect.top - tooltipRect.height - 8;
+  
+  // Aggiusta posizione se esce dal viewport
+  if (left < 8) left = 8;
+  if (left + tooltipRect.width > window.innerWidth - 8) {
+    left = window.innerWidth - tooltipRect.width - 8;
+  }
+  if (top < 8) {
+    top = tempRect.bottom + 8; // Mostra sotto se non c'è spazio sopra
+  }
+  
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+  
+  // Anima apparizione
+  requestAnimationFrame(() => {
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'translateY(0)';
+  });
+  
+  // Rimuovi tooltip dopo 4 secondi o al click su documento
+  const removeTooltip = () => {
+    tooltip.style.opacity = '0';
+    tooltip.style.transform = 'translateY(-10px)';
+    setTimeout(() => tooltip.remove(), 300);
+    document.removeEventListener('click', removeTooltip);
+  };
+  
+  setTimeout(removeTooltip, 4000);
+  document.addEventListener('click', removeTooltip);
+}
+
 export function updateCardClass(cardId, percentage) {
   const card = document.getElementById(cardId);
   if (!card) return;
@@ -46,7 +121,26 @@ export function displayData(data){
     if (current) {
       const currCard = $('current-conditions'); if (currCard) currCard.hidden = false;
       const tempEl=$('current-temp'), rainEl=$('current-rain'), pressEl=$('current-pressure'), humEl=$('current-humidity'), windEl=$('current-wind'), windDirIcon=$('current-wind-dir-icon'), iconEl=$('current-icon');
-      if (tempEl && typeof current.temperature_2m==='number') tempEl.textContent = `${Math.round(current.temperature_2m)}°`;
+      if (tempEl && typeof current.temperature_2m==='number') {
+        tempEl.textContent = `${Math.round(current.temperature_2m)}°`;
+        
+        // Add apparent temperature tooltip functionality
+        if (typeof current.apparent_temperature === 'number') {
+          tempEl.style.cursor = 'pointer';
+          tempEl.title = 'Clicca per vedere la temperatura percepita';
+          
+          // Remove existing event listeners to avoid duplicates
+          tempEl.removeEventListener('click', tempEl._apparentTempHandler);
+          
+          // Create and store new event handler
+          tempEl._apparentTempHandler = (e) => {
+            e.stopPropagation();
+            showApparentTemperatureTooltip(tempEl, current.apparent_temperature);
+          };
+          
+          tempEl.addEventListener('click', tempEl._apparentTempHandler);
+        }
+      }
       if (rainEl && typeof current.rain==='number') {
         const mm = current.rain === 0 ? '0' : current.rain.toFixed(1);
         rainEl.textContent = `${mm}  mm`;
