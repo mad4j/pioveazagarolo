@@ -315,53 +315,5 @@
       38
     ]
   },
-  "air_quality": {
-    "latitude": 41.8125,
-    "longitude": 12.8125,
-    "generationtime_ms": 0.123,
-    "utc_offset_seconds": 7200,
-    "timezone": "Europe/Rome",
-    "timezone_abbreviation": "GMT+2",
-    "current_units": {
-      "time": "iso8601",
-      "european_aqi": ""
-    },
-    "current": {
-      "time": "2025-08-31T11:15",
-      "european_aqi": 25
-    },
-    "hourly_units": {
-      "time": "iso8601",
-      "european_aqi": ""
-    },
-    "hourly": {
-      "time": [
-        "2025-08-31T00:00",
-        "2025-08-31T01:00",
-        "2025-08-31T02:00"
-      ],
-      "european_aqi": [
-        20,
-        22,
-        25
-      ]
-    },
-    "daily_units": {
-      "time": "iso8601",
-      "european_aqi_max": ""
-    },
-    "daily": {
-      "time": [
-        "2025-08-31",
-        "2025-09-01",
-        "2025-09-02"
-      ],
-      "european_aqi_max": [
-        30,
-        45,
-        65
-      ]
-    }
-  },
   "last_update": "2025-08-31 11:20"
 }
