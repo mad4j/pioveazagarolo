@@ -100,14 +100,13 @@ export function showAirQualityTooltip(iconElement, eaqiValue, level) {
   tooltip.style.cssText = `
     position: absolute;
     z-index: 1000;
-    background-color: ${level.bgColor};
-    border: 2px solid ${level.color};
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 13px;
-    color: #333;
-    max-width: 200px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font: 12px 'Helvetica Neue', Arial;
+    color: #ecf0f1;
+    background: rgba(44,62,80,0.92);
+    padding: 6px 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.35);
+    max-width: 240px;
     pointer-events: none;
     opacity: 0;
     transform: translateY(-10px);
@@ -115,10 +114,10 @@ export function showAirQualityTooltip(iconElement, eaqiValue, level) {
   `;
   
   tooltip.innerHTML = `
-    <div style="margin-bottom: 4px;">
-      <strong>EAQI:</strong> ${eaqiValue}
+    <div style="font-weight: 600; margin-bottom: 4px;">
+      EAQI: ${eaqiValue}
     </div>
-    <div style="font-size: 11px; line-height: 1.3;">
+    <div style="font-size: 12px; line-height: 1.2;">
       ${level.description}
     </div>
   `;
