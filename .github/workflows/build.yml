@@ -38,6 +38,17 @@ jobs:
           LAST_UPDATE=$(TZ="Europe/Rome" date +"%F %R")
           jq --arg update "$LAST_UPDATE" '. += {"last_update": $update}' data.json > temp.json && mv temp.json data.json
 
+      # Retrieve Air Quality Data and merge with weather data
+      - name: Retrieve Air Quality Data from Open-Meteo
+        run: |
+          # Fetch air quality data for the same coordinates and time period
+          curl 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=41.837610&longitude=12.831867&current=european_aqi&hourly=european_aqi&daily=european_aqi_max&timezone=auto&forecast_days=3' > air-quality.json
+          cat air-quality.json
+          # Merge air quality data into the main data.json file
+          jq -s '.[0] + {"air_quality": .[1]}' data.json air-quality.json > merged.json && mv merged.json data.json
+          # Clean up temporary file
+          rm air-quality.json
+
       # Update actual precipitation data
       - name: Update actual precipitation data
         run: |
