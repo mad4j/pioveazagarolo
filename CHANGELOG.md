@@ -2,6 +2,24 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.7.1] - 2025-08-31
+
+### Fix
+- Fix air quality icons display by calculating daily maximums from hourly data (acdef8c)
+
+### Other
+- chore(release): prepare 1.7.1 (e1a2444)
+- Unify air quality tooltip styling with chart tooltips (f97c8ac)
+- Initial plan (1bd1b0a)
+- chore: aggiornamento dati meteo (rolling) (6a3c341)
+- Reduce air quality icon size from 20px to 16px (37b9c37)
+- Transform air quality icons to simple colored dots and update tooltips (8f25621)
+- Initial plan (36006a9)
+- chore: aggiornamento dati meteo (rolling) (acbb0d8)
+- Initial assessment: Air quality icons not displaying due to data structure mismatch (fe16fc2)
+- Initial plan (7f88e59)
+- chore: aggiornamento dati meteo (rolling) (3a024a8)
+
 ## [1.7.0] - 2025-08-31
 
 ### Features
