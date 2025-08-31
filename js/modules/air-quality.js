@@ -85,8 +85,8 @@ function createAirQualityGauge(eaqiValue, level) {
   // Creare il path di sfondo per l'arco di 270 gradi (da 0 a 270 gradi)
   const bgStartX = centerX + radius; // 0 gradi (est)
   const bgStartY = centerY;
-  const bgEndX = centerX; // 270 gradi (sud)
-  const bgEndY = centerY + radius;
+  const bgEndX = centerX; // 270 gradi (nord)
+  const bgEndY = centerY - radius;
   
   return `
     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
