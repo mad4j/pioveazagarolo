@@ -40,7 +40,7 @@ export function getEAQILevel(eaqiValue) {
  */
 function createAirQualityGauge(eaqiValue, level) {
   const size = 20;
-  const strokeWidth = 3; // Increased from 2 to 3 for thicker lines
+  const strokeWidth = 4; // Increased from 3 to 4 for thicker arc
   const radius = (size - strokeWidth) / 2;
   const centerX = size / 2;
   const centerY = size / 2;
@@ -48,7 +48,7 @@ function createAirQualityGauge(eaqiValue, level) {
   // Calcola l'angolo per il valore (0-270 gradi per un arco di 3/4 di cerchio)
   const maxValue = 120; // Scala fino a 120 per coprire tutti i livelli EAQI
   const angle = Math.min((eaqiValue / maxValue) * 270, 270);
-  const needleAngle = angle; // Partendo da 0 gradi (est/destra)
+  const needleAngle = angle - 45; // Ruota tutto il gauge di -45°
   
   // Coordinate della punta dell'ago
   const needleLength = radius - 1;
@@ -56,13 +56,14 @@ function createAirQualityGauge(eaqiValue, level) {
   const needleY = centerY + needleLength * Math.sin(needleAngle * Math.PI / 180);
   
   // Definisci i segmenti basati sui livelli EAQI reali (270 gradi diviso in 6 segmenti = 45 gradi ciascuno)
+  // Ruota tutti i segmenti di -45°
   const segments = [
-    { startAngle: 0, endAngle: 45, color: '#50f0e6' },     // Good (0-20)
-    { startAngle: 45, endAngle: 90, color: '#50ccaa' },    // Fair (21-40) 
-    { startAngle: 90, endAngle: 135, color: '#f0e641' },   // Moderate (41-60)
-    { startAngle: 135, endAngle: 180, color: '#ff5050' },  // Poor (61-80)
-    { startAngle: 180, endAngle: 225, color: '#960032' },  // Very Poor (81-100)
-    { startAngle: 225, endAngle: 270, color: '#7d2181' }   // Extremely Poor (101+)
+    { startAngle: -45, endAngle: 0, color: '#50f0e6' },     // Good (0-20)
+    { startAngle: 0, endAngle: 45, color: '#50ccaa' },      // Fair (21-40) 
+    { startAngle: 45, endAngle: 90, color: '#f0e641' },     // Moderate (41-60)
+    { startAngle: 90, endAngle: 135, color: '#ff5050' },    // Poor (61-80)
+    { startAngle: 135, endAngle: 180, color: '#960032' },   // Very Poor (81-100)
+    { startAngle: 180, endAngle: 225, color: '#7d2181' }    // Extremely Poor (101+)
   ];
   
   let segmentPaths = '';
@@ -82,11 +83,11 @@ function createAirQualityGauge(eaqiValue, level) {
     `;
   });
   
-  // Creare il path di sfondo per l'arco di 270 gradi (da 0 a 270 gradi)
-  const bgStartX = centerX + radius; // 0 gradi (est)
-  const bgStartY = centerY;
-  const bgEndX = centerX; // 270 gradi (nord)
-  const bgEndY = centerY - radius;
+  // Creare il path di sfondo per l'arco di 270 gradi (da -45 a 225 gradi)
+  const bgStartX = centerX + radius * Math.cos(-45 * Math.PI / 180); // -45 gradi
+  const bgStartY = centerY + radius * Math.sin(-45 * Math.PI / 180);
+  const bgEndX = centerX + radius * Math.cos(225 * Math.PI / 180);   // 225 gradi
+  const bgEndY = centerY + radius * Math.sin(225 * Math.PI / 180);
   
   return `
     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
@@ -95,11 +96,11 @@ function createAirQualityGauge(eaqiValue, level) {
             fill="none" stroke="#e0e0e0" stroke-width="2" opacity="0.3"/>
       <!-- Segmenti colorati -->
       ${segmentPaths}
-      <!-- Ago dell'indicatore -->
+      <!-- Ago dell'indicatore con colore fisso -->
       <line x1="${centerX}" y1="${centerY}" x2="${needleX}" y2="${needleY}" 
-            stroke="${level.color}" stroke-width="2" stroke-linecap="round"/>
+            stroke="#2c3e50" stroke-width="2" stroke-linecap="round"/>
       <!-- Centro dell'ago -->
-      <circle cx="${centerX}" cy="${centerY}" r="1.5" fill="${level.color}"/>
+      <circle cx="${centerX}" cy="${centerY}" r="1.5" fill="#2c3e50"/>
     </svg>
   `;
 }
