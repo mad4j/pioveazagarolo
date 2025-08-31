@@ -42,12 +42,12 @@ export function createAirQualityIcon(cardId, eaqiValue, dayKey) {
   const card = $(cardId);
   if (!card) return;
 
-  // Trova il contenitore day-info dove aggiungere l'icona
-  const dayInfoContainer = card.querySelector('.day-info');
-  if (!dayInfoContainer) return;
+  // Trova il contenitore rain-icon dove aggiungere l'icona (a destra delle temperature)
+  const rainIconContainer = card.querySelector('.rain-icon');
+  if (!rainIconContainer) return;
 
   // Rimuovi icona esistente se presente
-  const existingIcon = dayInfoContainer.querySelector('.air-quality-icon');
+  const existingIcon = rainIconContainer.querySelector('.air-quality-icon');
   if (existingIcon) {
     existingIcon.remove();
   }
@@ -69,7 +69,7 @@ export function createAirQualityIcon(cardId, eaqiValue, dayKey) {
     font-size: 9px;
     font-weight: bold;
     cursor: pointer;
-    margin-left: 6px;
+    margin-left: 8px;
     border: 1px solid rgba(255,255,255,0.8);
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
     user-select: none;
@@ -90,7 +90,7 @@ export function createAirQualityIcon(cardId, eaqiValue, dayKey) {
     showAirQualityTooltip(airIcon, eaqiValue, level);
   });
   
-  dayInfoContainer.appendChild(airIcon);
+  rainIconContainer.appendChild(airIcon);
 }
 
 /**
