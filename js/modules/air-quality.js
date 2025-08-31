@@ -178,14 +178,28 @@ export function showAirQualityTooltip(iconElement, eaqiValue, level) {
  * @param {Object} airQualityData - Dati qualità dell'aria dall'API Open-Meteo
  */
 export function updateAirQualityDisplay(airQualityData) {
-  if (!airQualityData || !airQualityData.current || !airQualityData.daily) {
+  if (!airQualityData || !airQualityData.current || !airQualityData.hourly) {
     console.warn('Dati qualità dell\'aria non disponibili');
     return;
   }
   
   try {
+    // Calcola valori massimi giornalieri dai dati orari (72 ore = 3 giorni)
+    const hourlyEAQI = airQualityData.hourly.european_aqi || [];
+    const dailyEAQI = [];
+    
+    // Raggruppa per giorni e calcola massimo per ogni giorno
+    for (let day = 0; day < 3; day++) {
+      const startHour = day * 24;
+      const endHour = startHour + 24;
+      const dayValues = hourlyEAQI.slice(startHour, endHour);
+      
+      if (dayValues.length > 0) {
+        dailyEAQI[day] = Math.max(...dayValues);
+      }
+    }
+    
     // Aggiorna icone per le carte giornaliere (oggi, domani, dopodomani)
-    const dailyEAQI = airQualityData.daily.european_aqi_max || [];
     const dayConfigs = [
       { cardId: 'today-card', dayKey: 'today', index: 0 },
       { cardId: 'tomorrow-card', dayKey: 'tomorrow', index: 1 },
