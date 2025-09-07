@@ -51,7 +51,13 @@ if ('serviceWorker' in navigator) {
   const updateBtn = document.getElementById('update-button');
   navigator.serviceWorker.register('service-worker.js').then(registration => {
     console.log('Service Worker registrato con successo:', registration.scope);
-    function showUpdateButton(sw){ if(!updateBtn) return; updateBtn.style.display='inline-flex'; updateBtn.onclick=()=>{ if(sw && sw.state==='installed') sw.postMessage('SKIP_WAITING'); }; }
+    function showUpdateButton(sw){ 
+      if(!updateBtn) return; 
+      updateBtn.style.display='inline-flex'; 
+      updateBtn.onclick=()=>{ 
+        if(sw && sw.state==='installed') sw.postMessage('SKIP_WAITING'); 
+      }; 
+    }
     if (registration.waiting) showUpdateButton(registration.waiting);
     registration.addEventListener('updatefound', () => { const nw=registration.installing; if(!nw) return; nw.addEventListener('statechange',()=>{ if(nw.state==='installed' && navigator.serviceWorker.controller) showUpdateButton(nw); }); });
     navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());

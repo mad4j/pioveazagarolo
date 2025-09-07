@@ -21,7 +21,7 @@
     "wind_direction_10m": "°"
   },
   "current": {
-    "time": "2025-09-07T16:15",
+    "time": "2025-09-07T16:00",
     "interval": 900,
     "temperature_2m": 28.0,
     "rain": 0.00,
@@ -615,11 +615,11 @@
       23
     ]
   },
-  "last_update": "2025-09-07 16:18",
+  "last_update": "2025-09-07 16:09",
   "air_quality": {
     "latitude": 41.8,
     "longitude": 12.799999,
-    "generationtime_ms": 0.3838539123535156,
+    "generationtime_ms": 0.3440380096435547,
     "utc_offset_seconds": 7200,
     "timezone": "Europe/Rome",
     "timezone_abbreviation": "GMT+2",

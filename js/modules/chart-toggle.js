@@ -156,7 +156,6 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       const precipitationSlice = getDaySlice(weatherData.hourly.precipitation, dayIndex);
       buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime);
     }
-    }
   });
   
   // Show mode indicator on the chart that was clicked
