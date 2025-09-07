@@ -2,6 +2,62 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.7.2] - 2025-08-31
+
+### Features
+- feat: enhance air quality icons with thicker lines and 270-degree arc (1779a39)
+
+### Fix
+- Implement air quality gauge restyling: thicker arc, fixed needle color, -45° rotation (85e0e36)
+- fix: correct air quality arc to properly display 270-degree range (8a898ff)
+
+### Other
+- chore(release): prepare 1.7.2 (ed4d8b2)
+- chore: aggiornamento dati meteo (rolling) (a83c74d)
+- Initial plan (7236eed)
+- Initial plan (d99ab4b)
+- Replace air quality circular icons with gauge-style icons (19caecb)
+- Initial analysis of air quality icon replacement task (ce6c093)
+- Initial plan (6d11816)
+- chore: aggiornamento dati meteo (rolling) (eaec1bd)
+
+## [1.7.1] - 2025-08-31
+
+### Fix
+- Fix air quality icons display by calculating daily maximums from hourly data (acdef8c)
+
+### Other
+- chore(release): prepare 1.7.1 (e1a2444)
+- Unify air quality tooltip styling with chart tooltips (f97c8ac)
+- Initial plan (1bd1b0a)
+- chore: aggiornamento dati meteo (rolling) (6a3c341)
+- Reduce air quality icon size from 20px to 16px (37b9c37)
+- Transform air quality icons to simple colored dots and update tooltips (8f25621)
+- Initial plan (36006a9)
+- chore: aggiornamento dati meteo (rolling) (acbb0d8)
+- Initial assessment: Air quality icons not displaying due to data structure mismatch (fe16fc2)
+- Initial plan (7f88e59)
+- chore: aggiornamento dati meteo (rolling) (3a024a8)
+
+## [1.7.0] - 2025-08-31
+
+### Features
+- feat: move air quality icons to right of temperature column (3d18ff7)
+- feat: implement air quality (EAQI) indicators with tooltips (c864c49)
+- feat: plan air quality implementation for EAQI indicators (20af54e)
+- en(ci): add .nojekyll file to project (a940dfe)
+
+### Other
+- chore(release): prepare 1.7.0 (f9f2e32)
+- Update service-worker.js (6df9a79)
+- chore: restore original data.json and finalize air quality implementation (f1390cf)
+- Initial plan (5bef9cf)
+- chore: aggiornamento dati meteo (rolling) (dec9bc7)
+- Change cron schedule to run every 45 minutes (d594713)
+- Change workflow schedule to run every 30 minutes (2912035)
+- chore: aggiornamento dati meteo (rolling) (f640889)
+- chore: auto-update CHANGELOG for 1.6.4 (6255f8d)
+
 ## [1.6.4] - 2025-08-21
 
 ### Other

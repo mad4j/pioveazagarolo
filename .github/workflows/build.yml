@@ -4,9 +4,9 @@ name: Update Weather Data
 
 # Controls when the workflow will run
 on:
-  # Run every 15 minutes
+  # Run every hour
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '0 * * * *'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -32,11 +32,22 @@ jobs:
       # Runs a single command using the runners shell
       - name: Retrieve Weather Data from external site
         run: |
-          curl 'https://api.open-meteo.com/v1/forecast?latitude=41.837610&longitude=12.831867&hourly=precipitation,precipitation_probability&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,precipitation_probability_max&timezone=auto&forecast_days=3&current=temperature_2m,rain,weather_code,surface_pressure,precipitation,relative_humidity_2m,is_day,apparent_temperature,wind_speed_10m,wind_direction_10m' > data.json
+          curl 'https://api.open-meteo.com/v1/forecast?latitude=41.837610&longitude=12.831867&hourly=precipitation,precipitation_probability,temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,precipitation_probability_max&timezone=auto&forecast_days=3&current=temperature_2m,rain,weather_code,surface_pressure,precipitation,relative_humidity_2m,is_day,apparent_temperature,wind_speed_10m,wind_direction_10m' > data.json
           cat data.json
           # TZ="Europe/Rome" date +"%F %R" > lastupdate.txt
           LAST_UPDATE=$(TZ="Europe/Rome" date +"%F %R")
           jq --arg update "$LAST_UPDATE" '. += {"last_update": $update}' data.json > temp.json && mv temp.json data.json
+
+      # Retrieve Air Quality Data and merge with weather data
+      - name: Retrieve Air Quality Data from Open-Meteo
+        run: |
+          # Fetch air quality data for the same coordinates and time period
+          curl 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=41.837610&longitude=12.831867&current=european_aqi&hourly=european_aqi&daily=european_aqi_max&timezone=auto&forecast_days=3' > air-quality.json
+          cat air-quality.json
+          # Merge air quality data into the main data.json file
+          jq -s '.[0] + {"air_quality": .[1]}' data.json air-quality.json > merged.json && mv merged.json data.json
+          # Clean up temporary file
+          rm air-quality.json
 
       # Update actual precipitation data
       - name: Update actual precipitation data

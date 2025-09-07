@@ -10,6 +10,7 @@
   --text-secondary: #666666;
   --text-muted: #7f8c8d;
   --border-color: #e0e0e0;
+  --air-quality-needle: #2c3e50;
 }
 
 .visually-hidden {
@@ -620,6 +621,7 @@ footer {
     --text-secondary: #c5c5c5;
     --text-muted: #9aa0a6;
     --border-color: #3a3d40;
+    --air-quality-needle: #f2f2f2;
   }
 
   body {

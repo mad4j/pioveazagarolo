@@ -1,0 +1,285 @@
+// Modulo per la gestione della qualità dell'aria (EAQI - European Air Quality Index)
+// Fornisce funzioni per la mappatura colori, icone e tooltip informativi
+
+import { $ } from './constants.js';
+
+// Mappatura EAQI (European Air Quality Index) a colori e descrizioni
+// Riferimento: https://www.eea.europa.eu/themes/air/air-quality-index
+const EAQI_LEVELS = [
+  { min: 0, max: 20, level: 'good', color: '#50f0e6', bgColor: '#e8f8f7', label: 'Buona', description: 'Qualità dell\'aria eccellente' },
+  { min: 21, max: 40, level: 'fair', color: '#50ccaa', bgColor: '#e8f5f1', label: 'Discreta', description: 'Qualità dell\'aria buona' },
+  { min: 41, max: 60, level: 'moderate', color: '#f0e641', bgColor: '#fefae8', label: 'Moderata', description: 'Qualità dell\'aria accettabile' },
+  { min: 61, max: 80, level: 'poor', color: '#ff5050', bgColor: '#ffeaea', label: 'Scarsa', description: 'Possibili effetti sulla salute per gruppi sensibili' },
+  { min: 81, max: 100, level: 'very-poor', color: '#960032', bgColor: '#f2e6ea', label: 'Pessima', description: 'Rischi per la salute per tutti' },
+  { min: 101, max: 999, level: 'extremely-poor', color: '#7d2181', bgColor: '#f0e6f1', label: 'Estremamente pessima', description: 'Gravi rischi per la salute' }
+];
+
+/**
+ * Ottiene le informazioni di livello EAQI per un dato valore
+ * @param {number} eaqiValue - Valore EAQI (0-300+)
+ * @returns {Object} Oggetto con colore, livello e descrizione
+ */
+export function getEAQILevel(eaqiValue) {
+  if (!eaqiValue || eaqiValue < 0) return EAQI_LEVELS[0]; // Default to 'good' for invalid values
+  
+  for (const level of EAQI_LEVELS) {
+    if (eaqiValue >= level.min && eaqiValue <= level.max) {
+      return level;
+    }
+  }
+  
+  // For values > 300, return the worst level
+  return EAQI_LEVELS[EAQI_LEVELS.length - 1];
+}
+
+/**
+ * Crea SVG gauge per l'icona della qualità dell'aria
+ * @param {number} eaqiValue - Valore EAQI corrente
+ * @param {Object} level - Oggetto livello EAQI
+ * @returns {string} SVG markup per il gauge
+ */
+function createAirQualityGauge(eaqiValue, level) {
+  const size = 20;
+  const strokeWidth = 4; // Increased from 3 to 4 for thicker arc
+  const radius = (size - strokeWidth) / 2;
+  const centerX = size / 2;
+  const centerY = size / 2;
+  
+  // Calcola l'angolo per il valore (0-270 gradi per un arco di 3/4 di cerchio)
+  const maxValue = 120; // Scala fino a 120 per coprire tutti i livelli EAQI
+  const angle = Math.min((eaqiValue / maxValue) * 270, 270);
+  const needleAngle = angle - 45; // Ruota tutto il gauge di -45°
+  
+  // Coordinate della punta dell'ago
+  const needleLength = radius - 1;
+  const needleX = centerX + needleLength * Math.cos(needleAngle * Math.PI / 180);
+  const needleY = centerY + needleLength * Math.sin(needleAngle * Math.PI / 180);
+  
+  // Ottieni il colore dell'ago dalle CSS custom properties
+  const needleColor = getComputedStyle(document.documentElement).getPropertyValue('--air-quality-needle').trim() || '#2c3e50';
+  
+  // Definisci i segmenti basati sui livelli EAQI reali (270 gradi diviso in 6 segmenti = 45 gradi ciascuno)
+  // Ruota tutti i segmenti di -45°
+  const segments = [
+    { startAngle: -45, endAngle: 0, color: '#50f0e6' },     // Good (0-20)
+    { startAngle: 0, endAngle: 45, color: '#50ccaa' },      // Fair (21-40) 
+    { startAngle: 45, endAngle: 90, color: '#f0e641' },     // Moderate (41-60)
+    { startAngle: 90, endAngle: 135, color: '#ff5050' },    // Poor (61-80)
+    { startAngle: 135, endAngle: 180, color: '#960032' },   // Very Poor (81-100)
+    { startAngle: 180, endAngle: 225, color: '#7d2181' }    // Extremely Poor (101+)
+  ];
+  
+  let segmentPaths = '';
+  
+  segments.forEach(segment => {
+    const startX = centerX + radius * Math.cos(segment.startAngle * Math.PI / 180);
+    const startY = centerY + radius * Math.sin(segment.startAngle * Math.PI / 180);
+    const endX = centerX + radius * Math.cos(segment.endAngle * Math.PI / 180);
+    const endY = centerY + radius * Math.sin(segment.endAngle * Math.PI / 180);
+    
+    const largeArcFlag = (segment.endAngle - segment.startAngle) > 90 ? 1 : 0;
+    
+    segmentPaths += `
+      <path d="M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}" 
+            fill="none" stroke="${segment.color}" stroke-width="${strokeWidth}" 
+            stroke-linecap="round" opacity="0.7"/>
+    `;
+  });
+  
+  // Creare il path di sfondo per l'arco di 270 gradi (da -45 a 225 gradi)
+  const bgStartX = centerX + radius * Math.cos(-45 * Math.PI / 180); // -45 gradi
+  const bgStartY = centerY + radius * Math.sin(-45 * Math.PI / 180);
+  const bgEndX = centerX + radius * Math.cos(225 * Math.PI / 180);   // 225 gradi
+  const bgEndY = centerY + radius * Math.sin(225 * Math.PI / 180);
+  
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+      <!-- Sfondo arco 270 gradi -->
+      <path d="M ${bgStartX} ${bgStartY} A ${radius} ${radius} 0 1 1 ${bgEndX} ${bgEndY}" 
+            fill="none" stroke="#e0e0e0" stroke-width="2" opacity="0.3"/>
+      <!-- Segmenti colorati -->
+      ${segmentPaths}
+      <!-- Ago dell'indicatore con colore adattivo per modalità chiara/scura -->
+      <line x1="${centerX}" y1="${centerY}" x2="${needleX}" y2="${needleY}" 
+            stroke="${needleColor}" stroke-width="2" stroke-linecap="round"/>
+      <!-- Centro dell'ago -->
+      <circle cx="${centerX}" cy="${centerY}" r="1.5" fill="${needleColor}"/>
+    </svg>
+  `;
+}
+
+/**
+ * Crea e visualizza l'icona della qualità dell'aria per una carta meteo
+ * @param {string} cardId - ID della carta contenitore
+ * @param {number} eaqiValue - Valore EAQI corrente
+ * @param {string} dayKey - Chiave del giorno (today, tomorrow, dayaftertomorrow)
+ */
+export function createAirQualityIcon(cardId, eaqiValue, dayKey) {
+  const card = $(cardId);
+  if (!card) return;
+
+  // Trova il contenitore rain-icon dove aggiungere l'icona (a destra delle temperature)
+  const rainIconContainer = card.querySelector('.rain-icon');
+  if (!rainIconContainer) return;
+
+  // Rimuovi icona esistente se presente
+  const existingIcon = rainIconContainer.querySelector('.air-quality-icon');
+  if (existingIcon) {
+    existingIcon.remove();
+  }
+
+  const level = getEAQILevel(eaqiValue);
+  
+  // Crea elemento icona qualità dell'aria con gauge
+  const airIcon = document.createElement('div');
+  airIcon.className = 'air-quality-icon';
+  airIcon.style.cssText = `
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin-left: 8px;
+    user-select: none;
+    flex-shrink: 0;
+  `; 
+  
+  // Inserisci il gauge SVG
+  airIcon.innerHTML = createAirQualityGauge(eaqiValue, level);
+  
+  airIcon.setAttribute('aria-label', `Qualità dell'aria: ${level.label} (EAQI ${eaqiValue})`);
+  airIcon.setAttribute('title', 'Clicca per dettagli qualità dell\'aria');
+  airIcon.dataset.eaqi = eaqiValue;
+  airIcon.dataset.level = level.level;
+  airIcon.dataset.dayKey = dayKey;
+  
+  // Aggiungi event listener per tooltip
+  airIcon.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showAirQualityTooltip(airIcon, eaqiValue, level);
+  });
+  
+  rainIconContainer.appendChild(airIcon);
+}
+
+/**
+ * Mostra tooltip temporaneo con dettagli qualità dell'aria
+ * @param {HTMLElement} iconElement - Elemento icona che ha scatenato il tooltip
+ * @param {number} eaqiValue - Valore EAQI
+ * @param {Object} level - Oggetto livello EAQI
+ */
+export function showAirQualityTooltip(iconElement, eaqiValue, level) {
+  // Rimuovi tooltip esistenti
+  document.querySelectorAll('.air-quality-tooltip').forEach(t => t.remove());
+  
+  const tooltip = document.createElement('div');
+  tooltip.className = 'air-quality-tooltip';
+  tooltip.style.cssText = `
+    position: absolute;
+    z-index: 1000;
+    font: 12px 'Helvetica Neue', Arial;
+    color: #ecf0f1;
+    background: rgba(44,62,80,0.92);
+    padding: 6px 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.35);
+    max-width: 240px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  `;
+  
+  tooltip.innerHTML = `
+    <div style="font-weight: 600; margin-bottom: 4px;">
+      EAQI: ${eaqiValue}
+    </div>
+    <div style="font-size: 12px; line-height: 1.2;">
+      ${level.description}
+    </div>
+  `;
+  
+  document.body.appendChild(tooltip);
+  
+  // Posiziona tooltip vicino all'icona
+  const iconRect = iconElement.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  
+  let left = iconRect.left + iconRect.width / 2 - tooltipRect.width / 2;
+  let top = iconRect.top - tooltipRect.height - 8;
+  
+  // Aggiusta posizione se esce dal viewport
+  if (left < 8) left = 8;
+  if (left + tooltipRect.width > window.innerWidth - 8) {
+    left = window.innerWidth - tooltipRect.width - 8;
+  }
+  if (top < 8) {
+    top = iconRect.bottom + 8; // Mostra sotto se non c'è spazio sopra
+  }
+  
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+  
+  // Anima apparizione
+  requestAnimationFrame(() => {
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'translateY(0)';
+  });
+  
+  // Rimuovi tooltip dopo 4 secondi o al click su documento
+  const removeTooltip = () => {
+    tooltip.style.opacity = '0';
+    tooltip.style.transform = 'translateY(-10px)';
+    setTimeout(() => tooltip.remove(), 300);
+    document.removeEventListener('click', removeTooltip);
+  };
+  
+  setTimeout(removeTooltip, 4000);
+  document.addEventListener('click', removeTooltip);
+}
+
+/**
+ * Aggiorna tutte le icone di qualità dell'aria con i nuovi dati
+ * @param {Object} airQualityData - Dati qualità dell'aria dall'API Open-Meteo
+ */
+export function updateAirQualityDisplay(airQualityData) {
+  if (!airQualityData || !airQualityData.current || !airQualityData.hourly) {
+    console.warn('Dati qualità dell\'aria non disponibili');
+    return;
+  }
+  
+  try {
+    // Calcola valori massimi giornalieri dai dati orari (72 ore = 3 giorni)
+    const hourlyEAQI = airQualityData.hourly.european_aqi || [];
+    const dailyEAQI = [];
+    
+    // Raggruppa per giorni e calcola massimo per ogni giorno
+    for (let day = 0; day < 3; day++) {
+      const startHour = day * 24;
+      const endHour = startHour + 24;
+      const dayValues = hourlyEAQI.slice(startHour, endHour);
+      
+      if (dayValues.length > 0) {
+        dailyEAQI[day] = Math.max(...dayValues);
+      }
+    }
+    
+    // Aggiorna icone per le carte giornaliere (oggi, domani, dopodomani)
+    const dayConfigs = [
+      { cardId: 'today-card', dayKey: 'today', index: 0 },
+      { cardId: 'tomorrow-card', dayKey: 'tomorrow', index: 1 },
+      { cardId: 'dayaftertomorrow-card', dayKey: 'dayaftertomorrow', index: 2 }
+    ];
+    
+    dayConfigs.forEach(config => {
+      const eaqiValue = dailyEAQI[config.index];
+      if (eaqiValue !== undefined && eaqiValue !== null) {
+        createAirQualityIcon(config.cardId, eaqiValue, config.dayKey);
+      }
+    });
+    
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento display qualità dell\'aria:', error);
+  }
+}
