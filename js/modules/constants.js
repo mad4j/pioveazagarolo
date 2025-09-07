@@ -6,7 +6,8 @@ export const DATA_CACHE_TTL_MS = 3 * 60 * 60 * 1000; // 3 ore
 export const CHART_MODES = {
   PRECIPITATION: 'precipitation',
   TEMPERATURE: 'temperature',
-  WIND: 'wind'
+  WIND: 'wind',
+  PRESSURE: 'pressure'
 };
 
 export const DAY_CONFIGS = [

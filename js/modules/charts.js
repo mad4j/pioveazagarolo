@@ -132,6 +132,8 @@ export function getTemperatureLineColor(v) { if (v > 30) return '#e74c3c'; if (v
 
 export function getWindSpeedColor(v) { if (v > 50) return '#8e44ad'; if (v > 30) return '#e74c3c'; if (v > 20) return '#f39c12'; if (v > 10) return '#27ae60'; if (v > 5) return '#3498db'; return '#85c1e9'; }
 
+export function getPressureLineColor(v) { if (v > 1030) return '#e74c3c'; if (v > 1020) return '#f39c12'; if (v > 1010) return '#27ae60'; if (v > 1000) return '#3498db'; if (v > 990) return '#9b59b6'; return '#34495e'; }
+
 function isTouchDevice() { return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0; }
 
 export function buildChart(target, probabilityData, precipitationData, sunriseTime = null, sunsetTime = null) {
@@ -308,6 +310,164 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
             const left = rect.left + window.pageXOffset + tooltip.caretX + 10;
             const top = rect.top + window.pageYOffset + tooltip.caretY - 10;
 
+            tip.style.left = Math.min(left, bodyRect.width - 260) + 'px';
+            tip.style.top = top + 'px';
+            tip.style.opacity = 1;
+          }
+        }
+      },
+      interaction: {
+        mode: 'index',
+        intersect: false
+      }
+    }
+  });
+
+  // Force redraw once fonts are ready (prevents seeing raw unicode if font loads late)
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      try {
+        chartInstances[target].update();
+      } catch (e) { }
+    });
+  }
+}
+
+export function buildPressureChart(target, pressureData, sunriseTime = null, sunsetTime = null) {
+  const el = document.getElementById(target);
+  if (!el) return;
+  if (chartInstances[target]) chartInstances[target].destroy();
+
+  const pressureColors = pressureData.map(getPressureLineColor);
+  const minPressure = Math.min(...pressureData) - 2;
+  const maxPressure = Math.max(...pressureData) + 2;
+  const plugins = [sunriseSunsetPlugin];
+  if (target === 'today-chart') plugins.push(currentHourLinePlugin);
+
+  chartInstances[target] = new Chart(el, {
+    plugins,
+    data: {
+      labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
+      datasets: [{
+        label: 'Pressione (hPa)',
+        type: 'line',
+        fill: false,
+        tension: 0.4,
+        backgroundColor: 'rgb(142, 68, 173)',
+        borderColor: 'rgb(142, 68, 173)',
+        borderWidth: 2,
+        data: pressureData,
+        pointBackgroundColor: pressureColors,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        yAxisID: 'y'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: 2 },
+      onHover: (e, a, chart) => {
+        if (isTouchDevice() && a.length) {
+          if (chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout);
+          chart._tooltipTimeout = setTimeout(() => {
+            chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+            chart.setActiveElements([]);
+            chart.update('none');
+          }, 3000);
+        }
+      },
+      scales: {
+        y: {
+          min: minPressure,
+          max: maxPressure,
+          position: 'left',
+          grid: {
+            drawOnChartArea: true,
+            color: 'rgba(200,200,200,0.2)',
+            drawTicks: false
+          },
+          ticks: { display: false }
+        },
+        x: {
+          grid: { display: false },
+          ticks: {
+            maxRotation: 0,
+            minRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 6,
+            color: '#7f8c8d'
+          }
+        }
+      },
+      plugins: {
+        currentHourLine: {
+          color: '#27ae60',
+          overlayColor: 'rgba(128,128,128,0.18)'
+        },
+        sunriseSunset: {
+          sunrise: sunriseTime,
+          sunset: sunsetTime
+        },
+        legend: { display: false },
+        tooltip: {
+          enabled: false,
+          external: ({ chart, tooltip }) => {
+            let tip = document.getElementById('chartjs-tooltip-' + target);
+            if (!tip) {
+              tip = document.createElement('div');
+              tip.id = 'chartjs-tooltip-' + target;
+              Object.assign(tip.style, {
+                position: 'absolute',
+                pointerEvents: 'none',
+                transition: 'all .08s ease',
+                zIndex: 30
+              });
+              document.body.appendChild(tip);
+            }
+
+            if (!tooltip || tooltip.opacity === 0) {
+              tip.style.opacity = 0;
+              return;
+            }
+
+            const rows = [];
+            if (tooltip.dataPoints?.length) {
+              const dp = tooltip.dataPoints[0];
+              const pressure = Math.round(dp.parsed.y);
+              rows.push({ k: 'pressure', t: `Pressione: ${pressure} hPa` });
+
+              if (sunriseTime && sunsetTime) {
+                const hour = parseFloat(dp.label.split(':')[0]);
+                const sr = timeStringToHours(sunriseTime);
+                const ss = timeStringToHours(sunsetTime);
+                if (sr && ss) {
+                  const daylight = ss - sr;
+                  if (Math.abs(hour - sr) < 1) rows.push({ k: 'sunrise', t: `Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)` });
+                  else if (Math.abs(hour - ss) < 1) rows.push({ k: 'sunset', t: `Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)` });
+                }
+              }
+            }
+
+            const title = tooltip.title?.[0] ? `Ore ${tooltip.title[0]}` : '';
+            let html = `<div style="font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;">`;
+            if (title) html += `<div style="font-weight:600; margin-bottom:4px;">${title}</div>`;
+            html += '<div style="display:flex; flex-direction:column; gap:2px;">';
+            rows.forEach(r => {
+              let icon = '';
+              if (r.k === 'pressure') icon = '<i class="wi wi-barometer" style="margin-right:4px; color:#8e44ad;"></i>';
+              else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
+              else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
+              html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`;
+            });
+            html += '</div></div>';
+
+            tip.innerHTML = html;
+
+            const rect = chart.canvas.getBoundingClientRect();
+            const bodyRect = document.body.getBoundingClientRect();
+            const left = rect.left + window.pageXOffset + tooltip.caretX + 10;
+            const top = rect.top + window.pageYOffset + tooltip.caretY - 10;
             tip.style.left = Math.min(left, bodyRect.width - 260) + 'px';
             tip.style.top = top + 'px';
             tip.style.opacity = 1;
