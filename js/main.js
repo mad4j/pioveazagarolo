@@ -45,6 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   retrieveData();
   setInterval(retrieveData, 30 * 60 * 1000);
+
+  // Fallback: prevent accidental text selection when clicking/tapping weather cards
+  try {
+    const disableSelection = (e) => e.preventDefault();
+    const cards = document.querySelectorAll('.forecast-card, .current-conditions-card');
+    cards.forEach(card => {
+      // Modern browsers support 'user-select: none' via CSS; prevent selectionstart as extra safety
+      card.addEventListener('selectstart', disableSelection);
+      // On touch devices some browsers still allow long-press selection; prevent default on mousedown/touchstart
+      card.addEventListener('mousedown', (ev) => ev.preventDefault());
+      card.addEventListener('touchstart', (ev) => ev.preventDefault(), { passive: false });
+    });
+  } catch (err) { /* non-fatal */ }
 });
 
 if ('serviceWorker' in navigator) {
