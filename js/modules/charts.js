@@ -93,13 +93,16 @@ function drawWindArrow(ctx, xScale, area, hourIndex, direction) {
   // Subtract 90 degrees to align with north being up
   const angle = ((direction - 90) * Math.PI) / 180;
   
-  // Calculate arrow end points
-  const endX = x + Math.cos(angle) * arrowLength;
-  const endY = y + Math.sin(angle) * arrowLength;
+  // Calculate arrow start and end points, centered around rotation point
+  const halfLength = arrowLength / 2;
+  const startX = x - Math.cos(angle) * halfLength;
+  const startY = y - Math.sin(angle) * halfLength;
+  const endX = x + Math.cos(angle) * halfLength;
+  const endY = y + Math.sin(angle) * halfLength;
   
   // Draw arrow shaft
   ctx.beginPath();
-  ctx.moveTo(x, y);
+  ctx.moveTo(startX, startY);
   ctx.lineTo(endX, endY);
   ctx.stroke();
   
@@ -284,7 +287,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
             rows.forEach(r => {
               let icon = '';
               if(r.k === 'wind') icon = '<i class="wi wi-strong-wind" style="margin-right:4px; color:#3498db;"></i>';
-              else if(r.k === 'direction') icon = '<i class="wi wi-direction-up" style="margin-right:4px; color:#2c3e50;"></i>';
+              else if(r.k === 'direction') icon = '<span style="margin-right:4px; color:#2c3e50; font-family: Arial, sans-serif;">↗</span>';
               else if(r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if(r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
               
