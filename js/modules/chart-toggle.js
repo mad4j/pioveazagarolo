@@ -1,5 +1,5 @@
 import { CHART_MODES, chartModes, $ } from './constants.js';
-import { buildChart, buildTemperatureChart, getDaySlice } from './charts.js';
+import { buildChart, buildTemperatureChart, buildWindChart, getDaySlice } from './charts.js';
 
 /**
  * Shows a temporary tooltip indicating current chart mode
@@ -31,10 +31,17 @@ export function showChartModeTooltip(chartId, mode) {
     transition: opacity 0.3s ease, transform 0.3s ease;
   `;
   
-  const modeText = mode === CHART_MODES.PRECIPITATION ? 'Precipitazioni' : 'Temperature';
-  const icon = mode === CHART_MODES.PRECIPITATION ? 
-    '<i class="wi wi-umbrella" style="margin-right: 4px; color: #3498db;"></i>' :
-    '<i class="wi wi-thermometer" style="margin-right: 4px; color: #e74c3c;"></i>';
+  let modeText, icon;
+  if (mode === CHART_MODES.PRECIPITATION) {
+    modeText = 'Precipitazioni';
+    icon = '<i class="wi wi-umbrella" style="margin-right: 4px; color: #3498db;"></i>';
+  } else if (mode === CHART_MODES.TEMPERATURE) {
+    modeText = 'Temperature';
+    icon = '<i class="wi wi-thermometer" style="margin-right: 4px; color: #e74c3c;"></i>';
+  } else {
+    modeText = 'Vento';
+    icon = '<i class="wi wi-strong-wind" style="margin-right: 4px; color: #27ae60;"></i>';
+  }
   
   tooltip.innerHTML = `
     <div style="font-weight: 600; margin-bottom: 4px;">
@@ -91,7 +98,16 @@ export function toggleChartMode(triggeredChartId, weatherData) {
   
   // Get current mode from any chart (they should all be synchronized)
   const currentMode = chartModes['today-chart'];
-  const newMode = currentMode === CHART_MODES.PRECIPITATION ? CHART_MODES.TEMPERATURE : CHART_MODES.PRECIPITATION;
+  
+  // Cycle through modes: precipitation → temperature → wind → precipitation
+  let newMode;
+  if (currentMode === CHART_MODES.PRECIPITATION) {
+    newMode = CHART_MODES.TEMPERATURE;
+  } else if (currentMode === CHART_MODES.TEMPERATURE) {
+    newMode = CHART_MODES.WIND;
+  } else {
+    newMode = CHART_MODES.PRECIPITATION;
+  }
   
   // Chart IDs and their corresponding day indices
   const chartConfigs = [
@@ -102,10 +118,15 @@ export function toggleChartMode(triggeredChartId, weatherData) {
   
   let actualNewMode = newMode;
   
-  // Check if temperature data is available before switching
+  // Check data availability before switching
   if (newMode === CHART_MODES.TEMPERATURE) {
     if (!weatherData.hourly.temperature_2m || !weatherData.hourly.apparent_temperature) {
       // Temperature data not available, stay in precipitation mode
+      actualNewMode = CHART_MODES.PRECIPITATION;
+    }
+  } else if (newMode === CHART_MODES.WIND) {
+    if (!weatherData.hourly.wind_speed_10m || !weatherData.hourly.wind_direction_10m) {
+      // Wind data not available, stay in precipitation mode
       actualNewMode = CHART_MODES.PRECIPITATION;
     }
   }
@@ -124,11 +145,17 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
       const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
       buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, sunriseTime, sunsetTime);
+    } else if (actualNewMode === CHART_MODES.WIND) {
+      // Switch to wind chart
+      const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
+      const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
+      buildWindChart(chartId, windSpeedSlice, windDirectionSlice, sunriseTime, sunsetTime);
     } else {
       // Switch to precipitation chart
       const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
       const precipitationSlice = getDaySlice(weatherData.hourly.precipitation, dayIndex);
       buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime);
+    }
     }
   });
   
@@ -217,6 +244,10 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
     const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
     buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, sunriseTime, sunsetTime);
+  } else if (currentMode === CHART_MODES.WIND && weatherData.hourly.wind_speed_10m && weatherData.hourly.wind_direction_10m) {
+    const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
+    const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
+    buildWindChart(chartId, windSpeedSlice, windDirectionSlice, sunriseTime, sunsetTime);
   } else {
     // Default to precipitation chart and ensure all charts are in precipitation mode
     chartModes[chartId] = CHART_MODES.PRECIPITATION;
