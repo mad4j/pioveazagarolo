@@ -4,6 +4,50 @@ export const chartInstances = {};
 
 export function getDaySlice(array, dayIndex) { const start = dayIndex * 24; return array.slice(start, start + 24); }
 
+// Function to get simple icon symbols for different hours
+function getHourIconGlyph(hour) {
+  // Use simple Unicode symbols instead of weather icon font
+  if (hour === 0) return '🕛'; // Midnight clock
+  else if (hour === 6) return '🌅'; // Sunrise
+  else if (hour === 12) return '☀️'; // Noon sun  
+  else if (hour === 18) return '🌇'; // Sunset
+  return ''; // Empty for other hours
+}
+
+// Plugin to display hour icons on x-axis
+export const hourIconsPlugin = { id:'hourIcons', afterDraw(chart, args, opts) {
+  if (!chart.scales.x) return;
+  const xScale = chart.scales.x;
+  const { ctx, chartArea } = chart;
+  ctx.save();
+  
+  // Draw icons at key hours
+  const keyHours = [0, 6, 12, 18];
+  keyHours.forEach(hour => {
+    const x = xScale.getPixelForValue(hour);
+    if (x >= chartArea.left && x <= chartArea.right) {
+      const glyph = getHourIconGlyph(hour);
+      if (glyph) {
+        ctx.font = '16px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = '#7f8c8d';
+        const y = chartArea.bottom + 5;
+        ctx.fillText(glyph, x, y);
+      }
+    }
+  });
+  
+  ctx.restore();
+} };
+
+// Function to convert wind direction degrees to text
+function getWindDirectionText(degrees) {
+  const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+  const index = Math.round(degrees / 22.5) % 16;
+  return directions[index];
+}
+
 // Plugin linea ora corrente
 export const currentHourLinePlugin = { id:'currentHourLine', afterDraw(chart, args, opts) {
   if (chart.config?.data?.labels?.length !== 24) return; if (!opts) return;
@@ -131,8 +175,8 @@ function isTouchDevice(){ return 'ontouchstart' in window||navigator.maxTouchPoi
 export function buildChart(target, probabilityData, precipitationData, sunriseTime=null, sunsetTime=null){
   const el=document.getElementById(target); if(!el)return; if(chartInstances[target]) chartInstances[target].destroy();
   const precipColors=precipitationData.map(getPrecipitationBarColor); const m=Math.max(...precipitationData,1); const maxPrecip=m<2?2:Math.ceil(m);
-  const plugins=[sunriseSunsetPlugin]; if(target==='today-chart') plugins.push(currentHourLinePlugin);
-  chartInstances[target]=new Chart(el,{ plugins, data:{ labels:[...Array(24).keys()].map(h=>`${h}:00`.padStart(5,'0')), datasets:[ {label:'Probabilità (%)',type:'line',fill:true,tension:0.4,backgroundColor:'rgba(52,152,219,0.30)',borderColor:'rgb(41,128,185)',borderWidth:2,data:probabilityData,pointBackgroundColor:'rgb(41,128,185)',pointRadius:0,pointHoverRadius:4,yAxisID:'y'}, {label:'Precipitazione (mm/h)',type:'bar',backgroundColor:precipColors,borderColor:precipColors,borderWidth:1,data:precipitationData,yAxisID:'y1',order:2} ]}, options:{ responsive:true, maintainAspectRatio:false, layout:{padding:2}, onHover:(e,a,chart)=>{ if(isTouchDevice()&&a.length){ if(chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout); chart._tooltipTimeout=setTimeout(()=>{chart.tooltip.setActiveElements([],{x:0,y:0}); chart.setActiveElements([]); chart.update('none');},3000);} }, scales:{ y:{min:0,max:100,position:'left',grid:{drawOnChartArea:true,color:'rgba(200,200,200,0.2)',drawTicks:false},ticks:{display:false}}, y1:{min:0,max:maxPrecip,position:'right',grid:{drawOnChartArea:false,drawTicks:false},ticks:{display:false}}, x:{grid:{display:false},ticks:{maxRotation:0,minRotation:0,autoSkip:true,maxTicksLimit:6,color:'#7f8c8d'}} }, plugins:{ currentHourLine:{color:'#27ae60',overlayColor:'rgba(128,128,128,0.18)'}, sunriseSunset:{sunrise:sunriseTime,sunset:sunsetTime}, legend:{display:false}, tooltip:{ enabled:false, external:({chart,tooltip})=>{ let tip=document.getElementById('chartjs-tooltip-'+target); if(!tip){ tip=document.createElement('div'); tip.id='chartjs-tooltip-'+target; Object.assign(tip.style,{position:'absolute',pointerEvents:'none',transition:'all .08s ease',zIndex:30}); document.body.appendChild(tip);} if(!tooltip||tooltip.opacity===0){ tip.style.opacity=0; return; } const rows=[]; if(tooltip.dataPoints?.length){ const dp=tooltip.dataPoints[0]; const idx=dp.dataIndex; const prob=Math.round(dp.parsed.y); const ds2=chart.data.datasets[1]; let mm=0; if(ds2&&ds2.data&&ds2.data[idx]!=null) mm=ds2.data[idx]; const precipStr= mm<1 && mm>0 ? mm.toFixed(1):Math.round(mm); rows.push({k:'rain',t:`Pioggia: ${precipStr}mm (${prob}%)`}); if(sunriseTime&&sunsetTime){ const hour=parseFloat(dp.label.split(':')[0]); const sr=timeStringToHours(sunriseTime); const ss=timeStringToHours(sunsetTime); if(sr&&ss){ const daylight=ss-sr; if(Math.abs(hour-sr)<1) rows.push({k:'sunrise',t:`Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)`}); else if(Math.abs(hour-ss)<1) rows.push({k:'sunset',t:`Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)`}); } } } const title=tooltip.title?.[0]?`Ore ${tooltip.title[0]}`:''; let html=`<div style=\"font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;\">`; if(title) html+=`<div style=\\"font-weight:600; margin-bottom:4px;\\">${title}</div>`; html+='<div style=\"display:flex; flex-direction:column; gap:2px;\">'; rows.forEach(r=>{ let icon=''; if(r.k==='rain') icon='<i class=\"wi wi-umbrella\" style=\"margin-right:4px; color:#3498db;\"></i>'; else if(r.k==='sunrise') icon='<i class=\"wi wi-sunrise\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if(r.k==='sunset') icon='<i class=\"wi wi-sunset\" style=\"margin-right:4px; color:#ff3b30;\"></i>'; html+=`<div style=\\"display:flex; align-items:center; font-size:12px; line-height:1.2;\\">${icon}<span>${r.t}</span></div>`; }); html+='</div></div>'; tip.innerHTML=html; const rect=chart.canvas.getBoundingClientRect(); const bodyRect=document.body.getBoundingClientRect(); const left=rect.left + window.pageXOffset + tooltip.caretX + 10; const top=rect.top + window.pageYOffset + tooltip.caretY - 10; tip.style.left=Math.min(left, bodyRect.width-260)+'px'; tip.style.top=top+'px'; tip.style.opacity=1; } } }, interaction:{mode:'index',intersect:false} } });
+  const plugins=[sunriseSunsetPlugin, hourIconsPlugin]; if(target==='today-chart') plugins.push(currentHourLinePlugin);
+  chartInstances[target]=new Chart(el,{ plugins, data:{ labels:[...Array(24).keys()], datasets:[ {label:'Probabilità (%)',type:'line',fill:true,tension:0.4,backgroundColor:'rgba(52,152,219,0.30)',borderColor:'rgb(41,128,185)',borderWidth:2,data:probabilityData,pointBackgroundColor:'rgb(41,128,185)',pointRadius:0,pointHoverRadius:4,yAxisID:'y'}, {label:'Precipitazione (mm/h)',type:'bar',backgroundColor:precipColors,borderColor:precipColors,borderWidth:1,data:precipitationData,yAxisID:'y1',order:2} ]}, options:{ responsive:true, maintainAspectRatio:false, layout:{padding:2}, onHover:(e,a,chart)=>{ if(isTouchDevice()&&a.length){ if(chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout); chart._tooltipTimeout=setTimeout(()=>{chart.tooltip.setActiveElements([],{x:0,y:0}); chart.setActiveElements([]); chart.update('none');},3000);} }, scales:{ y:{min:0,max:100,position:'left',grid:{drawOnChartArea:true,color:'rgba(200,200,200,0.2)',drawTicks:false},ticks:{display:false}}, y1:{min:0,max:maxPrecip,position:'right',grid:{drawOnChartArea:false,drawTicks:false},ticks:{display:false}}, x:{grid:{display:false},ticks:{display:false}} }, plugins:{ currentHourLine:{color:'#27ae60',overlayColor:'rgba(128,128,128,0.18)'}, sunriseSunset:{sunrise:sunriseTime,sunset:sunsetTime}, legend:{display:false}, tooltip:{ enabled:false, external:({chart,tooltip})=>{ let tip=document.getElementById('chartjs-tooltip-'+target); if(!tip){ tip=document.createElement('div'); tip.id='chartjs-tooltip-'+target; Object.assign(tip.style,{position:'absolute',pointerEvents:'none',transition:'all .08s ease',zIndex:30}); document.body.appendChild(tip);} if(!tooltip||tooltip.opacity===0){ tip.style.opacity=0; return; } const rows=[]; if(tooltip.dataPoints?.length){ const dp=tooltip.dataPoints[0]; const idx=dp.dataIndex; const prob=Math.round(dp.parsed.y); const ds2=chart.data.datasets[1]; let mm=0; if(ds2&&ds2.data&&ds2.data[idx]!=null) mm=ds2.data[idx]; const precipStr= mm<1 && mm>0 ? mm.toFixed(1):Math.round(mm); rows.push({k:'rain',t:`Pioggia: ${precipStr}mm (${prob}%)`}); if(sunriseTime&&sunsetTime){ const hour=idx; const sr=timeStringToHours(sunriseTime); const ss=timeStringToHours(sunsetTime); if(sr&&ss){ const daylight=ss-sr; if(Math.abs(hour-sr)<1) rows.push({k:'sunrise',t:`Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)`}); else if(Math.abs(hour-ss)<1) rows.push({k:'sunset',t:`Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)`}); } } } const title=tooltip.title?.[0]?`Ore ${tooltip.title[0]}:00`:''; let html=`<div style=\"font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;\">`; if(title) html+=`<div style=\\"font-weight:600; margin-bottom:4px;\\">${title}</div>`; html+='<div style=\"display:flex; flex-direction:column; gap:2px;\">'; rows.forEach(r=>{ let icon=''; if(r.k==='rain') icon='<i class=\"wi wi-umbrella\" style=\"margin-right:4px; color:#3498db;\"></i>'; else if(r.k==='sunrise') icon='<i class=\"wi wi-sunrise\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if(r.k==='sunset') icon='<i class=\"wi wi-sunset\" style=\"margin-right:4px; color:#ff3b30;\"></i>'; html+=`<div style=\\"display:flex; align-items:center; font-size:12px; line-height:1.2;\\">${icon}<span>${r.t}</span></div>`; }); html+='</div></div>'; tip.innerHTML=html; const rect=chart.canvas.getBoundingClientRect(); const bodyRect=document.body.getBoundingClientRect(); const left=rect.left + window.pageXOffset + tooltip.caretX + 10; const top=rect.top + window.pageYOffset + tooltip.caretY - 10; tip.style.left=Math.min(left, bodyRect.width-260)+'px'; tip.style.top=top+'px'; tip.style.opacity=1; } } }, interaction:{mode:'index',intersect:false} } });
   // Force redraw once fonts are ready (prevents seeing raw unicode if font loads late)
   if(document.fonts && document.fonts.ready){
     document.fonts.ready.then(()=>{ try{ chartInstances[target].update(); }catch{} });
@@ -145,7 +189,7 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
   const minTemp = Math.min(...temperatureData, ...apparentTemperatureData) - 2;
   const maxTemp = Math.max(...temperatureData, ...apparentTemperatureData) + 2;
   const plugins=[sunriseSunsetPlugin]; if(target==='today-chart') plugins.push(currentHourLinePlugin);
-  chartInstances[target]=new Chart(el,{ plugins, data:{ labels:[...Array(24).keys()].map(h=>`${h}:00`.padStart(5,'0')), datasets:[ {label:'Temperatura (°C)',type:'line',fill:false,tension:0.4,backgroundColor:'rgb(231,76,60)',borderColor:'rgb(231,76,60)',borderWidth:2,data:temperatureData,pointBackgroundColor:tempColors,pointRadius:0,pointHoverRadius:4,yAxisID:'y'}, {label:'Temperatura percepita (°C)',type:'line',fill:false,tension:0.4,backgroundColor:'rgba(243,156,18,0.7)',borderColor:'rgb(243,156,18)',borderWidth:1,borderDash:[5,5],data:apparentTemperatureData,pointBackgroundColor:'rgb(243,156,18)',pointRadius:0,pointHoverRadius:4,yAxisID:'y'} ]}, options:{ responsive:true, maintainAspectRatio:false, layout:{padding:2}, onHover:(e,a,chart)=>{ if(isTouchDevice()&&a.length){ if(chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout); chart._tooltipTimeout=setTimeout(()=>{chart.tooltip.setActiveElements([],{x:0,y:0}); chart.setActiveElements([]); chart.update('none');},3000);} }, scales:{ y:{min:minTemp,max:maxTemp,position:'left',grid:{drawOnChartArea:true,color:'rgba(200,200,200,0.2)',drawTicks:false},ticks:{display:false}}, x:{grid:{display:false},ticks:{maxRotation:0,minRotation:0,autoSkip:true,maxTicksLimit:6,color:'#7f8c8d'}} }, plugins:{ currentHourLine:{color:'#27ae60',overlayColor:'rgba(128,128,128,0.18)'}, sunriseSunset:{sunrise:sunriseTime,sunset:sunsetTime}, legend:{display:false}, tooltip:{ enabled:false, external:({chart,tooltip})=>{ let tip=document.getElementById('chartjs-tooltip-'+target); if(!tip){ tip=document.createElement('div'); tip.id='chartjs-tooltip-'+target; Object.assign(tip.style,{position:'absolute',pointerEvents:'none',transition:'all .08s ease',zIndex:30}); document.body.appendChild(tip);} if(!tooltip||tooltip.opacity===0){ tip.style.opacity=0; return; } const rows=[]; if(tooltip.dataPoints?.length){ const dp=tooltip.dataPoints[0]; const idx=dp.dataIndex; const temp=Math.round(dp.parsed.y); const ds2=chart.data.datasets[1]; let apparent=temp; if(ds2&&ds2.data&&ds2.data[idx]!=null) apparent=Math.round(ds2.data[idx]); rows.push({k:'temp',t:`Temperatura: ${temp}°C`}); if(Math.abs(temp-apparent)>1) rows.push({k:'apparent',t:`Percepita: ${apparent}°C`}); if(sunriseTime&&sunsetTime){ const hour=parseFloat(dp.label.split(':')[0]); const sr=timeStringToHours(sunriseTime); const ss=timeStringToHours(sunsetTime); if(sr&&ss){ const daylight=ss-sr; if(Math.abs(hour-sr)<1) rows.push({k:'sunrise',t:`Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)`}); else if(Math.abs(hour-ss)<1) rows.push({k:'sunset',t:`Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)`}); } } } const title=tooltip.title?.[0]?`Ore ${tooltip.title[0]}`:''; let html=`<div style=\"font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;\">`; if(title) html+=`<div style=\\"font-weight:600; margin-bottom:4px;\\">${title}</div>`; html+='<div style=\"display:flex; flex-direction:column; gap:2px;\">'; rows.forEach(r=>{ let icon=''; if(r.k==='temp') icon='<i class=\"wi wi-thermometer\" style=\"margin-right:4px; color:#e74c3c;\"></i>'; else if(r.k==='apparent') icon='<i class=\"wi wi-thermometer-exterior\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if(r.k==='sunrise') icon='<i class=\"wi wi-sunrise\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if(r.k==='sunset') icon='<i class=\"wi wi-sunset\" style=\"margin-right:4px; color:#ff3b30;\"></i>'; html+=`<div style=\\"display:flex; align-items:center; font-size:12px; line-height:1.2;\\">${icon}<span>${r.t}</span></div>`; }); html+='</div></div>'; tip.innerHTML=html; const rect=chart.canvas.getBoundingClientRect(); const bodyRect=document.body.getBoundingClientRect(); const left=rect.left + window.pageXOffset + tooltip.caretX + 10; const top=rect.top + window.pageYOffset + tooltip.caretY - 10; tip.style.left=Math.min(left, bodyRect.width-260)+'px'; tip.style.top=top+'px'; tip.style.opacity=1; } } }, interaction:{mode:'index',intersect:false} } });
+  chartInstances[target]=new Chart(el,{ plugins, data:{ labels:[...Array(24).keys()], datasets:[ {label:'Temperatura (°C)',type:'line',fill:false,tension:0.4,backgroundColor:'rgb(231,76,60)',borderColor:'rgb(231,76,60)',borderWidth:2,data:temperatureData,pointBackgroundColor:tempColors,pointRadius:0,pointHoverRadius:4,yAxisID:'y'}, {label:'Temperatura percepita (°C)',type:'line',fill:false,tension:0.4,backgroundColor:'rgba(243,156,18,0.7)',borderColor:'rgb(243,156,18)',borderWidth:1,borderDash:[5,5],data:apparentTemperatureData,pointBackgroundColor:'rgb(243,156,18)',pointRadius:0,pointHoverRadius:4,yAxisID:'y'} ]}, options:{ responsive:true, maintainAspectRatio:false, layout:{padding:2}, onHover:(e,a,chart)=>{ if(isTouchDevice()&&a.length){ if(chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout); chart._tooltipTimeout=setTimeout(()=>{chart.tooltip.setActiveElements([],{x:0,y:0}); chart.setActiveElements([]); chart.update('none');},3000);} }, scales:{ y:{min:minTemp,max:maxTemp,position:'left',grid:{drawOnChartArea:true,color:'rgba(200,200,200,0.2)',drawTicks:false},ticks:{display:false}}, x:{grid:{display:false},ticks:{maxRotation:0,minRotation:0,autoSkip:false,maxTicksLimit:24,color:'#7f8c8d',font:{size:16},callback:getIconTickCallback}} }, plugins:{ currentHourLine:{color:'#27ae60',overlayColor:'rgba(128,128,128,0.18)'}, sunriseSunset:{sunrise:sunriseTime,sunset:sunsetTime}, legend:{display:false}, tooltip:{ enabled:false, external:({chart,tooltip})=>{ let tip=document.getElementById('chartjs-tooltip-'+target); if(!tip){ tip=document.createElement('div'); tip.id='chartjs-tooltip-'+target; Object.assign(tip.style,{position:'absolute',pointerEvents:'none',transition:'all .08s ease',zIndex:30}); document.body.appendChild(tip);} if(!tooltip||tooltip.opacity===0){ tip.style.opacity=0; return; } const rows=[]; if(tooltip.dataPoints?.length){ const dp=tooltip.dataPoints[0]; const idx=dp.dataIndex; const temp=Math.round(dp.parsed.y); const ds2=chart.data.datasets[1]; let apparent=temp; if(ds2&&ds2.data&&ds2.data[idx]!=null) apparent=Math.round(ds2.data[idx]); rows.push({k:'temp',t:`Temperatura: ${temp}°C`}); if(Math.abs(temp-apparent)>1) rows.push({k:'apparent',t:`Percepita: ${apparent}°C`}); if(sunriseTime&&sunsetTime){ const hour=idx; const sr=timeStringToHours(sunriseTime); const ss=timeStringToHours(sunsetTime); if(sr&&ss){ const daylight=ss-sr; if(Math.abs(hour-sr)<1) rows.push({k:'sunrise',t:`Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)`}); else if(Math.abs(hour-ss)<1) rows.push({k:'sunset',t:`Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)`}); } } } const title=tooltip.title?.[0]?`Ore ${tooltip.title[0]}:00`:''; let html=`<div style=\"font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;\">`; if(title) html+=`<div style=\\"font-weight:600; margin-bottom:4px;\\">${title}</div>`; html+='<div style=\"display:flex; flex-direction:column; gap:2px;\">'; rows.forEach(r=>{ let icon=''; if(r.k==='temp') icon='<i class=\"wi wi-thermometer\" style=\"margin-right:4px; color:#e74c3c;\"></i>'; else if(r.k==='apparent') icon='<i class=\"wi wi-thermometer-exterior\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if(r.k==='sunrise') icon='<i class=\"wi wi-sunrise\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if(r.k==='sunset') icon='<i class=\"wi wi-sunset\" style=\"margin-right:4px; color:#ff3b30;\"></i>'; html+=`<div style=\\"display:flex; align-items:center; font-size:12px; line-height:1.2;\\">${icon}<span>${r.t}</span></div>`; }); html+='</div></div>'; tip.innerHTML=html; const rect=chart.canvas.getBoundingClientRect(); const bodyRect=document.body.getBoundingClientRect(); const left=rect.left + window.pageXOffset + tooltip.caretX + 10; const top=rect.top + window.pageYOffset + tooltip.caretY - 10; tip.style.left=Math.min(left, bodyRect.width-260)+'px'; tip.style.top=top+'px'; tip.style.opacity=1; } } }, interaction:{mode:'index',intersect:false} } });
   // Force redraw once fonts are ready (prevents seeing raw unicode if font loads late)
   if(document.fonts && document.fonts.ready){
     document.fonts.ready.then(()=>{ try{ chartInstances[target].update(); }catch{} });
@@ -165,7 +209,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
   chartInstances[target] = new Chart(el, {
     plugins,
     data: {
-      labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5,'0')),
+      labels: [...Array(24).keys()],
       datasets: [{
         label: 'Velocità vento (km/h)',
         type: 'bar',
@@ -207,9 +251,11 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
           ticks: {
             maxRotation: 0,
             minRotation: 0,
-            autoSkip: true,
-            maxTicksLimit: 6,
-            color: '#7f8c8d'
+            autoSkip: false,
+            maxTicksLimit: 24,
+            color: '#7f8c8d',
+            font: { family: 'weathericons', size: 14 },
+            callback: getIconTickCallback
           }
         }
       },
@@ -262,7 +308,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
               }
               
               if(sunriseTime && sunsetTime) {
-                const hour = parseFloat(dp.label.split(':')[0]);
+                const hour = idx;
                 const sr = timeStringToHours(sunriseTime);
                 const ss = timeStringToHours(sunsetTime);
                 if(sr && ss) {
@@ -276,7 +322,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
               }
             }
             
-            const title = tooltip.title?.[0] ? `Ore ${tooltip.title[0]}` : '';
+            const title = tooltip.title?.[0] ? `Ore ${tooltip.title[0]}:00` : '';
             let html = `<div style="font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;">`;
             
             if(title) {
