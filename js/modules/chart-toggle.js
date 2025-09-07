@@ -163,19 +163,30 @@ export function setupChartToggleListeners(weatherData) {
     
     // Also handle touch devices with double-tap
     let lastTouchTime = 0;
+    let tapCount = 0;
     chartElement.removeEventListener('touchend', chartElement._doubleTapHandler);
     
     chartElement._doubleTapHandler = (e) => {
       const currentTime = new Date().getTime();
       const timeDiff = currentTime - lastTouchTime;
       
-      if (timeDiff < 300 && timeDiff > 0) {
+      // Reset tap count if too much time has passed
+      if (timeDiff > 300) {
+        tapCount = 0;
+      }
+      
+      tapCount++;
+      lastTouchTime = currentTime;
+      
+      if (tapCount === 2) {
+        // Double-tap detected
         e.preventDefault();
         e.stopPropagation();
         toggleChartMode(chartId, weatherData);
+        // Reset for next double-tap sequence
+        tapCount = 0;
+        lastTouchTime = 0;
       }
-      
-      lastTouchTime = currentTime;
     };
     
     chartElement.addEventListener('touchend', chartElement._doubleTapHandler, { passive: false });
