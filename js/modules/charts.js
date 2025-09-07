@@ -90,8 +90,8 @@ function drawWindArrow(ctx, xScale, area, hourIndex, direction) {
   ctx.lineWidth = 1.5;
   
   // Convert wind direction to radians (direction is where wind comes FROM)
-  // Subtract 90 degrees to align with north being up, and add 180 to show where wind goes TO
-  const angle = ((direction + 180 - 90) * Math.PI) / 180;
+  // Subtract 90 degrees to align with north being up
+  const angle = ((direction - 90) * Math.PI) / 180;
   
   // Calculate arrow end points
   const endX = x + Math.cos(angle) * arrowLength;
