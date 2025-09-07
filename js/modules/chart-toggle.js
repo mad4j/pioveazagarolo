@@ -105,11 +105,18 @@ export function toggleChartMode(chartId, weatherData) {
   const sunsetTime = weatherData.daily.sunset?.[dayIndex];
   
   if (newMode === CHART_MODES.TEMPERATURE) {
-    // Switch to temperature chart
+    // Switch to temperature chart only if data is available
     if (weatherData.hourly.temperature_2m && weatherData.hourly.apparent_temperature) {
       const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
       const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
       buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, sunriseTime, sunsetTime);
+    } else {
+      // Temperature data not available, stay in precipitation mode
+      chartModes[chartId] = CHART_MODES.PRECIPITATION;
+      const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
+      const precipitationSlice = getDaySlice(weatherData.hourly.precipitation, dayIndex);
+      buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime);
+      newMode = CHART_MODES.PRECIPITATION; // Update newMode for tooltip
     }
   } else {
     // Switch to precipitation chart
