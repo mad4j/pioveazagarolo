@@ -16,7 +16,7 @@ export function showChartModeTooltip(chartId, mode) {
   const tooltip = document.createElement('div');
   tooltip.className = 'chart-mode-tooltip';
   tooltip.style.cssText = `
-    position: absolute;
+    position: fixed;
     z-index: 1000;
     font: 12px 'Helvetica Neue', Arial;
     color: #ecf0f1;
@@ -50,20 +50,18 @@ export function showChartModeTooltip(chartId, mode) {
   
   document.body.appendChild(tooltip);
   
-  // Position tooltip above the chart
-  const chartRect = chartElement.getBoundingClientRect();
+  // Position tooltip at the top center of the page
   const tooltipRect = tooltip.getBoundingClientRect();
   
-  let left = chartRect.left + chartRect.width / 2 - tooltipRect.width / 2;
-  let top = chartRect.top - tooltipRect.height - 10;
+  let left = (window.innerWidth - tooltipRect.width) / 2;
+  let top = 20; // Fixed top position
   
-  // Adjust if tooltip would go off-screen
+  // Ensure tooltip doesn't go off-screen horizontally
   if (left < 10) left = 10;
   if (left + tooltipRect.width > window.innerWidth - 10) left = window.innerWidth - tooltipRect.width - 10;
-  if (top < 10) top = chartRect.bottom + 10;
   
-  tooltip.style.left = left + window.pageXOffset + 'px';
-  tooltip.style.top = top + window.pageYOffset + 'px';
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
   
   // Animate in
   requestAnimationFrame(() => {
@@ -149,24 +147,32 @@ export function setupChartToggleListeners(weatherData) {
     const chartElement = $(chartId);
     if (!chartElement) return;
     
+    // Get the forecast card container (parent of chart-container)
+    const chartContainer = chartElement.parentElement; // .chart-container
+    const forecastCard = chartContainer ? chartContainer.parentElement : null; // .forecast-card
+    
+    if (!forecastCard) return;
+    
     // Remove existing listeners to avoid duplicates
     chartElement.removeEventListener('dblclick', chartElement._toggleHandler);
+    forecastCard.removeEventListener('dblclick', forecastCard._toggleHandler);
     
-    // Create and store new event handler
-    chartElement._toggleHandler = (e) => {
+    // Create and store new event handler for the entire forecast card
+    forecastCard._toggleHandler = (e) => {
       e.preventDefault();
       e.stopPropagation();
       toggleChartMode(chartId, weatherData);
     };
     
-    chartElement.addEventListener('dblclick', chartElement._toggleHandler);
+    forecastCard.addEventListener('dblclick', forecastCard._toggleHandler);
     
-    // Also handle touch devices with double-tap
+    // Also handle touch devices with double-tap on the entire forecast card
     let lastTouchTime = 0;
     let tapCount = 0;
     chartElement.removeEventListener('touchend', chartElement._doubleTapHandler);
+    forecastCard.removeEventListener('touchend', forecastCard._doubleTapHandler);
     
-    chartElement._doubleTapHandler = (e) => {
+    forecastCard._doubleTapHandler = (e) => {
       const currentTime = new Date().getTime();
       const timeDiff = currentTime - lastTouchTime;
       
@@ -189,7 +195,7 @@ export function setupChartToggleListeners(weatherData) {
       }
     };
     
-    chartElement.addEventListener('touchend', chartElement._doubleTapHandler, { passive: false });
+    forecastCard.addEventListener('touchend', forecastCard._doubleTapHandler, { passive: false });
   });
 }
 
