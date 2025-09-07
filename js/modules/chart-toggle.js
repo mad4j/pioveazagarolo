@@ -1,5 +1,5 @@
 import { CHART_MODES, chartModes, $ } from './constants.js';
-import { buildChart, buildTemperatureChart, buildWindChart, getDaySlice } from './charts.js';
+import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, getDaySlice } from './charts.js';
 
 /**
  * Shows a temporary tooltip indicating current chart mode
@@ -38,6 +38,9 @@ export function showChartModeTooltip(chartId, mode) {
   } else if (mode === CHART_MODES.TEMPERATURE) {
     modeText = 'Temperature';
     icon = '<i class="wi wi-thermometer" style="margin-right: 4px; color: #e74c3c;"></i>';
+  } else if (mode === CHART_MODES.PRESSURE) {
+    modeText = 'Pressione';
+    icon = '<i class="wi wi-barometer" style="margin-right: 4px; color: #8e44ad;"></i>';
   } else {
     modeText = 'Vento';
     icon = '<i class="wi wi-strong-wind" style="margin-right: 4px; color: #27ae60;"></i>';
@@ -99,12 +102,14 @@ export function toggleChartMode(triggeredChartId, weatherData) {
   // Get current mode from any chart (they should all be synchronized)
   const currentMode = chartModes['today-chart'];
   
-  // Cycle through modes: precipitation → temperature → wind → precipitation
+  // Cycle through modes: precipitation → temperature → wind → pressure → precipitation
   let newMode;
   if (currentMode === CHART_MODES.PRECIPITATION) {
     newMode = CHART_MODES.TEMPERATURE;
   } else if (currentMode === CHART_MODES.TEMPERATURE) {
     newMode = CHART_MODES.WIND;
+  } else if (currentMode === CHART_MODES.WIND) {
+    newMode = CHART_MODES.PRESSURE;
   } else {
     newMode = CHART_MODES.PRECIPITATION;
   }
@@ -129,6 +134,11 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       // Wind data not available, stay in precipitation mode
       actualNewMode = CHART_MODES.PRECIPITATION;
     }
+  } else if (newMode === CHART_MODES.PRESSURE) {
+    if (!weatherData.hourly.surface_pressure) {
+      // Pressure data not available, stay in precipitation mode
+      actualNewMode = CHART_MODES.PRECIPITATION;
+    }
   }
   
   // Update all charts simultaneously
@@ -150,6 +160,10 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
       const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
       buildWindChart(chartId, windSpeedSlice, windDirectionSlice, sunriseTime, sunsetTime);
+    } else if (actualNewMode === CHART_MODES.PRESSURE) {
+      // Switch to pressure chart
+      const pressureSlice = getDaySlice(weatherData.hourly.surface_pressure, dayIndex);
+      buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime);
     } else {
       // Switch to precipitation chart
       const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
@@ -247,6 +261,9 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
     const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
     buildWindChart(chartId, windSpeedSlice, windDirectionSlice, sunriseTime, sunsetTime);
+  } else if (currentMode === CHART_MODES.PRESSURE && weatherData.hourly.surface_pressure) {
+    const pressureSlice = getDaySlice(weatherData.hourly.surface_pressure, dayIndex);
+    buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime);
   } else {
     // Default to precipitation chart and ensure all charts are in precipitation mode
     chartModes[chartId] = CHART_MODES.PRECIPITATION;
