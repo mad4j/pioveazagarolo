@@ -84,49 +84,58 @@ export function showChartModeTooltip(chartId, mode) {
 }
 
 /**
- * Toggles chart mode between precipitation and temperature
- * @param {string} chartId - Target chart ID
+ * Toggles chart mode between precipitation and temperature for ALL charts simultaneously
+ * @param {string} triggeredChartId - Chart ID that triggered the toggle
  * @param {Object} weatherData - Weather data object
  */
-export function toggleChartMode(chartId, weatherData) {
+export function toggleChartMode(triggeredChartId, weatherData) {
   if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
   
-  const currentMode = chartModes[chartId];
+  // Get current mode from any chart (they should all be synchronized)
+  const currentMode = chartModes['today-chart'];
   const newMode = currentMode === CHART_MODES.PRECIPITATION ? CHART_MODES.TEMPERATURE : CHART_MODES.PRECIPITATION;
   
-  // Update mode tracking
-  chartModes[chartId] = newMode;
+  // Chart IDs and their corresponding day indices
+  const chartConfigs = [
+    { chartId: 'today-chart', dayIndex: 0 },
+    { chartId: 'tomorrow-chart', dayIndex: 1 },
+    { chartId: 'dayaftertomorrow-chart', dayIndex: 2 }
+  ];
   
-  // Get day index from chart ID
-  const dayIndex = chartId === 'today-chart' ? 0 : (chartId === 'tomorrow-chart' ? 1 : 2);
+  let actualNewMode = newMode;
   
-  // Get sunrise/sunset times
-  const sunriseTime = weatherData.daily.sunrise?.[dayIndex];
-  const sunsetTime = weatherData.daily.sunset?.[dayIndex];
-  
+  // Check if temperature data is available before switching
   if (newMode === CHART_MODES.TEMPERATURE) {
-    // Switch to temperature chart only if data is available
-    if (weatherData.hourly.temperature_2m && weatherData.hourly.apparent_temperature) {
+    if (!weatherData.hourly.temperature_2m || !weatherData.hourly.apparent_temperature) {
+      // Temperature data not available, stay in precipitation mode
+      actualNewMode = CHART_MODES.PRECIPITATION;
+    }
+  }
+  
+  // Update all charts simultaneously
+  chartConfigs.forEach(({ chartId, dayIndex }) => {
+    // Update mode tracking for all charts
+    chartModes[chartId] = actualNewMode;
+    
+    // Get sunrise/sunset times for this day
+    const sunriseTime = weatherData.daily.sunrise?.[dayIndex];
+    const sunsetTime = weatherData.daily.sunset?.[dayIndex];
+    
+    if (actualNewMode === CHART_MODES.TEMPERATURE) {
+      // Switch to temperature chart
       const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
       const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
       buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, sunriseTime, sunsetTime);
     } else {
-      // Temperature data not available, stay in precipitation mode
-      chartModes[chartId] = CHART_MODES.PRECIPITATION;
+      // Switch to precipitation chart
       const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
       const precipitationSlice = getDaySlice(weatherData.hourly.precipitation, dayIndex);
       buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime);
-      newMode = CHART_MODES.PRECIPITATION; // Update newMode for tooltip
     }
-  } else {
-    // Switch to precipitation chart
-    const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
-    const precipitationSlice = getDaySlice(weatherData.hourly.precipitation, dayIndex);
-    buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime);
-  }
+  });
   
-  // Show mode indicator
-  showChartModeTooltip(chartId, newMode);
+  // Show mode indicator on the chart that was clicked
+  showChartModeTooltip(triggeredChartId, actualNewMode);
 }
 
 /**
@@ -174,7 +183,7 @@ export function setupChartToggleListeners(weatherData) {
 }
 
 /**
- * Builds appropriate chart based on current mode
+ * Builds appropriate chart based on current global mode
  * @param {string} chartId - Target chart ID
  * @param {Object} weatherData - Weather data object
  * @param {number} dayIndex - Day index (0, 1, 2)
@@ -182,7 +191,8 @@ export function setupChartToggleListeners(weatherData) {
 export function buildAppropriateChart(chartId, weatherData, dayIndex) {
   if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
   
-  const currentMode = chartModes[chartId];
+  // Use global mode (all charts should be in same mode)
+  const currentMode = chartModes['today-chart'];
   const sunriseTime = weatherData.daily.sunrise?.[dayIndex];
   const sunsetTime = weatherData.daily.sunset?.[dayIndex];
   
@@ -191,7 +201,7 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
     buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, sunriseTime, sunsetTime);
   } else {
-    // Default to precipitation chart
+    // Default to precipitation chart and ensure all charts are in precipitation mode
     chartModes[chartId] = CHART_MODES.PRECIPITATION;
     const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
     const precipitationSlice = getDaySlice(weatherData.hourly.precipitation, dayIndex);
