@@ -3,6 +3,7 @@ import { getRainIconClass } from './icons.js';
 import { buildChart, getDaySlice } from './charts.js';
 import { precipitationManager } from './precipitation.js';
 import { updateAirQualityDisplay } from './air-quality.js';
+import { setupChartToggleListeners, buildAppropriateChart } from './chart-toggle.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
 
@@ -223,8 +224,12 @@ export function displayData(data){
       // }
     }
     
-    buildChart(cfg.chartId, probSlice, precipSlice, daily.sunrise[i], daily.sunset[i]);
+    buildAppropriateChart(cfg.chartId, data, i);
   });
+  
+  // Setup chart toggle listeners once after all charts are built
+  setupChartToggleListeners(data);
+  
   const lastUpdated = $('last-updated'); 
   if (lastUpdated) {
     try {
