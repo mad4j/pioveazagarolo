@@ -509,7 +509,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
             rows.forEach(r => {
               let icon = '';
               if (r.k === 'wind') icon = '<i class="wi wi-strong-wind" style="margin-right:4px; color:#3498db;"></i>';
-              else if (r.k === 'direction') icon = `<span style="margin-right:4px; color:${getWindDirectionColor()}; font-family: Arial, sans-serif;">↗</span>`;
+              else if (r.k === 'direction') icon = `<span style="margin-right:4px; color:#f2f2f2; font-family: Arial, sans-serif;">↗</span>`;
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
 
