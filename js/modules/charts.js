@@ -91,8 +91,9 @@ function drawWindArrow(ctx, xScale, area, hourIndex, direction) {
   const arrowHeadSize = 4;
 
   ctx.save();
-  ctx.strokeStyle = '#2c3e50';
-  ctx.fillStyle = '#2c3e50';
+  const arrowColor = getWindDirectionColor();
+  ctx.strokeStyle = arrowColor;
+  ctx.fillStyle = arrowColor;
   ctx.lineWidth = 1.5;
 
   // Convert wind direction to radians (direction is where wind comes FROM)
@@ -137,6 +138,10 @@ export function getPressureLineColor(v) { if (v > 1030) return '#e74c3c'; if (v 
 export function getHumidityBarColor(v) { if (v > 80) return '#2980b9'; if (v > 60) return '#3498db'; if (v > 40) return '#27ae60'; if (v > 30) return '#f1c40f'; return '#e67e22'; }
 
 function isTouchDevice() { return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0; }
+
+function isDarkMode() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+
+function getWindDirectionColor() { return isDarkMode() ? '#f2f2f2' : '#2c3e50'; }
 
 export function buildChart(target, probabilityData, precipitationData, sunriseTime = null, sunsetTime = null) {
   const el = document.getElementById(target); if (!el) return; if (chartInstances[target]) chartInstances[target].destroy();
@@ -504,7 +509,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
             rows.forEach(r => {
               let icon = '';
               if (r.k === 'wind') icon = '<i class="wi wi-strong-wind" style="margin-right:4px; color:#3498db;"></i>';
-              else if (r.k === 'direction') icon = '<span style="margin-right:4px; color:#2c3e50; font-family: Arial, sans-serif;">↗</span>';
+              else if (r.k === 'direction') icon = `<span style="margin-right:4px; color:${getWindDirectionColor()}; font-family: Arial, sans-serif;">↗</span>`;
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
 
