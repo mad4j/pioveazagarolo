@@ -162,7 +162,7 @@ function getRainIconClass(weatherCode) {
     "temperature_2m": 20.0,
     "rain": 0.00,
     "weather_code": 3,
-    "surface_pressure": 978.4,
+    "pressure_msl": 978.4,
     "precipitation": 0.00,
     "relative_humidity_2m": 75
   },

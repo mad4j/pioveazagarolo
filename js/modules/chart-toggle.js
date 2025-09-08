@@ -152,7 +152,7 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       actualNewMode = CHART_MODES.PRECIPITATION;
     }
   } else if (newMode === CHART_MODES.PRESSURE) {
-    if (!weatherData.hourly.surface_pressure) {
+    if (!weatherData.hourly.pressure_msl) {
       // Pressure data not available, stay in precipitation mode
       actualNewMode = CHART_MODES.PRECIPITATION;
     }
@@ -180,7 +180,7 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       buildWindChart(chartId, windSpeedSlice, windDirectionSlice, sunriseTime, sunsetTime);
     } else if (actualNewMode === CHART_MODES.PRESSURE) {
       // Switch to pressure chart
-      const pressureSlice = getDaySlice(weatherData.hourly.surface_pressure, dayIndex);
+      const pressureSlice = getDaySlice(weatherData.hourly.pressure_msl, dayIndex);
       buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime);
     } else {
       // Switch to precipitation chart
@@ -280,8 +280,8 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
     const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
     buildWindChart(chartId, windSpeedSlice, windDirectionSlice, sunriseTime, sunsetTime);
-  } else if (currentMode === CHART_MODES.PRESSURE && weatherData.hourly.surface_pressure) {
-    const pressureSlice = getDaySlice(weatherData.hourly.surface_pressure, dayIndex);
+  } else if (currentMode === CHART_MODES.PRESSURE && weatherData.hourly.pressure_msl) {
+    const pressureSlice = getDaySlice(weatherData.hourly.pressure_msl, dayIndex);
     buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime);
   } else {
     // Default to precipitation chart and ensure all charts are in precipitation mode
