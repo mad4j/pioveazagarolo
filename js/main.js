@@ -53,9 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
     cards.forEach(card => {
       // Modern browsers support 'user-select: none' via CSS; prevent selectionstart as extra safety
       card.addEventListener('selectstart', disableSelection);
-      // On touch devices some browsers still allow long-press selection; prevent default on mousedown/touchstart
+      // Prevent selection on mousedown but allow touch gestures for pull-to-refresh
       card.addEventListener('mousedown', (ev) => ev.preventDefault());
-      card.addEventListener('touchstart', (ev) => ev.preventDefault(), { passive: false });
+      // Note: Removed touchstart preventDefault to allow pull-to-refresh gesture
+      // CSS user-select: none is sufficient for preventing text selection on modern touch devices
     });
   } catch (err) { /* non-fatal */ }
 });
