@@ -181,12 +181,12 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
       type: 'line', 
       fill: false, 
       tension: 0.4, 
-      backgroundColor: 'rgba(243,156,18,0.7)', 
-      borderColor: 'rgb(243,156,18)', 
-      borderWidth: 1, 
+      backgroundColor: 'rgba(233,30,99,0.8)', 
+      borderColor: 'rgb(233,30,99)', 
+      borderWidth: 2, 
       borderDash: [5, 5], 
       data: apparentTemperatureData, 
-      pointBackgroundColor: 'rgb(243,156,18)', 
+      pointBackgroundColor: 'rgb(233,30,99)', 
       pointRadius: 0, 
       pointHoverRadius: 4, 
       yAxisID: 'y' 
@@ -339,7 +339,7 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
             rows.forEach(r => { 
               let icon = ''; 
               if (r.k === 'temp') icon = '<i class="wi wi-thermometer" style="margin-right:4px; color:#e74c3c;"></i>'; 
-              else if (r.k === 'apparent') icon = '<i class="wi wi-thermometer-exterior" style="margin-right:4px; color:#f39c12;"></i>'; 
+              else if (r.k === 'apparent') icon = '<i class="wi wi-thermometer-exterior" style="margin-right:4px; color:#e91e63;"></i>'; 
               else if (r.k === 'humidity') icon = '<i class="wi wi-humidity" style="margin-right:4px; color:#3498db;"></i>'; 
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>'; 
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>'; 
