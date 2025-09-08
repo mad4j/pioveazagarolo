@@ -2,6 +2,7 @@
 import { displayData, showToast } from './modules/ui.js';
 import { loadCachedData, saveCachedData } from './modules/cache.js';
 import { precipitationManager } from './modules/precipitation.js';
+import { PullToRefresh } from './modules/pull-to-refresh.js';
 import './modules/debug-mobile.js';
 
 async function retrieveData() {
@@ -45,6 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   retrieveData();
   setInterval(retrieveData, 30 * 60 * 1000);
+
+  // Initialize pull-to-refresh functionality
+  const pullToRefresh = new PullToRefresh({
+    onRefresh: async () => {
+      await retrieveData();
+    },
+    threshold: 80,
+    maxPull: 150,
+    resistance: 2.5
+  });
 
   // Fallback: prevent accidental text selection when clicking/tapping weather cards
   try {

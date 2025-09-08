@@ -670,4 +670,104 @@ footer {
   .low-chance {
     background-color: rgba(46, 204, 113, 0.18);
   }
+
+/* Pull-to-refresh styles */
+.pull-to-refresh-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-color), #1d2b36);
+  color: var(--text-primary);
+  z-index: 1200;
+  transform: translateY(-150px);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.pull-to-refresh-container.pulling {
+  transition: none;
+}
+
+.pull-to-refresh-container.refreshing {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
+.pull-to-refresh-arrow {
+  margin-bottom: 8px;
+  transition: transform 0.2s ease;
+}
+
+.pull-to-refresh-arrow svg {
+  width: 24px;
+  height: 24px;
+  color: var(--text-primary);
+  transition: transform 0.3s ease;
+}
+
+.pull-to-refresh-container.ready-to-refresh .pull-to-refresh-arrow svg {
+  color: var(--accent-color);
+}
+
+.pull-to-refresh-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  transition: color 0.2s ease;
+}
+
+.pull-to-refresh-container.ready-to-refresh .pull-to-refresh-text {
+  color: var(--accent-color);
+}
+
+.pull-to-refresh-loading {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pull-to-refresh-container.refreshing .pull-to-refresh-loading {
+  display: flex;
+}
+
+.pull-to-refresh-container.refreshing .pull-to-refresh-arrow,
+.pull-to-refresh-container.refreshing .pull-to-refresh-text {
+  display: none;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Ensure pull-to-refresh works on mobile devices */
+@media (max-width: 768px) {
+  .pull-to-refresh-container {
+    height: 120px;
+    transform: translateY(-120px);
+  }
+}
 }
