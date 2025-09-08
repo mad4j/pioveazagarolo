@@ -171,7 +171,8 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       // Switch to temperature chart
       const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
       const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
-      buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, sunriseTime, sunsetTime);
+      const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
+      buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime);
     } else if (actualNewMode === CHART_MODES.WIND) {
       // Switch to wind chart
       const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
@@ -273,7 +274,8 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
   if (currentMode === CHART_MODES.TEMPERATURE && weatherData.hourly.temperature_2m && weatherData.hourly.apparent_temperature) {
     const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
     const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
-    buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, sunriseTime, sunsetTime);
+    const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
+    buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime);
   } else if (currentMode === CHART_MODES.WIND && weatherData.hourly.wind_speed_10m && weatherData.hourly.wind_direction_10m) {
     const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
     const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
