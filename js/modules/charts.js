@@ -50,6 +50,54 @@ export const windDirectionPlugin = {
   }
 };
 
+// Plugin zone pressione orizzontali per barometro
+export const pressureZonesPlugin = {
+  id: 'pressureZones', 
+  beforeDraw(chart, args, opts) {
+    if (!opts || !opts.minPressure || !opts.maxPressure) return;
+    
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+    
+    ctx.save();
+    
+    const yScale = chart.scales.y;
+    if (!yScale) return;
+    
+    // Define pressure zones (based on meteorological standards)
+    const zones = [
+      { min: 1030, max: 1050, color: 'rgba(231, 76, 60, 0.15)', label: 'Pressione molto alta' },   // Red - Very high pressure  
+      { min: 1020, max: 1030, color: 'rgba(243, 156, 18, 0.15)', label: 'Pressione alta' },       // Orange - High pressure
+      { min: 1013, max: 1020, color: 'rgba(46, 204, 113, 0.15)', label: 'Pressione normale alta' }, // Light green - Normal high
+      { min: 1000, max: 1013, color: 'rgba(39, 174, 96, 0.15)', label: 'Pressione normale' },     // Green - Normal pressure
+      { min: 990, max: 1000, color: 'rgba(52, 152, 219, 0.15)', label: 'Pressione bassa' },        // Light blue - Low pressure  
+      { min: 970, max: 990, color: 'rgba(52, 73, 94, 0.15)', label: 'Pressione molto bassa' }      // Dark blue - Very low pressure
+    ];
+    
+    zones.forEach(zone => {
+      // Only draw zones that intersect with the chart's pressure range
+      const zoneTop = Math.max(zone.min, opts.minPressure);
+      const zoneBottom = Math.min(zone.max, opts.maxPressure);
+      
+      if (zoneTop < zoneBottom) {
+        const y1 = yScale.getPixelForValue(zoneBottom);
+        const y2 = yScale.getPixelForValue(zoneTop);
+        
+        // Draw horizontal pressure zone
+        ctx.fillStyle = zone.color;
+        ctx.fillRect(chartArea.left, y1, chartArea.right - chartArea.left, y2 - y1);
+        
+        // Optional: Add zone border for better definition
+        ctx.strokeStyle = zone.color.replace('0.15', '0.3');
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(chartArea.left, y1, chartArea.right - chartArea.left, y2 - y1);
+      }
+    });
+    
+    ctx.restore();
+  }
+};
+
 function timeStringToHours(str) { try { const t = str.split('T')[1]; if (!t) return null; const [h, m] = t.split(':').map(Number); return h + m / 60; } catch { return null; } }
 function formatTime(str) { try { const t = str.split('T')[1]; return t ? t.substring(0, 5) : str; } catch { return str; } }
 function formatDaylightHours(decimalHours) {
@@ -555,7 +603,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   const pressureColors = pressureData.map(getPressureLineColor);
   const minPressure = Math.min(...pressureData) - 2;
   const maxPressure = Math.max(...pressureData) + 2;
-  const plugins = [sunriseSunsetPlugin];
+  const plugins = [pressureZonesPlugin, sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
 
   chartInstances[target] = new Chart(el, {
@@ -615,6 +663,10 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
         }
       },
       plugins: {
+        pressureZones: {
+          minPressure: minPressure,
+          maxPressure: maxPressure
+        },
         currentHourLine: {
           color: '#27ae60',
           overlayColor: 'rgba(128,128,128,0.18)'
@@ -651,6 +703,17 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
               const pressure = Math.round(dp.parsed.y);
               rows.push({ k: 'pressure', t: `Pressione: ${pressure} hPa` });
 
+              // Add pressure interpretation
+              let pressureDesc = '';
+              if (pressure >= 1030) pressureDesc = 'Molto alta - Tempo stabile';
+              else if (pressure >= 1020) pressureDesc = 'Alta - Bel tempo';
+              else if (pressure >= 1013) pressureDesc = 'Normale alta - Stabile';
+              else if (pressure >= 1000) pressureDesc = 'Normale - Variabile';
+              else if (pressure >= 990) pressureDesc = 'Bassa - Instabile';
+              else pressureDesc = 'Molto bassa - Tempestoso';
+              
+              rows.push({ k: 'condition', t: pressureDesc });
+
               if (sunriseTime && sunsetTime) {
                 const hour = parseFloat(dp.label.split(':')[0]);
                 const sr = timeStringToHours(sunriseTime);
@@ -670,6 +733,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
             rows.forEach(r => {
               let icon = '';
               if (r.k === 'pressure') icon = '<i class="wi wi-barometer" style="margin-right:4px; color:#8e44ad;"></i>';
+              else if (r.k === 'condition') icon = '<i class="wi wi-day-sunny" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
               html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`;
