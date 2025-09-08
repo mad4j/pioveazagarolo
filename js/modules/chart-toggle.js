@@ -92,12 +92,29 @@ export function showChartModeTooltip(chartId, mode) {
 }
 
 /**
+ * Removes all visible chart tooltips immediately
+ */
+function hideAllChartTooltips() {
+  // Hide all chart tooltips by finding tooltip DOM elements
+  const chartIds = ['today-chart', 'tomorrow-chart', 'dayaftertomorrow-chart'];
+  chartIds.forEach(chartId => {
+    const tooltip = document.getElementById(`chartjs-tooltip-${chartId}`);
+    if (tooltip) {
+      tooltip.style.opacity = '0';
+    }
+  });
+}
+
+/**
  * Toggles chart mode between precipitation and temperature for ALL charts simultaneously
  * @param {string} triggeredChartId - Chart ID that triggered the toggle
  * @param {Object} weatherData - Weather data object
  */
 export function toggleChartMode(triggeredChartId, weatherData) {
   if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
+  
+  // Hide any visible tooltips immediately before switching modes
+  hideAllChartTooltips();
   
   // Get current mode from any chart (they should all be synchronized)
   const currentMode = chartModes['today-chart'];
