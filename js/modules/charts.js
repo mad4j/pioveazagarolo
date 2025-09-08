@@ -234,12 +234,24 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
     scales.y1 = { 
       min: 0, 
       max: 100, 
+      beginAtZero: true,
       position: 'right', 
       grid: { 
         drawOnChartArea: false, 
         drawTicks: false 
       }, 
-      ticks: { display: false } 
+      ticks: { 
+        display: false,
+        min: 0,
+        max: 100
+      },
+      bounds: 'data',
+      afterBuildTicks: function(scale) {
+        // Force the scale to always be 0-100
+        scale.min = 0;
+        scale.max = 100;
+        return;
+      }
     };
   }
   
