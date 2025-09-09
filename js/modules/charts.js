@@ -1,4 +1,5 @@
 import { DAY_CONFIGS } from './constants.js';
+import { getRainIconClass } from './icons.js';
 
 export const chartInstances = {};
 
@@ -46,6 +47,27 @@ export const windDirectionPlugin = {
         drawWindArrow(ctx, xScale, chartArea, index, direction);
       }
     });
+    ctx.restore();
+  }
+};
+
+// Plugin per icone meteo orarie
+export const weatherIconsPlugin = {
+  id: 'weatherIcons', 
+  afterDraw(chart, args, opts) {
+    if (!opts || !opts.weatherCodes || !opts.isDayData) return;
+    const xScale = chart.scales.x;
+    if (!xScale) return;
+    const { ctx, chartArea } = chart;
+    ctx.save();
+    
+    opts.weatherCodes.forEach((weatherCode, index) => {
+      if (typeof weatherCode === 'number') {
+        const isDay = opts.isDayData[index];
+        drawWeatherIcon(ctx, xScale, chartArea, index, weatherCode, isDay);
+      }
+    });
+    
     ctx.restore();
   }
 };
@@ -124,6 +146,47 @@ function drawWindArrow(ctx, xScale, area, hourIndex, direction) {
   ctx.lineTo(endX - Math.cos(headAngle2) * arrowHeadSize, endY - Math.sin(headAngle2) * arrowHeadSize);
   ctx.stroke();
 
+  ctx.restore();
+}
+
+function drawWeatherIcon(ctx, xScale, area, hourIndex, weatherCode, isDay) {
+  const x = xScale.getPixelForValue(hourIndex);
+  if (x < area.left || x > area.right) return;
+  
+  // Get the appropriate icon class for the weather code
+  const iconClass = getRainIconClass(weatherCode, isDay);
+  
+  // Extract the icon code from the class (e.g., 'wi wi-day-sunny' -> get the unicode)
+  let glyph = '';
+  if (iconClass.includes('wi-day-sunny')) glyph = '\uf00d';
+  else if (iconClass.includes('wi-night-clear')) glyph = '\uf02e';
+  else if (iconClass.includes('wi-cloud')) glyph = '\uf013';
+  else if (iconClass.includes('wi-rain')) glyph = '\uf019';
+  else if (iconClass.includes('wi-snow')) glyph = '\uf01b';
+  else if (iconClass.includes('wi-fog')) glyph = '\uf014';
+  else if (iconClass.includes('wi-sprinkle')) glyph = '\uf01c';
+  else if (iconClass.includes('wi-thunderstorm')) glyph = '\uf01e';
+  else if (iconClass.includes('wi-storm-showers')) glyph = '\uf01d';
+  else glyph = '\uf00d'; // Default to sun icon
+  
+  ctx.save();
+  ctx.font = '14px weathericons';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#2c3e50';
+  
+  // Position icons at the top of the chart area, but inside the visible area
+  const y = area.top + 15;
+  
+  try {
+    ctx.fillText(glyph, x, y);
+  } catch {
+    // Fallback: draw a simple circle if font not ready
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+  
   ctx.restore();
 }
 
@@ -547,7 +610,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
   }
 }
 
-export function buildPressureChart(target, pressureData, sunriseTime = null, sunsetTime = null) {
+export function buildPressureChart(target, pressureData, sunriseTime = null, sunsetTime = null, weatherCodes = null, isDayData = null) {
   const el = document.getElementById(target);
   if (!el) return;
   if (chartInstances[target]) chartInstances[target].destroy();
@@ -557,6 +620,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   const maxPressure = Math.max(...pressureData) + 2;
   const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
+  if (weatherCodes && isDayData) plugins.push(weatherIconsPlugin);
 
   chartInstances[target] = new Chart(el, {
     plugins,
@@ -622,6 +686,10 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
         sunriseSunset: {
           sunrise: sunriseTime,
           sunset: sunsetTime
+        },
+        weatherIcons: {
+          weatherCodes: weatherCodes,
+          isDayData: isDayData
         },
         legend: { display: false },
         tooltip: {
