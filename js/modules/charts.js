@@ -290,7 +290,9 @@ function isTouchDevice() { return 'ontouchstart' in window || navigator.maxTouch
 
 function isDarkMode() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
 
-function getWindDirectionColor() { return isDarkMode() ? '#f2f2f2' : '#ffffff'; }
+function getWindDirectionColor() { return isDarkMode() ? '#f2f2f2' : '#2c3e50'; }
+
+function getWindDirectionTooltipColor() { return isDarkMode() ? '#f2f2f2' : '#ffffff'; }
 
 export function buildChart(target, probabilityData, precipitationData, sunriseTime = null, sunsetTime = null) {
   const el = document.getElementById(target); if (!el) return; if (chartInstances[target]) chartInstances[target].destroy();
@@ -658,7 +660,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
             rows.forEach(r => {
               let icon = '';
               if (r.k === 'wind') icon = '<i class="wi wi-strong-wind" style="margin-right:4px; color:#3498db;"></i>';
-              else if (r.k === 'direction') icon = `<span style="margin-right:4px; color:${getWindDirectionColor()}; font-family: Arial, sans-serif;">↗</span>`;
+              else if (r.k === 'direction') icon = `<span style="margin-right:4px; color:${getWindDirectionTooltipColor()}; font-family: Arial, sans-serif;">↗</span>`;
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
 
