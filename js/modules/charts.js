@@ -51,7 +51,7 @@ export const windDirectionPlugin = {
   }
 };
 
-// Plugin per icone meteo orarie
+// Plugin per icone meteo orarie (modalità normale - ogni ora)
 export const weatherIconsPlugin = {
   id: 'weatherIcons', 
   afterDraw(chart, args, opts) {
@@ -71,6 +71,92 @@ export const weatherIconsPlugin = {
     ctx.restore();
   }
 };
+
+// Plugin per icone meteo in modalità pressione (ogni 3 ore)
+export const pressureWeatherIconsPlugin = {
+  id: 'pressureWeatherIcons',
+  afterDraw(chart, args, opts) {
+    if (!opts || !opts.weatherCodes || !opts.isDayData) return;
+    const xScale = chart.scales.x;
+    if (!xScale) return;
+    const { ctx, chartArea } = chart;
+    ctx.save();
+    
+    // Intervalli di 3 ore: 0-2, 3-5, 6-8, 9-11, 12-14, 15-17, 18-20, 21-23
+    const threeHourIntervals = [
+      { start: 0, center: 1 },   // 00:00-02:59, centered at 01:30
+      { start: 3, center: 4 },   // 03:00-05:59, centered at 04:30  
+      { start: 6, center: 7 },   // 06:00-08:59, centered at 07:30
+      { start: 9, center: 10 },  // 09:00-11:59, centered at 10:30
+      { start: 12, center: 13 }, // 12:00-14:59, centered at 13:30
+      { start: 15, center: 16 }, // 15:00-17:59, centered at 16:30
+      { start: 18, center: 19 }, // 18:00-20:59, centered at 19:30
+      { start: 21, center: 22 }  // 21:00-23:59, centered at 22:30
+    ];
+    
+    threeHourIntervals.forEach(interval => {
+      const { start, center } = interval;
+      const codes = [];
+      const isDayValues = [];
+      
+      // Collect weather codes and day/night values for this 3-hour interval
+      for (let i = start; i < start + 3 && i < opts.weatherCodes.length; i++) {
+        if (typeof opts.weatherCodes[i] === 'number') {
+          codes.push(opts.weatherCodes[i]);
+          isDayValues.push(opts.isDayData[i]);
+        }
+      }
+      
+      if (codes.length === 0) return;
+      
+      // Select the most appropriate weather code for this interval
+      const selectedWeatherCode = selectWeatherCodeForInterval(codes);
+      
+      // Select the most appropriate day/night value (use middle hour if available)
+      const middleIndex = Math.floor(codes.length / 2);
+      const selectedIsDay = isDayValues[middleIndex] !== undefined ? isDayValues[middleIndex] : isDayValues[0];
+      
+      // Draw the icon centered in the 3-hour interval
+      drawWeatherIcon(ctx, xScale, chartArea, center, selectedWeatherCode, selectedIsDay);
+    });
+    
+    ctx.restore();
+  }
+};
+
+/**
+ * Selects the most appropriate weather code for a 3-hour interval
+ * @param {number[]} codes - Array of weather codes for the interval
+ * @returns {number} - Selected weather code
+ */
+function selectWeatherCodeForInterval(codes) {
+  if (codes.length === 0) return 0;
+  if (codes.length === 1) return codes[0];
+  
+  // Count occurrences of each weather code
+  const codeCount = {};
+  codes.forEach(code => {
+    codeCount[code] = (codeCount[code] || 0) + 1;
+  });
+  
+  // Find the most frequent code
+  let maxCount = 0;
+  let mostFrequentCode = codes[0];
+  
+  Object.entries(codeCount).forEach(([code, count]) => {
+    if (count > maxCount) {
+      maxCount = count;
+      mostFrequentCode = parseInt(code);
+    }
+  });
+  
+  // If all codes are different (maxCount === 1), use the middle hour's code
+  if (maxCount === 1 && codes.length >= 3) {
+    return codes[1]; // Middle hour (index 1 of 0,1,2)
+  }
+  
+  return mostFrequentCode;
+}
 
 function timeStringToHours(str) { try { const t = str.split('T')[1]; if (!t) return null; const [h, m] = t.split(':').map(Number); return h + m / 60; } catch { return null; } }
 function formatTime(str) { try { const t = str.split('T')[1]; return t ? t.substring(0, 5) : str; } catch { return str; } }
@@ -620,7 +706,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   const maxPressure = Math.max(...pressureData) + 2;
   const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
-  if (weatherCodes && isDayData) plugins.push(weatherIconsPlugin);
+  if (weatherCodes && isDayData) plugins.push(pressureWeatherIconsPlugin);
 
   chartInstances[target] = new Chart(el, {
     plugins,
@@ -687,7 +773,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
           sunrise: sunriseTime,
           sunset: sunsetTime
         },
-        weatherIcons: {
+        pressureWeatherIcons: {
           weatherCodes: weatherCodes,
           isDayData: isDayData
         },
