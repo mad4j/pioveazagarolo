@@ -51,7 +51,51 @@ export const windDirectionPlugin = {
   }
 };
 
-// Plugin per icone meteo orarie
+// Helper function to get representative weather code for a 3-hour interval
+function getRepresentativeWeatherCode(weatherCodes, isDayData, startIndex) {
+  const interval = [];
+  const dayInterval = [];
+  
+  // Collect the 3-hour interval data
+  for (let i = 0; i < 3; i++) {
+    const index = startIndex + i;
+    if (index < weatherCodes.length && typeof weatherCodes[index] === 'number') {
+      interval.push(weatherCodes[index]);
+      dayInterval.push(isDayData[index]);
+    }
+  }
+  
+  if (interval.length === 0) return null;
+  
+  // Count occurrences of each weather code
+  const counts = {};
+  interval.forEach(code => {
+    counts[code] = (counts[code] || 0) + 1;
+  });
+  
+  // Find the most common weather code
+  const maxCount = Math.max(...Object.values(counts));
+  const mostCommon = Object.keys(counts).filter(code => counts[code] === maxCount);
+  
+  // If there's a clear winner, use it
+  if (mostCommon.length === 1) {
+    const code = parseInt(mostCommon[0]);
+    const codeIndex = interval.indexOf(code);
+    return {
+      weatherCode: code,
+      isDay: dayInterval[codeIndex]
+    };
+  }
+  
+  // If all are different or tie, use the middle hour (index 1)
+  const middleIndex = Math.floor(interval.length / 2);
+  return {
+    weatherCode: interval[middleIndex],
+    isDay: dayInterval[middleIndex]
+  };
+}
+
+// Plugin per icone meteo orarie (ridotte - una ogni 3 ore)
 export const weatherIconsPlugin = {
   id: 'weatherIcons', 
   afterDraw(chart, args, opts) {
@@ -61,12 +105,13 @@ export const weatherIconsPlugin = {
     const { ctx, chartArea } = chart;
     ctx.save();
     
-    opts.weatherCodes.forEach((weatherCode, index) => {
-      if (typeof weatherCode === 'number') {
-        const isDay = opts.isDayData[index];
-        drawWeatherIcon(ctx, xScale, chartArea, index, weatherCode, isDay);
+    // Show icons every 3 hours: 0, 3, 6, 9, 12, 15, 18, 21
+    for (let hour = 0; hour < 24; hour += 3) {
+      const representative = getRepresentativeWeatherCode(opts.weatherCodes, opts.isDayData, hour);
+      if (representative) {
+        drawWeatherIcon(ctx, xScale, chartArea, hour, representative.weatherCode, representative.isDay);
       }
-    });
+    }
     
     ctx.restore();
   }
