@@ -131,8 +131,8 @@ function formatDaylightHours(decimalHours) {
 function drawSunIcon(ctx, xScale, area, h, type) {
   const x = xScale.getPixelForValue(h);
   if (x < area.left || x > area.right) return;
-  // Real glyph characters (not double-escaped) so canvas renders icon instead of literal code
-  const glyph = type === 'sunrise' ? '\uf051' : '\uf052';
+  // Use String.fromCharCode to ensure proper Unicode rendering
+  const glyph = type === 'sunrise' ? String.fromCharCode(0xf051) : String.fromCharCode(0xf052);
   ctx.save();
   // Font-face dichiara font-family: 'weathericons' (minuscolo). Riduciamo dimensione.
   ctx.font = '16px weathericons';
@@ -203,16 +203,16 @@ function drawWeatherIcon(ctx, xScale, area, hourIndex, weatherCode, isDay) {
   
   // Extract the icon code from the class (e.g., 'wi wi-day-sunny' -> get the unicode)
   let glyph = '';
-  if (iconClass.includes('wi-day-sunny')) glyph = '\uf00d';
-  else if (iconClass.includes('wi-night-clear')) glyph = '\uf02e';
-  else if (iconClass.includes('wi-cloud')) glyph = '\uf013';
-  else if (iconClass.includes('wi-rain')) glyph = '\uf019';
-  else if (iconClass.includes('wi-snow')) glyph = '\uf01b';
-  else if (iconClass.includes('wi-fog')) glyph = '\uf014';
-  else if (iconClass.includes('wi-sprinkle')) glyph = '\uf01c';
-  else if (iconClass.includes('wi-thunderstorm')) glyph = '\uf01e';
-  else if (iconClass.includes('wi-storm-showers')) glyph = '\uf01d';
-  else glyph = '\uf00d'; // Default to sun icon
+  if (iconClass.includes('wi-day-sunny')) glyph = String.fromCharCode(0xf00d);
+  else if (iconClass.includes('wi-night-clear')) glyph = String.fromCharCode(0xf02e);
+  else if (iconClass.includes('wi-cloud')) glyph = String.fromCharCode(0xf013);
+  else if (iconClass.includes('wi-rain')) glyph = String.fromCharCode(0xf019);
+  else if (iconClass.includes('wi-snow')) glyph = String.fromCharCode(0xf01b);
+  else if (iconClass.includes('wi-fog')) glyph = String.fromCharCode(0xf014);
+  else if (iconClass.includes('wi-sprinkle')) glyph = String.fromCharCode(0xf01c);
+  else if (iconClass.includes('wi-thunderstorm')) glyph = String.fromCharCode(0xf01e);
+  else if (iconClass.includes('wi-storm-showers')) glyph = String.fromCharCode(0xf01d);
+  else glyph = String.fromCharCode(0xf00d); // Default to sun icon
   
   ctx.save();
   ctx.font = '14px weathericons';
