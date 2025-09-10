@@ -1,6 +1,90 @@
 import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
 import { toggleChartMode } from './chart-toggle.js';
 
+// Chart mode tooltip state
+let chartModeTooltipTimer = null;
+
+/**
+ * Shows a tooltip indicating the current chart mode
+ * @param {string} mode - The current chart mode
+ */
+export function showChartModeTooltip(mode) {
+  // Hide any existing tooltip first
+  hideChartModeTooltip();
+  
+  // Create tooltip element
+  const tooltip = document.createElement('div');
+  tooltip.id = 'chart-mode-tooltip';
+  tooltip.className = 'chart-mode-tooltip';
+  
+  // Set tooltip text based on mode
+  const modeNames = {
+    [CHART_MODES.PRECIPITATION]: 'Precipitazioni',
+    [CHART_MODES.TEMPERATURE]: 'Temperature', 
+    [CHART_MODES.WIND]: 'Vento',
+    [CHART_MODES.PRESSURE]: 'Pressione'
+  };
+  
+  tooltip.innerHTML = `
+    <div style="font-weight: 600; margin-bottom: 4px;">
+      ${modeNames[mode] || mode}
+    </div>
+    <div style="font-size: 0.75rem; opacity: 0.8;">
+      doppio click per cambiare
+    </div>
+  `;
+  
+  // Add to DOM
+  document.body.appendChild(tooltip);
+  
+  // Position tooltip near the navigation dots
+  const navigationContainer = document.querySelector('.chart-mode-navigation');
+  if (navigationContainer) {
+    const rect = navigationContainer.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    
+    // Position above the navigation dots, centered
+    const left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+    const top = rect.top - tooltipRect.height - 12; // 12px gap
+    
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+  
+  // Show tooltip with animation
+  setTimeout(() => {
+    tooltip.classList.add('show');
+  }, 10);
+  
+  // Auto-hide after 2 seconds
+  chartModeTooltipTimer = setTimeout(() => {
+    hideChartModeTooltip();
+  }, 2000);
+  
+  console.log(`📊 Chart mode tooltip shown: ${modeNames[mode]}`);
+}
+
+/**
+ * Hides the chart mode tooltip
+ */
+function hideChartModeTooltip() {
+  const tooltip = document.getElementById('chart-mode-tooltip');
+  if (tooltip) {
+    tooltip.classList.remove('show');
+    setTimeout(() => {
+      if (tooltip.parentNode) {
+        tooltip.parentNode.removeChild(tooltip);
+      }
+    }, 300); // Wait for fade out animation
+  }
+  
+  // Clear timer
+  if (chartModeTooltipTimer) {
+    clearTimeout(chartModeTooltipTimer);
+    chartModeTooltipTimer = null;
+  }
+}
+
 /**
  * Updates the visual state of navigation dots to reflect the current chart mode
  * @param {string} activeMode - The currently active chart mode
@@ -57,6 +141,9 @@ export function setupNavigationDots(weatherData) {
         
         // Update navigation dots visual state
         updateNavigationDots(mode);
+        
+        // Show tooltip to indicate the active mode
+        showChartModeTooltip(mode);
       }
     };
     

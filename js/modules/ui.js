@@ -3,7 +3,7 @@ import { getRainIconClass } from './icons.js';
 import { buildChart, getDaySlice } from './charts.js';
 import { precipitationManager } from './precipitation.js';
 import { updateAirQualityDisplay } from './air-quality.js';
-import { setupChartToggleListeners, buildAppropriateChart, showChartModeTooltip } from './chart-toggle.js';
+import { setupChartToggleListeners, buildAppropriateChart } from './chart-toggle.js';
 import { setupNavigationDots, syncNavigationDotsWithChartMode } from './navigation-dots.js';
 import { setupVersionTooltip } from './version-tooltip.js';
 
@@ -238,9 +238,7 @@ export function displayData(data){
   // Setup version tooltip functionality
   setupVersionTooltip();
   
-  // Show mode change tooltip on page load/refresh
-  const currentMode = chartModes['today-chart'];
-  showChartModeTooltip('today-chart', currentMode);
+  // Tooltip display is now handled by navigation dots when user interacts
   
   const lastUpdated = $('last-updated'); 
   if (lastUpdated) {
