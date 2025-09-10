@@ -138,9 +138,8 @@
 /* Chart Mode Navigation Dots */
 .chart-mode-navigation {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.25rem;
   align-items: center;
-  margin-right: 1rem;
 }
 
 .nav-dot {
@@ -190,56 +189,10 @@
   box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
 }
 
-/* Mode-specific colors for active dots */
-.nav-dot[data-mode="precipitation"].active .dot-icon {
-  background-color: var(--secondary-color);
-  border-color: var(--secondary-color);
-  box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
-}
-
-.nav-dot[data-mode="temperature"].active .dot-icon {
-  background-color: #e74c3c;
-  border-color: #e74c3c;
-  box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
-}
-
-.nav-dot[data-mode="wind"].active .dot-icon {
-  background-color: #27ae60;
-  border-color: #27ae60;
-  box-shadow: 0 0 8px rgba(39, 174, 96, 0.4);
-}
-
-.nav-dot[data-mode="pressure"].active .dot-icon {
-  background-color: #8e44ad;
-  border-color: #8e44ad;
-  box-shadow: 0 0 8px rgba(142, 68, 173, 0.4);
-}
-
-@media (prefers-color-scheme: dark) {
-  .nav-dot[data-mode="temperature"].active .dot-icon {
-    background-color: #e67e22;
-    border-color: #e67e22;
-    box-shadow: 0 0 8px rgba(230, 126, 34, 0.4);
-  }
-  
-  .nav-dot[data-mode="wind"].active .dot-icon {
-    background-color: #2ecc71;
-    border-color: #2ecc71;
-    box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
-  }
-  
-  .nav-dot[data-mode="pressure"].active .dot-icon {
-    background-color: #9b59b6;
-    border-color: #9b59b6;
-    box-shadow: 0 0 8px rgba(155, 89, 182, 0.4);
-  }
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .chart-mode-navigation {
-    gap: 0.3rem;
-    margin-right: 0.5rem;
+    gap: 0.2rem;
   }
   
   .nav-dot {
@@ -401,6 +354,37 @@ body {
   text-align: center;
   margin: 0.5rem 0;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+}
+
+.header-title {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chart-mode-navigation {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.header-buttons {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
 }
 
 .header h1 {

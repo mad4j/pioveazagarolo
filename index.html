@@ -18,7 +18,7 @@
 
 <body>
   <div class="dashboard-container">
-    <div class="header d-flex align-items-center justify-content-between">
+    <div class="header">
       <!-- Navigation dots for chart modes -->
       <div class="chart-mode-navigation" aria-label="Modalità grafici disponibili">
         <button class="nav-dot" data-mode="precipitation" title="Modalità precipitazioni" aria-label="Precipitazioni">
@@ -34,15 +34,19 @@
           <span class="dot-icon"></span>
         </button>
       </div>
-      <div class="flex-grow-1 text-center">
+      
+      <div class="header-title">
         <h1 class="mb-0">Piove a Zagarolo?</h1>
       </div>
-  <button id="install-button" class="btn btn-sm ms-2 icon-btn" style="display:none;" title="Installa app" aria-label="Installa applicazione PWA">
-        <i class="wi wi-cloud-down" aria-hidden="true"></i>
-      </button>
-  <button id="update-button" class="btn btn-sm ms-1 icon-btn" style="display:none;" title="Aggiorna app" aria-label="Aggiorna applicazione all'ultima versione">
-        <i class="wi wi-refresh" aria-hidden="true"></i>
-      </button>
+      
+      <div class="header-buttons">
+        <button id="install-button" class="btn btn-sm icon-btn" style="display:none;" title="Installa app" aria-label="Installa applicazione PWA">
+          <i class="wi wi-cloud-down" aria-hidden="true"></i>
+        </button>
+        <button id="update-button" class="btn btn-sm icon-btn" style="display:none;" title="Aggiorna app" aria-label="Aggiorna applicazione all'ultima versione">
+          <i class="wi wi-refresh" aria-hidden="true"></i>
+        </button>
+      </div>
     </div>
 
     <!-- Condizioni attuali compatte -->
