@@ -164,7 +164,7 @@ export function setupNavigationDots(weatherData) {
  */
 function switchToMode(targetMode, weatherData) {
   // Import chart building functions
-  import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, getDaySlice }) => {
+  import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice }) => {
     if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
     
     // Chart IDs and their corresponding day indices
@@ -186,6 +186,10 @@ function switchToMode(targetMode, weatherData) {
       }
     } else if (targetMode === CHART_MODES.PRESSURE) {
       if (!weatherData.hourly.pressure_msl) {
+        actualMode = CHART_MODES.PRECIPITATION;
+      }
+    } else if (targetMode === CHART_MODES.AIR_QUALITY) {
+      if (!weatherData.air_quality || !weatherData.air_quality.hourly || !weatherData.air_quality.hourly.european_aqi) {
         actualMode = CHART_MODES.PRECIPITATION;
       }
     }
@@ -216,6 +220,10 @@ function switchToMode(targetMode, weatherData) {
         const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
         const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
         buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
+      } else if (actualMode === CHART_MODES.AIR_QUALITY) {
+        // Switch to air quality chart
+        const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
+        buildAirQualityChart(chartId, eaqiSlice, sunriseTime, sunsetTime);
       } else {
         // Switch to precipitation chart
         const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);

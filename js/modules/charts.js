@@ -1147,7 +1147,7 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
               else if (eaqiValue > 40) eaqiLevel = 'Moderata';
               else if (eaqiValue > 20) eaqiLevel = 'Discreta';
               
-              rows.push({ k: 'eaqi', t: `Qualità dell'aria: ${eaqiValue} (${eaqiLevel})` });
+              rows.push({ k: 'eaqi', t: `EAQI: ${eaqiValue} (${eaqiLevel})` });
 
               if (sunriseTime && sunsetTime) {
                 const hour = parseFloat(dp.label.split(':')[0]);
