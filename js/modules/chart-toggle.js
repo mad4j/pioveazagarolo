@@ -1,6 +1,18 @@
 import { CHART_MODES, chartModes, $, saveChartMode } from './constants.js';
 import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, getDaySlice } from './charts.js';
 
+// Keep a reference to sync function to avoid import issues
+let syncNavigationDots = null;
+
+// Initialize sync function when module loads
+document.addEventListener('DOMContentLoaded', () => {
+  import('./navigation-dots.js').then(({ syncNavigationDotsWithChartMode }) => {
+    syncNavigationDots = syncNavigationDotsWithChartMode;
+  }).catch(err => {
+    console.warn('Could not load navigation dots sync:', err);
+  });
+});
+
 /**
  * Shows a temporary tooltip indicating current chart mode
  * @param {string} chartId - Target chart ID
@@ -197,6 +209,18 @@ export function toggleChartMode(triggeredChartId, weatherData) {
   
   // Show mode indicator on the chart that was clicked
   showChartModeTooltip(triggeredChartId, actualNewMode);
+  
+  // Sync navigation dots with the new mode
+  if (syncNavigationDots) {
+    syncNavigationDots();
+  } else {
+    // Fallback: try to import and call sync function
+    import('./navigation-dots.js').then(({ syncNavigationDotsWithChartMode }) => {
+      syncNavigationDotsWithChartMode();
+    }).catch(err => {
+      console.warn('Could not sync navigation dots:', err);
+    });
+  }
 }
 
 /**

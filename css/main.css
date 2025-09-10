@@ -135,6 +135,76 @@
   opacity: 1;
 }
 
+/* Chart Mode Navigation Dots */
+.chart-mode-navigation {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.nav-dot {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.nav-dot:hover {
+  transform: scale(1.1);
+}
+
+.nav-dot:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
+.dot-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.nav-dot.active .dot-icon {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+}
+
+.nav-dot:hover .dot-icon {
+  background-color: var(--text-secondary);
+  transform: scale(1.2);
+}
+
+.nav-dot.active:hover .dot-icon {
+  background-color: var(--secondary-color);
+  box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chart-mode-navigation {
+    gap: 0.2rem;
+  }
+  
+  .nav-dot {
+    padding: 0.2rem;
+  }
+  
+  .dot-icon {
+    width: 6px;
+    height: 6px;
+  }
+}
+
 @keyframes toast-in {
   to {
     opacity: 1;
@@ -284,6 +354,27 @@ body {
   text-align: center;
   margin: 0.5rem 0;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+}
+
+.header-title {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-buttons {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
 }
 
 .header h1 {
@@ -432,12 +523,42 @@ footer {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+  position: relative;
 }
 
-/* Version info slightly smaller than rest of footer text */
-.version-info, .version-info #app-version { 
-  font-size: 0.55rem; /* smaller than base footer text */
-  letter-spacing: 0.3px;
+/* Center the chart navigation dots in footer */
+footer .chart-mode-navigation {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+/* Version tooltip - centered on page */
+.version-tooltip {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, var(--primary-color), #1d2b36);
+  color: #fff;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 1200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.version-tooltip.show {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .footer-link {
@@ -618,8 +739,6 @@ footer {
     margin-bottom: 0;
     padding-bottom: 0.25rem;
   }
-  /* Mobile: keep version text proportionally smaller */
-  .version-info, .version-info #app-version { font-size: 0.5rem; }
 }
 
 /* Dark mode */
