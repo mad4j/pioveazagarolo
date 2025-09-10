@@ -561,6 +561,29 @@ footer .chart-mode-navigation {
   pointer-events: auto;
 }
 
+/* Chart mode tooltip - positioned above navigation dots */
+.chart-mode-tooltip {
+  position: fixed;
+  background: linear-gradient(135deg, var(--primary-color), #1d2b36);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  z-index: 1200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(8px);
+  white-space: nowrap;
+}
+
+.chart-mode-tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .footer-link {
   color: var(--secondary-color);
   text-decoration: none;
