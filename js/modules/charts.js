@@ -755,20 +755,48 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   const pressureDeltas = pressureData.map(pressure => pressure - 1013);
   const deltasColors = pressureDeltas.map(getPressureDeltaBarColor);
   
-  // Calculate scale to center 1013 hPa in the chart
+  // Calculate scale to ensure 1013 hPa is visible but not necessarily centered
   const dataMin = Math.min(...pressureData);
   const dataMax = Math.max(...pressureData);
   const referencePoint = 1013;
-  const dataRange = Math.max(dataMax - referencePoint, referencePoint - dataMin);
-  const padding = Math.max(dataRange * 0.1, 2); // 10% padding or minimum 2 hPa
-  const minPressure = referencePoint - dataRange - padding;
-  const maxPressure = referencePoint + dataRange + padding;
   
-  // Calculate delta scale range
+  // Calculate natural data range with padding
+  const dataRange = dataMax - dataMin;
+  const basePadding = Math.max(dataRange * 0.15, 3); // 15% padding or minimum 3 hPa
+  
+  // Start with natural data bounds plus padding
+  let minPressure = dataMin - basePadding;
+  let maxPressure = dataMax + basePadding;
+  
+  // Ensure 1013 hPa reference line is visible within the chart
+  if (referencePoint < minPressure) {
+    // 1013 is below the current range, extend downward
+    minPressure = referencePoint - basePadding;
+  } else if (referencePoint > maxPressure) {
+    // 1013 is above the current range, extend upward  
+    maxPressure = referencePoint + basePadding;
+  }
+  
+  // Ensure minimum range for chart readability
+  const finalRange = maxPressure - minPressure;
+  if (finalRange < 10) {
+    const center = (minPressure + maxPressure) / 2;
+    minPressure = center - 5;
+    maxPressure = center + 5;
+  }
+  
+  // Calculate delta scale range - center delta bars on 1013 hPa line
   const maxDelta = Math.max(...pressureDeltas.map(Math.abs));
   const deltaRange = Math.max(maxDelta, 5); // Minimum range of 5 hPa
-  const minDelta = -deltaRange;
-  const maxDeltaValue = deltaRange;
+  
+  // Calculate where 1013 hPa falls in the pressure scale (as a fraction from 0 to 1)
+  const pressurePosition = (referencePoint - minPressure) / (maxPressure - minPressure);
+  
+  // Adjust delta scale so that 0 (zero delta) aligns with 1013 hPa position
+  // We want: (0 - minDelta) / (maxDeltaValue - minDelta) = pressurePosition
+  // Solving: minDelta = -pressurePosition * 2 * deltaRange, maxDeltaValue = (1 - pressurePosition) * 2 * deltaRange
+  const minDelta = -pressurePosition * 2 * deltaRange;
+  const maxDeltaValue = (1 - pressurePosition) * 2 * deltaRange;
   
   const plugins = [sunriseSunsetPlugin, pressure1013LinePlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
