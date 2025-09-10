@@ -295,7 +295,18 @@ export function getWindSpeedColor(v) { if (v > 50) return '#8e44ad'; if (v > 30)
 
 export function getPressureLineColor(v) { if (v > 1030) return '#e74c3c'; if (v > 1020) return '#f39c12'; if (v > 1010) return '#27ae60'; if (v > 1000) return '#3498db'; if (v > 990) return '#9b59b6'; return '#34495e'; }
 
-export function getHumidityBarColor(v) { if (v > 80) return '#2980b9'; if (v > 60) return '#3498db'; if (v > 40) return '#27ae60'; if (v > 30) return '#f1c40f'; return '#e67e22'; }
+export function getHumidityBarColor(v) { 
+  // Clear gradient from light (low humidity) to dark (high humidity) with better visibility
+  if (v >= 90) return '#1a252f';     // Very dark blue - very high humidity (90-100%)
+  if (v >= 80) return '#2c3e50';     // Dark blue-gray - high humidity (80-89%)
+  if (v >= 70) return '#34495e';     // Medium dark blue-gray - moderately high humidity (70-79%)
+  if (v >= 60) return '#52708e';     // Medium blue - moderate humidity (60-69%)
+  if (v >= 50) return '#6c8ebf';     // Light blue - moderate humidity (50-59%)
+  if (v >= 40) return '#85a3d1';     // Lighter blue - moderate-low humidity (40-49%)
+  if (v >= 30) return '#a3c1e3';     // Light blue - low humidity (30-39%)
+  if (v >= 20) return '#c1d7f0';     // Very light blue - low humidity (20-29%)
+  return '#e0efff';                  // Pale blue - very low humidity (0-19%)
+}
 
 export function getPressureDeltaBarColor(delta) {
   // Color mapping for pressure deltas (pressure - 1013)
