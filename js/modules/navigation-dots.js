@@ -25,7 +25,14 @@ function showChartModeTooltip(mode) {
     [CHART_MODES.PRESSURE]: 'Pressione'
   };
   
-  tooltip.textContent = modeNames[mode] || mode;
+  tooltip.innerHTML = `
+    <div style="font-weight: 600; margin-bottom: 4px;">
+      ${modeNames[mode] || mode}
+    </div>
+    <div style="font-size: 0.75rem; opacity: 0.8;">
+      doppio click per cambiare
+    </div>
+  `;
   
   // Add to DOM
   document.body.appendChild(tooltip);

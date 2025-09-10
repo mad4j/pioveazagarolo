@@ -13,95 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/**
- * Shows a temporary tooltip indicating current chart mode
- * @param {string} chartId - Target chart ID
- * @param {string} mode - Current chart mode
- */
-export function showChartModeTooltip(chartId, mode) {
-  // Remove existing chart mode tooltips
-  document.querySelectorAll('.chart-mode-tooltip').forEach(t => t.remove());
-  
-  const chartElement = $(chartId);
-  if (!chartElement) return;
-  
-  const tooltip = document.createElement('div');
-  tooltip.className = 'chart-mode-tooltip';
-  tooltip.style.cssText = `
-    position: fixed;
-    z-index: 1000;
-    font: 12px 'Helvetica Neue', Arial;
-    color: #ecf0f1;
-    background: rgba(44,62,80,0.92);
-    padding: 6px 8px;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,.35);
-    max-width: 240px;
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  `;
-  
-  let modeText, icon;
-  if (mode === CHART_MODES.PRECIPITATION) {
-    modeText = 'Precipitazioni';
-    icon = '<i class="wi wi-umbrella" style="margin-right: 4px; color: #3498db;"></i>';
-  } else if (mode === CHART_MODES.TEMPERATURE) {
-    modeText = 'Temperature';
-    icon = '<i class="wi wi-thermometer" style="margin-right: 4px; color: #e74c3c;"></i>';
-  } else if (mode === CHART_MODES.PRESSURE) {
-    modeText = 'Pressione';
-    icon = '<i class="wi wi-barometer" style="margin-right: 4px; color: #8e44ad;"></i>';
-  } else {
-    modeText = 'Vento';
-    icon = '<i class="wi wi-strong-wind" style="margin-right: 4px; color: #27ae60;"></i>';
-  }
-  
-  tooltip.innerHTML = `
-    <div style="font-weight: 600; margin-bottom: 4px;">
-      Modalità grafico
-    </div>
-    <div style="display: flex; align-items: center; font-size: 12px; line-height: 1.2;">
-      ${icon}<span>${modeText}</span>
-    </div>
-    <div style="font-size: 10px; margin-top: 4px; color: #bdc3c7;">
-      Doppio click per cambiare
-    </div>
-  `;
-  
-  document.body.appendChild(tooltip);
-  
-  // Position tooltip at the bottom center of the page
-  const tooltipRect = tooltip.getBoundingClientRect();
-  
-  let left = (window.innerWidth - tooltipRect.width) / 2;
-  let top = window.innerHeight - tooltipRect.height - 20; // Fixed bottom position
-  
-  // Ensure tooltip doesn't go off-screen horizontally
-  if (left < 10) left = 10;
-  if (left + tooltipRect.width > window.innerWidth - 10) left = window.innerWidth - tooltipRect.width - 10;
-  
-  tooltip.style.left = left + 'px';
-  tooltip.style.top = top + 'px';
-  
-  // Animate in
-  requestAnimationFrame(() => {
-    tooltip.style.opacity = '1';
-    tooltip.style.transform = 'translateY(0)';
-  });
-  
-  // Remove tooltip after 3 seconds or on click
-  const removeTooltip = () => {
-    tooltip.style.opacity = '0';
-    tooltip.style.transform = 'translateY(-10px)';
-    setTimeout(() => tooltip.remove(), 300);
-    document.removeEventListener('click', removeTooltip);
-  };
-  
-  setTimeout(removeTooltip, 3000);
-  document.addEventListener('click', removeTooltip, { once: true });
-}
+// Chart tooltip functionality removed - now handled by navigation-dots.js
 
 /**
  * Removes all visible chart tooltips immediately
@@ -207,8 +119,7 @@ export function toggleChartMode(triggeredChartId, weatherData) {
     }
   });
   
-  // Show mode indicator on the chart that was clicked
-  showChartModeTooltip(triggeredChartId, actualNewMode);
+  // Mode indicator tooltip is now handled by navigation dots only
   
   // Sync navigation dots with the new mode
   if (syncNavigationDots) {
