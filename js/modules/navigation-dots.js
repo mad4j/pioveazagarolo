@@ -9,6 +9,8 @@ let chartModeTooltipTimer = null;
  * @param {string} mode - The current chart mode
  */
 export function showChartModeTooltip(mode) {
+  console.log(`📊 Debug: showChartModeTooltip called with mode: "${mode}" (type: ${typeof mode})`);
+  
   // Hide any existing tooltip first
   hideChartModeTooltip();
   
@@ -18,13 +20,20 @@ export function showChartModeTooltip(mode) {
   tooltip.className = 'chart-mode-tooltip';
   
   // Set tooltip text based on mode
-  const modeNames = {
-    [CHART_MODES.PRECIPITATION]: 'Precipitazioni',
-    [CHART_MODES.TEMPERATURE]: 'Temperature', 
-    [CHART_MODES.WIND]: 'Vento',
-    [CHART_MODES.PRESSURE]: 'Pressione',
-    [CHART_MODES.AIR_QUALITY]: 'Qualità dell\'aria'
-  };
+  const modeNames = {};
+  modeNames[CHART_MODES.PRECIPITATION] = 'Precipitazioni';
+  modeNames[CHART_MODES.TEMPERATURE] = 'Temperature'; 
+  modeNames[CHART_MODES.WIND] = 'Vento';
+  modeNames[CHART_MODES.PRESSURE] = 'Pressione';
+  modeNames['air-quality'] = 'Qualità dell\'aria'; // Direct hardcode to bypass caching issue
+  
+  console.log(`📊 Debug: CHART_MODES.AIR_QUALITY value: "${CHART_MODES.AIR_QUALITY}"`);
+  console.log(`📊 Debug: Direct lookup modeNames['air-quality']:`, modeNames['air-quality']);
+  console.log(`📊 Debug: Mode names object keys:`, Object.keys(modeNames));
+  
+  console.log(`📊 Debug: Available modes:`, CHART_MODES);
+  console.log(`📊 Debug: Mode names mapping:`, modeNames);
+  console.log(`📊 Debug: Looking for mode "${mode}" in modeNames:`, modeNames[mode]);
   
   tooltip.innerHTML = `
     <div style="font-weight: 600; margin-bottom: 4px;">
@@ -164,8 +173,19 @@ export function setupNavigationDots(weatherData) {
  */
 function switchToMode(targetMode, weatherData) {
   // Import chart building functions
-  import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, getDaySlice }) => {
+  import(`./charts.js?t=${Date.now()}`).then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildEAQIChart, getDaySlice }) => {
+    console.log(`📊 Debug: Imported functions:`, { 
+      buildChart: typeof buildChart, 
+      buildTemperatureChart: typeof buildTemperatureChart, 
+      buildWindChart: typeof buildWindChart, 
+      buildPressureChart: typeof buildPressureChart, 
+      buildEAQIChart: typeof buildEAQIChart, 
+      getDaySlice: typeof getDaySlice 
+    });
     if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
+    
+    console.log(`📊 Debug: switchToMode called with targetMode: "${targetMode}"`);
+    console.log(`📊 Debug: Air quality data available:`, !!weatherData?.air_quality?.hourly?.european_aqi);
     
     // Chart IDs and their corresponding day indices
     const chartConfigs = [
@@ -187,6 +207,13 @@ function switchToMode(targetMode, weatherData) {
     } else if (targetMode === CHART_MODES.PRESSURE) {
       if (!weatherData.hourly.pressure_msl) {
         actualMode = CHART_MODES.PRECIPITATION;
+      }
+    } else if (targetMode === 'air-quality') { // Use string to avoid undefined constant issue
+      if (!weatherData.air_quality?.hourly?.european_aqi) {
+        actualMode = CHART_MODES.PRECIPITATION;
+        console.log(`📊 Debug: Air quality data not available, falling back to precipitation`);
+      } else {
+        console.log(`📊 Debug: Air quality data available, switching to EAQI charts`);
       }
     }
     
@@ -216,6 +243,11 @@ function switchToMode(targetMode, weatherData) {
         const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
         const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
         buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
+      } else if (actualMode === 'air-quality') { // Use string to avoid undefined constant issue
+        // Switch to air quality chart
+        const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
+        console.log(`📊 Debug: Building EAQI chart for ${chartId} with data:`, eaqiSlice.slice(0, 5));
+        buildEAQIChart(chartId, eaqiSlice, sunriseTime, sunsetTime);
       } else {
         // Switch to precipitation chart
         const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
