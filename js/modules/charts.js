@@ -755,14 +755,35 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   const pressureDeltas = pressureData.map(pressure => pressure - 1013);
   const deltasColors = pressureDeltas.map(getPressureDeltaBarColor);
   
-  // Calculate scale to center 1013 hPa in the chart
+  // Calculate scale to ensure 1013 hPa is visible but not necessarily centered
   const dataMin = Math.min(...pressureData);
   const dataMax = Math.max(...pressureData);
   const referencePoint = 1013;
-  const dataRange = Math.max(dataMax - referencePoint, referencePoint - dataMin);
-  const padding = Math.max(dataRange * 0.1, 2); // 10% padding or minimum 2 hPa
-  const minPressure = referencePoint - dataRange - padding;
-  const maxPressure = referencePoint + dataRange + padding;
+  
+  // Calculate natural data range with padding
+  const dataRange = dataMax - dataMin;
+  const basePadding = Math.max(dataRange * 0.15, 3); // 15% padding or minimum 3 hPa
+  
+  // Start with natural data bounds plus padding
+  let minPressure = dataMin - basePadding;
+  let maxPressure = dataMax + basePadding;
+  
+  // Ensure 1013 hPa reference line is visible within the chart
+  if (referencePoint < minPressure) {
+    // 1013 is below the current range, extend downward
+    minPressure = referencePoint - basePadding;
+  } else if (referencePoint > maxPressure) {
+    // 1013 is above the current range, extend upward  
+    maxPressure = referencePoint + basePadding;
+  }
+  
+  // Ensure minimum range for chart readability
+  const finalRange = maxPressure - minPressure;
+  if (finalRange < 10) {
+    const center = (minPressure + maxPressure) / 2;
+    minPressure = center - 5;
+    maxPressure = center + 5;
+  }
   
   // Calculate delta scale range
   const maxDelta = Math.max(...pressureDeltas.map(Math.abs));
