@@ -33,77 +33,25 @@ export function getEAQILevel(eaqiValue) {
 }
 
 /**
- * Crea SVG gauge per l'icona della qualità dell'aria
+ * Crea SVG cerchio colorato per l'icona della qualità dell'aria
  * @param {number} eaqiValue - Valore EAQI corrente
  * @param {Object} level - Oggetto livello EAQI
- * @returns {string} SVG markup per il gauge
+ * @returns {string} SVG markup per il cerchio colorato
  */
-function createAirQualityGauge(eaqiValue, level) {
+function createAirQualityCircle(eaqiValue, level) {
   const size = 20;
-  const strokeWidth = 4; // Increased from 3 to 4 for thicker arc
-  const radius = (size - strokeWidth) / 2;
+  const radius = 8;
   const centerX = size / 2;
   const centerY = size / 2;
   
-  // Calcola l'angolo per il valore (0-270 gradi per un arco di 3/4 di cerchio)
-  const maxValue = 120; // Scala fino a 120 per coprire tutti i livelli EAQI
-  const angle = Math.min((eaqiValue / maxValue) * 270, 270);
-  const needleAngle = angle - 45; // Ruota tutto il gauge di -45°
-  
-  // Coordinate della punta dell'ago
-  const needleLength = radius - 1;
-  const needleX = centerX + needleLength * Math.cos(needleAngle * Math.PI / 180);
-  const needleY = centerY + needleLength * Math.sin(needleAngle * Math.PI / 180);
-  
-  // Ottieni il colore dell'ago dalle CSS custom properties
-  const needleColor = getComputedStyle(document.documentElement).getPropertyValue('--air-quality-needle').trim() || '#2c3e50';
-  
-  // Definisci i segmenti basati sui livelli EAQI reali (270 gradi diviso in 6 segmenti = 45 gradi ciascuno)
-  // Ruota tutti i segmenti di -45°
-  const segments = [
-    { startAngle: -45, endAngle: 0, color: '#50f0e6' },     // Good (0-20)
-    { startAngle: 0, endAngle: 45, color: '#50ccaa' },      // Fair (21-40) 
-    { startAngle: 45, endAngle: 90, color: '#f0e641' },     // Moderate (41-60)
-    { startAngle: 90, endAngle: 135, color: '#ff5050' },    // Poor (61-80)
-    { startAngle: 135, endAngle: 180, color: '#960032' },   // Very Poor (81-100)
-    { startAngle: 180, endAngle: 225, color: '#7d2181' }    // Extremely Poor (101+)
-  ];
-  
-  let segmentPaths = '';
-  
-  segments.forEach(segment => {
-    const startX = centerX + radius * Math.cos(segment.startAngle * Math.PI / 180);
-    const startY = centerY + radius * Math.sin(segment.startAngle * Math.PI / 180);
-    const endX = centerX + radius * Math.cos(segment.endAngle * Math.PI / 180);
-    const endY = centerY + radius * Math.sin(segment.endAngle * Math.PI / 180);
-    
-    const largeArcFlag = (segment.endAngle - segment.startAngle) > 90 ? 1 : 0;
-    
-    segmentPaths += `
-      <path d="M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}" 
-            fill="none" stroke="${segment.color}" stroke-width="${strokeWidth}" 
-            stroke-linecap="round" opacity="0.7"/>
-    `;
-  });
-  
-  // Creare il path di sfondo per l'arco di 270 gradi (da -45 a 225 gradi)
-  const bgStartX = centerX + radius * Math.cos(-45 * Math.PI / 180); // -45 gradi
-  const bgStartY = centerY + radius * Math.sin(-45 * Math.PI / 180);
-  const bgEndX = centerX + radius * Math.cos(225 * Math.PI / 180);   // 225 gradi
-  const bgEndY = centerY + radius * Math.sin(225 * Math.PI / 180);
-  
   return `
     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-      <!-- Sfondo arco 270 gradi -->
-      <path d="M ${bgStartX} ${bgStartY} A ${radius} ${radius} 0 1 1 ${bgEndX} ${bgEndY}" 
-            fill="none" stroke="#e0e0e0" stroke-width="2" opacity="0.3"/>
-      <!-- Segmenti colorati -->
-      ${segmentPaths}
-      <!-- Ago dell'indicatore con colore adattivo per modalità chiara/scura -->
-      <line x1="${centerX}" y1="${centerY}" x2="${needleX}" y2="${needleY}" 
-            stroke="${needleColor}" stroke-width="2" stroke-linecap="round"/>
-      <!-- Centro dell'ago -->
-      <circle cx="${centerX}" cy="${centerY}" r="1.5" fill="${needleColor}"/>
+      <!-- Cerchio colorato EAQI -->
+      <circle cx="${centerX}" cy="${centerY}" r="${radius}" 
+              fill="${level.color}" 
+              stroke="rgba(255,255,255,0.8)" 
+              stroke-width="1"
+              opacity="0.9"/>
     </svg>
   `;
 }
@@ -130,7 +78,7 @@ export function createAirQualityIcon(cardId, eaqiValue, dayKey) {
 
   const level = getEAQILevel(eaqiValue);
   
-  // Crea elemento icona qualità dell'aria con gauge
+  // Crea elemento icona qualità dell'aria con cerchio colorato
   const airIcon = document.createElement('div');
   airIcon.className = 'air-quality-icon';
   airIcon.style.cssText = `
@@ -145,8 +93,8 @@ export function createAirQualityIcon(cardId, eaqiValue, dayKey) {
     flex-shrink: 0;
   `; 
   
-  // Inserisci il gauge SVG
-  airIcon.innerHTML = createAirQualityGauge(eaqiValue, level);
+  // Inserisci il cerchio colorato SVG
+  airIcon.innerHTML = createAirQualityCircle(eaqiValue, level);
   
   airIcon.setAttribute('aria-label', `Qualità dell'aria: ${level.label} (EAQI ${eaqiValue})`);
   airIcon.setAttribute('title', 'Clicca per dettagli qualità dell\'aria');
@@ -154,9 +102,27 @@ export function createAirQualityIcon(cardId, eaqiValue, dayKey) {
   airIcon.dataset.level = level.level;
   airIcon.dataset.dayKey = dayKey;
   
-  // Aggiungi event listener per tooltip
+  // Aggiungi event listener per tooltip (hover e click)
+  let tooltipTimer = null;
+  
+  airIcon.addEventListener('mouseenter', (e) => {
+    clearTimeout(tooltipTimer);
+    showAirQualityTooltip(airIcon, eaqiValue, level);
+  });
+  
+  airIcon.addEventListener('mouseleave', (e) => {
+    tooltipTimer = setTimeout(() => {
+      document.querySelectorAll('.air-quality-tooltip').forEach(t => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(-10px)';
+        setTimeout(() => t.remove(), 300);
+      });
+    }, 500); // Small delay before hiding
+  });
+  
   airIcon.addEventListener('click', (e) => {
     e.stopPropagation();
+    clearTimeout(tooltipTimer);
     showAirQualityTooltip(airIcon, eaqiValue, level);
   });
   
