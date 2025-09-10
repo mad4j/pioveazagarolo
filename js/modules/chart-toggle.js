@@ -60,11 +60,11 @@ export function showChartModeTooltip(chartId, mode) {
   
   document.body.appendChild(tooltip);
   
-  // Position tooltip at the top center of the page
+  // Position tooltip at the bottom center of the page
   const tooltipRect = tooltip.getBoundingClientRect();
   
   let left = (window.innerWidth - tooltipRect.width) / 2;
-  let top = 20; // Fixed top position
+  let top = window.innerHeight - tooltipRect.height - 20; // Fixed bottom position
   
   // Ensure tooltip doesn't go off-screen horizontally
   if (left < 10) left = 10;

@@ -1,9 +1,9 @@
-import { DAY_CONFIGS, ARIA_LABEL_DAY, dayFormatter, $ } from './constants.js';
+import { DAY_CONFIGS, ARIA_LABEL_DAY, dayFormatter, $, chartModes } from './constants.js';
 import { getRainIconClass } from './icons.js';
 import { buildChart, getDaySlice } from './charts.js';
 import { precipitationManager } from './precipitation.js';
 import { updateAirQualityDisplay } from './air-quality.js';
-import { setupChartToggleListeners, buildAppropriateChart } from './chart-toggle.js';
+import { setupChartToggleListeners, buildAppropriateChart, showChartModeTooltip } from './chart-toggle.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
 
@@ -229,6 +229,10 @@ export function displayData(data){
   
   // Setup chart toggle listeners once after all charts are built
   setupChartToggleListeners(data);
+  
+  // Show mode change tooltip on page load/refresh
+  const currentMode = chartModes['today-chart'];
+  showChartModeTooltip('today-chart', currentMode);
   
   const lastUpdated = $('last-updated'); 
   if (lastUpdated) {
