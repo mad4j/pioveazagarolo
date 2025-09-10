@@ -72,6 +72,37 @@ export const weatherIconsPlugin = {
   }
 };
 
+// Plugin per linea 1013 hPa in modalità pressione
+export const pressure1013LinePlugin = {
+  id: 'pressure1013Line',
+  afterDraw(chart, args, opts) {
+    const yScale = chart.scales.y;
+    if (!yScale) return;
+    
+    const { ctx, chartArea } = chart;
+    const { left, right } = chartArea;
+    
+    // Get the y pixel position for 1013 hPa
+    const y1013 = yScale.getPixelForValue(1013);
+    
+    // Only draw the line if 1013 is within the visible range
+    if (y1013 >= chartArea.top && y1013 <= chartArea.bottom) {
+      ctx.save();
+      ctx.strokeStyle = opts?.color || '#e74c3c';
+      ctx.lineWidth = opts?.lineWidth || 2;
+      ctx.setLineDash(opts?.lineDash || []);
+      ctx.globalAlpha = opts?.opacity || 0.8;
+      
+      ctx.beginPath();
+      ctx.moveTo(left, y1013);
+      ctx.lineTo(right, y1013);
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+  }
+};
+
 // Plugin per icone meteo in modalità pressione (ogni 3 ore)
 export const pressureWeatherIconsPlugin = {
   id: 'pressureWeatherIcons',
@@ -286,11 +317,26 @@ export function getPressureLineColor(v) { if (v > 1030) return '#e74c3c'; if (v 
 
 export function getHumidityBarColor(v) { if (v > 80) return '#2980b9'; if (v > 60) return '#3498db'; if (v > 40) return '#27ae60'; if (v > 30) return '#f1c40f'; return '#e67e22'; }
 
+export function getPressureDeltaBarColor(delta) {
+  // Color mapping for pressure deltas (pressure - 1013)
+  // Positive deltas (high pressure) - warmer colors
+  // Negative deltas (low pressure) - cooler colors
+  if (delta > 15) return '#8b0000';     // Dark red for very high pressure
+  if (delta > 10) return '#c0392b';     // Red for high pressure
+  if (delta > 5) return '#e74c3c';      // Light red for moderately high pressure
+  if (delta > 2) return '#f39c12';      // Orange for slightly high pressure
+  if (delta > -2) return '#95a5a6';     // Gray for neutral pressure
+  if (delta > -5) return '#3498db';     // Blue for slightly low pressure
+  if (delta > -10) return '#2980b9';    // Darker blue for moderately low pressure
+  if (delta > -15) return '#1f3a93';    // Dark blue for low pressure
+  return '#0f1419';                     // Very dark blue for very low pressure
+}
+
 function isTouchDevice() { return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0; }
 
 function isDarkMode() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
 
-function getWindDirectionColor() { return isDarkMode() ? '#f2f2f2' : '#2c3e50'; }
+function getWindDirectionColor() { return isDarkMode() ? '#f2f2f2' : '#3498db'; }
 
 export function buildChart(target, probabilityData, precipitationData, sunriseTime = null, sunsetTime = null) {
   const el = document.getElementById(target); if (!el) return; if (chartInstances[target]) chartInstances[target].destroy();
@@ -629,7 +675,9 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
 
               if (typeof direction === 'number') {
                 const directionText = getWindDirectionText(direction);
-                rows.push({ k: 'direction', t: `Direzione: ${directionText} (${Math.round(direction)}°)` });
+                const italianName = getItalianWindName(directionText);
+                const directionDisplay = italianName ? `${directionText} (${italianName})` : directionText;
+                rows.push({ k: 'direction', t: `Direzione: ${directionDisplay}` });
               }
 
               if (sunriseTime && sunsetTime) {
@@ -658,7 +706,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
             rows.forEach(r => {
               let icon = '';
               if (r.k === 'wind') icon = '<i class="wi wi-strong-wind" style="margin-right:4px; color:#3498db;"></i>';
-              else if (r.k === 'direction') icon = `<span style="margin-right:4px; color:${getWindDirectionColor()}; font-family: Arial, sans-serif;">↗</span>`;
+              else if (r.k === 'direction') icon = `<i class="wi wi-wind-direction" style="margin-right:4px; color:${getWindDirectionColor()};"></i>`;
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
 
@@ -702,9 +750,27 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   if (chartInstances[target]) chartInstances[target].destroy();
 
   const pressureColors = pressureData.map(getPressureLineColor);
-  const minPressure = Math.min(...pressureData) - 2;
-  const maxPressure = Math.max(...pressureData) + 2;
-  const plugins = [sunriseSunsetPlugin];
+  
+  // Calculate pressure deltas (pressure - 1013)
+  const pressureDeltas = pressureData.map(pressure => pressure - 1013);
+  const deltasColors = pressureDeltas.map(getPressureDeltaBarColor);
+  
+  // Calculate scale to center 1013 hPa in the chart
+  const dataMin = Math.min(...pressureData);
+  const dataMax = Math.max(...pressureData);
+  const referencePoint = 1013;
+  const dataRange = Math.max(dataMax - referencePoint, referencePoint - dataMin);
+  const padding = Math.max(dataRange * 0.1, 2); // 10% padding or minimum 2 hPa
+  const minPressure = referencePoint - dataRange - padding;
+  const maxPressure = referencePoint + dataRange + padding;
+  
+  // Calculate delta scale range
+  const maxDelta = Math.max(...pressureDeltas.map(Math.abs));
+  const deltaRange = Math.max(maxDelta, 5); // Minimum range of 5 hPa
+  const minDelta = -deltaRange;
+  const maxDeltaValue = deltaRange;
+  
+  const plugins = [sunriseSunsetPlugin, pressure1013LinePlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
   if (weatherCodes && isDayData) plugins.push(pressureWeatherIconsPlugin);
 
@@ -712,20 +778,39 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
     plugins,
     data: {
       labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
-      datasets: [{
-        label: 'Pressione (hPa)',
-        type: 'line',
-        fill: false,
-        tension: 0.4,
-        backgroundColor: 'rgb(142, 68, 173)',
-        borderColor: 'rgb(142, 68, 173)',
-        borderWidth: 2,
-        data: pressureData,
-        pointBackgroundColor: pressureColors,
-        pointRadius: 0,
-        pointHoverRadius: 4,
-        yAxisID: 'y'
-      }]
+      datasets: [
+        {
+          label: 'Pressione (hPa)',
+          type: 'line',
+          fill: false,
+          tension: 0.4,
+          backgroundColor: 'rgb(142, 68, 173)',
+          borderColor: 'rgb(142, 68, 173)',
+          borderWidth: 2,
+          data: pressureData,
+          pointBackgroundColor: pressureColors,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          yAxisID: 'y',
+          order: 1
+        },
+        {
+          label: 'Delta Pressione (hPa)',
+          type: 'bar',
+          backgroundColor: deltasColors,
+          borderColor: deltasColors,
+          borderWidth: 0,
+          data: pressureDeltas,
+          yAxisID: 'y1',
+          order: 2,
+          // Hide from tooltips
+          tooltip: {
+            filter: function(tooltipItem) {
+              return false;
+            }
+          }
+        }
+      ]
     },
     options: {
       responsive: true,
@@ -747,11 +832,21 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
           max: maxPressure,
           position: 'left',
           grid: {
-            drawOnChartArea: true,
-            color: 'rgba(200,200,200,0.2)',
+            drawOnChartArea: false,
             drawTicks: false
           },
           ticks: { display: false }
+        },
+        y1: {
+          min: minDelta,
+          max: maxDeltaValue,
+          position: 'right',
+          grid: {
+            drawOnChartArea: false,
+            drawTicks: false
+          },
+          ticks: { display: false },
+          display: false // Hide the axis completely
         },
         x: {
           grid: { display: false },
@@ -765,6 +860,12 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
         }
       },
       plugins: {
+        pressure1013Line: {
+          color: '#27ae60',
+          lineWidth: 2,
+          lineDash: [8, 4],
+          opacity: 0.8
+        },
         currentHourLine: {
           color: '#27ae60',
           overlayColor: 'rgba(128,128,128,0.18)'
@@ -780,6 +881,10 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
         legend: { display: false },
         tooltip: {
           enabled: false,
+          filter: function(tooltipItem) {
+            // Hide delta bars from tooltip (dataset index 1)
+            return tooltipItem.datasetIndex !== 1;
+          },
           external: ({ chart, tooltip }) => {
             let tip = document.getElementById('chartjs-tooltip-' + target);
             if (!tip) {
@@ -801,18 +906,21 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
 
             const rows = [];
             if (tooltip.dataPoints?.length) {
-              const dp = tooltip.dataPoints[0];
-              const pressure = Math.round(dp.parsed.y);
-              rows.push({ k: 'pressure', t: `Pressione: ${pressure} hPa` });
+              // Only show pressure data (filter out deltas)
+              const pressureDataPoint = tooltip.dataPoints.find(dp => dp.datasetIndex === 0);
+              if (pressureDataPoint) {
+                const pressure = Math.round(pressureDataPoint.parsed.y);
+                rows.push({ k: 'pressure', t: `Pressione: ${pressure} hPa` });
 
-              if (sunriseTime && sunsetTime) {
-                const hour = parseFloat(dp.label.split(':')[0]);
-                const sr = timeStringToHours(sunriseTime);
-                const ss = timeStringToHours(sunsetTime);
-                if (sr && ss) {
-                  const daylight = ss - sr;
-                  if (Math.abs(hour - sr) < 1) rows.push({ k: 'sunrise', t: `Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)` });
-                  else if (Math.abs(hour - ss) < 1) rows.push({ k: 'sunset', t: `Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)` });
+                if (sunriseTime && sunsetTime) {
+                  const hour = parseFloat(pressureDataPoint.label.split(':')[0]);
+                  const sr = timeStringToHours(sunriseTime);
+                  const ss = timeStringToHours(sunsetTime);
+                  if (sr && ss) {
+                    const daylight = ss - sr;
+                    if (Math.abs(hour - sr) < 1) rows.push({ k: 'sunrise', t: `Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)` });
+                    else if (Math.abs(hour - ss) < 1) rows.push({ k: 'sunset', t: `Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)` });
+                  }
                 }
               }
             }
@@ -866,4 +974,18 @@ function getWindDirectionText(degrees) {
   ];
   const index = Math.round((degrees % 360) / 22.5) % 16;
   return directions[index];
+}
+
+function getItalianWindName(compassDirection) {
+  const windNames = {
+    'N': 'Tramontana',
+    'NE': 'Grecale', 
+    'E': 'Levante',
+    'SE': 'Scirocco',
+    'S': 'Ostro',
+    'SW': 'Libeccio',
+    'W': 'Ponente', 
+    'NW': 'Maestrale'
+  };
+  return windNames[compassDirection] || null;
 }
