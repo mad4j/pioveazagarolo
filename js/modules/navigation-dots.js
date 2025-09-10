@@ -29,9 +29,6 @@ export function showChartModeTooltip(mode) {
     <div style="font-weight: 600; margin-bottom: 4px;">
       ${modeNames[mode] || mode}
     </div>
-    <div style="font-size: 0.75rem; opacity: 0.8;">
-      doppio click per cambiare
-    </div>
   `;
   
   // Add to DOM
