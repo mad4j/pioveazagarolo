@@ -295,7 +295,7 @@ export function getWindSpeedColor(v) { if (v > 50) return '#8e44ad'; if (v > 30)
 
 export function getPressureLineColor(v) { if (v > 1030) return '#e74c3c'; if (v > 1020) return '#f39c12'; if (v > 1010) return '#27ae60'; if (v > 1000) return '#3498db'; if (v > 990) return '#9b59b6'; return '#34495e'; }
 
-export function getHumidityBarColor(v) { if (v > 80) return '#2980b9'; if (v > 60) return '#3498db'; if (v > 40) return '#27ae60'; if (v > 30) return '#f1c40f'; return '#e67e22'; }
+export function getHumidityBarColor(v) { if (v > 80) return '#99ccff'; if (v > 60) return '#b3d9ff'; if (v > 40) return '#b3e6b3'; if (v > 30) return '#ffeb99'; return '#ffcc99'; }
 
 export function getEAQIBarColor(eaqiValue) { 
   if (eaqiValue <= 20) return '#50f0e6';      // Good
