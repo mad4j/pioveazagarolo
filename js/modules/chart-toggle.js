@@ -37,10 +37,6 @@ function hideAllChartTooltips() {
  * @param {Object} weatherData - Weather data object
  */
 export function toggleChartMode(triggeredChartId, weatherData) {
-  console.log(`📊 Debug: toggleChartMode called with chartId: ${triggeredChartId}`);
-  console.log(`📊 Debug: weatherData available:`, !!weatherData);
-  console.log(`📊 Debug: air_quality data available:`, !!weatherData?.air_quality?.hourly?.european_aqi);
-  
   if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
   
   // Hide any visible tooltips immediately before switching modes
