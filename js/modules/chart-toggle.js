@@ -1,4 +1,4 @@
-import { CHART_MODES, chartModes, $ } from './constants.js';
+import { CHART_MODES, chartModes, $, saveChartMode } from './constants.js';
 import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, getDaySlice } from './charts.js';
 
 /**
@@ -157,6 +157,9 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       actualNewMode = CHART_MODES.PRECIPITATION;
     }
   }
+  
+  // Save the new mode to localStorage for persistence across page refreshes
+  saveChartMode(actualNewMode);
   
   // Update all charts simultaneously
   chartConfigs.forEach(({ chartId, dayIndex }) => {
