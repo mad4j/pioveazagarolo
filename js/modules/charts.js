@@ -297,6 +297,15 @@ export function getPressureLineColor(v) { if (v > 1030) return '#e74c3c'; if (v 
 
 export function getHumidityBarColor(v) { if (v > 80) return '#2980b9'; if (v > 60) return '#3498db'; if (v > 40) return '#27ae60'; if (v > 30) return '#f1c40f'; return '#e67e22'; }
 
+export function getEAQIBarColor(eaqiValue) { 
+  if (eaqiValue <= 20) return '#50f0e6';      // Good
+  if (eaqiValue <= 40) return '#50ccaa';      // Fair  
+  if (eaqiValue <= 60) return '#f0e641';      // Moderate
+  if (eaqiValue <= 80) return '#ff5050';      // Poor
+  if (eaqiValue <= 100) return '#960032';     // Very poor
+  return '#7d2181';                           // Extremely poor
+}
+
 export function getPressureDeltaBarColor(delta) {
   // Color mapping for pressure deltas (pressure - 1013)
   // Positive deltas (high pressure) - warmer colors
@@ -1015,4 +1024,173 @@ function getItalianWindName(compassDirection) {
     'NW': 'Maestrale'
   };
   return windNames[compassDirection] || null;
+}
+
+/**
+ * Construisce un grafico a barre per la qualità dell'aria (EAQI)
+ * @param {string} target - ID dell'elemento canvas
+ * @param {Array} eaqiData - Array di valori EAQI orari (24 elementi)
+ * @param {string} sunriseTime - Orario alba (opzionale)
+ * @param {string} sunsetTime - Orario tramonto (opzionale) 
+ */
+export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunsetTime = null) {
+  const el = document.getElementById(target);
+  if (!el) return;
+  if (chartInstances[target]) chartInstances[target].destroy();
+
+  // Mappa i colori EAQI per ogni valore
+  const eaqiColors = eaqiData.map(getEAQIBarColor);
+  
+  // Calcola il range per le scale
+  const maxEAQI = Math.max(...eaqiData);
+  const minEAQI = Math.min(...eaqiData);
+  
+  // Assicura un range minimo per leggibilità
+  let scaleMax = Math.max(maxEAQI + 5, 50); // Almeno 50 per vedere i livelli base
+  let scaleMin = Math.max(0, minEAQI - 5);
+
+  const plugins = [sunriseSunsetPlugin];
+  if (target === 'today-chart') plugins.push(currentHourLinePlugin);
+
+  chartInstances[target] = new Chart(el, {
+    plugins,
+    data: {
+      labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
+      datasets: [
+        {
+          label: 'Qualità dell\'aria (EAQI)',
+          type: 'bar',
+          backgroundColor: eaqiColors,
+          borderColor: eaqiColors.map(color => color), // Same color for border
+          borderWidth: 1,
+          data: eaqiData,
+          maxBarThickness: 30
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: 2 },
+      onHover: (e, a, chart) => {
+        if (isTouchDevice() && a.length) {
+          if (chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout);
+          chart._tooltipTimeout = setTimeout(() => {
+            chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+            chart.setActiveElements([]);
+            chart.update('none');
+          }, 3000);
+        }
+      },
+      scales: {
+        y: {
+          min: scaleMin,
+          max: scaleMax,
+          grid: {
+            drawOnChartArea: false,
+            drawTicks: false
+          },
+          ticks: { display: false }
+        },
+        x: {
+          grid: { display: false },
+          ticks: {
+            maxRotation: 0,
+            minRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 6,
+            color: '#7f8c8d'
+          }
+        }
+      },
+      plugins: {
+        currentHourLine: {
+          color: '#27ae60',
+          overlayColor: 'rgba(128,128,128,0.18)'
+        },
+        sunriseSunset: {
+          sunrise: sunriseTime,
+          sunset: sunsetTime
+        },
+        legend: { display: false },
+        tooltip: {
+          enabled: false,
+          external: ({ chart, tooltip }) => {
+            let tip = document.getElementById('chartjs-tooltip-' + target);
+            if (!tip) {
+              tip = document.createElement('div');
+              tip.id = 'chartjs-tooltip-' + target;
+              Object.assign(tip.style, {
+                position: 'absolute',
+                pointerEvents: 'none',
+                transition: 'all .08s ease',
+                zIndex: 30
+              });
+              document.body.appendChild(tip);
+            }
+
+            if (!tooltip || tooltip.opacity === 0) {
+              tip.style.opacity = 0;
+              return;
+            }
+
+            const rows = [];
+            if (tooltip.dataPoints?.length) {
+              const dp = tooltip.dataPoints[0];
+              const eaqiValue = Math.round(dp.parsed.y);
+              const hourIndex = dp.dataIndex;
+              
+              // Determina il livello di qualità dell'aria
+              let eaqiLevel = 'Eccellente';
+              if (eaqiValue > 100) eaqiLevel = 'Estremamente pessima';
+              else if (eaqiValue > 80) eaqiLevel = 'Pessima';
+              else if (eaqiValue > 60) eaqiLevel = 'Scarsa';
+              else if (eaqiValue > 40) eaqiLevel = 'Moderata';
+              else if (eaqiValue > 20) eaqiLevel = 'Discreta';
+              
+              rows.push({ k: 'eaqi', t: `EAQI: ${eaqiValue} (${eaqiLevel})` });
+
+              if (sunriseTime && sunsetTime) {
+                const hour = parseFloat(dp.label.split(':')[0]);
+                const sr = timeStringToHours(sunriseTime);
+                const ss = timeStringToHours(sunsetTime);
+                if (sr && ss) {
+                  if (hour >= sr && hour < ss) {
+                    rows.push({ k: 'day', t: 'Giorno' });
+                  } else {
+                    rows.push({ k: 'night', t: 'Notte' });
+                  }
+                }
+              }
+            }
+
+            const html = rows.map(row => 
+              `<div class="tooltip-row">${row.t}</div>`
+            ).join('');
+
+            tip.innerHTML = html;
+            tip.className = 'chart-tooltip';
+
+            // Position tooltip
+            const canvas = chart.canvas;
+            const rect = canvas.getBoundingClientRect();
+            
+            // Basic positioning - keep within viewport
+            let left = rect.left + tooltip.caretX;
+            let top = rect.top + tooltip.caretY - 10;
+            
+            // Adjust to stay within viewport
+            if (left + 150 > window.innerWidth) left -= 160;
+            if (top < 10) top = rect.top + tooltip.caretY + 10;
+            
+            Object.assign(tip.style, {
+              left: left + 'px',
+              top: top + 'px',
+              opacity: 1
+            });
+          }
+        }
+      }
+    }
+  });
 }
