@@ -8,7 +8,8 @@ export const CHART_MODES = {
   PRECIPITATION: 'precipitation',
   TEMPERATURE: 'temperature',
   WIND: 'wind',
-  PRESSURE: 'pressure'
+  PRESSURE: 'pressure',
+  AIR_QUALITY: 'air-quality'
 };
 
 export const DAY_CONFIGS = [
