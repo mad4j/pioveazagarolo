@@ -733,8 +733,15 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   if (chartInstances[target]) chartInstances[target].destroy();
 
   const pressureColors = pressureData.map(getPressureLineColor);
-  const minPressure = Math.min(...pressureData) - 2;
-  const maxPressure = Math.max(...pressureData) + 2;
+  
+  // Calculate scale to center 1013 hPa in the chart
+  const dataMin = Math.min(...pressureData);
+  const dataMax = Math.max(...pressureData);
+  const referencePoint = 1013;
+  const dataRange = Math.max(dataMax - referencePoint, referencePoint - dataMin);
+  const padding = Math.max(dataRange * 0.1, 2); // 10% padding or minimum 2 hPa
+  const minPressure = referencePoint - dataRange - padding;
+  const maxPressure = referencePoint + dataRange + padding;
   const plugins = [sunriseSunsetPlugin, pressure1013LinePlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
   if (weatherCodes && isDayData) plugins.push(pressureWeatherIconsPlugin);
@@ -796,8 +803,9 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
       },
       plugins: {
         pressure1013Line: {
-          color: '#e74c3c',
+          color: '#27ae60',
           lineWidth: 2,
+          lineDash: [8, 4],
           opacity: 0.8
         },
         currentHourLine: {
