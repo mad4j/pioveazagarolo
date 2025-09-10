@@ -3,11 +3,13 @@ import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, 
 
 // Keep a reference to sync function to avoid import issues
 let syncNavigationDots = null;
+let showTooltip = null;
 
 // Initialize sync function when module loads
 document.addEventListener('DOMContentLoaded', () => {
-  import('./navigation-dots.js').then(({ syncNavigationDotsWithChartMode }) => {
+  import('./navigation-dots.js').then(({ syncNavigationDotsWithChartMode, showChartModeTooltip }) => {
     syncNavigationDots = syncNavigationDotsWithChartMode;
+    showTooltip = showChartModeTooltip;
   }).catch(err => {
     console.warn('Could not load navigation dots sync:', err);
   });
@@ -130,6 +132,18 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       syncNavigationDotsWithChartMode();
     }).catch(err => {
       console.warn('Could not sync navigation dots:', err);
+    });
+  }
+  
+  // Show tooltip to indicate the new mode
+  if (showTooltip) {
+    showTooltip(actualNewMode);
+  } else {
+    // Fallback: try to import and call tooltip function
+    import('./navigation-dots.js').then(({ showChartModeTooltip }) => {
+      showChartModeTooltip(actualNewMode);
+    }).catch(err => {
+      console.warn('Could not show chart mode tooltip:', err);
     });
   }
 }

@@ -8,7 +8,7 @@ let chartModeTooltipTimer = null;
  * Shows a tooltip indicating the current chart mode
  * @param {string} mode - The current chart mode
  */
-function showChartModeTooltip(mode) {
+export function showChartModeTooltip(mode) {
   // Hide any existing tooltip first
   hideChartModeTooltip();
   
