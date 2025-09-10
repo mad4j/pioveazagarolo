@@ -1,5 +1,5 @@
 import { DAY_CONFIGS } from './constants.js';
-import { getRainIconClass } from './icons.js';
+import { getRainIconClass, getWeatherDescription } from './icons.js';
 
 export const chartInstances = {};
 
@@ -290,7 +290,9 @@ function drawWeatherIcon(ctx, xScale, area, hourIndex, weatherCode, isDay) {
   ctx.font = '14px weathericons';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#2c3e50';
+  
+  // Theme-based color: blue for normal theme, white for dark theme
+  ctx.fillStyle = isDarkMode() ? '#f2f2f2' : '#3498db';
   
   // Position icons at the top of the chart area, but inside the visible area
   const y = area.top + 15;
@@ -940,6 +942,19 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
                 const pressure = Math.round(pressureDataPoint.parsed.y);
                 rows.push({ k: 'pressure', t: `Pressione: ${pressure} hPa` });
 
+                // Add weather information if available
+                if (weatherCodes && isDayData) {
+                  const hourIndex = pressureDataPoint.dataIndex;
+                  const weatherCode = weatherCodes[hourIndex];
+                  const isDay = isDayData[hourIndex];
+                  
+                  if (typeof weatherCode === 'number') {
+                    const weatherDesc = getWeatherDescription(weatherCode);
+                    const iconClass = getRainIconClass(weatherCode, isDay);
+                    rows.push({ k: 'weather', t: weatherDesc, weatherCode, isDay, iconClass });
+                  }
+                }
+
                 if (sunriseTime && sunsetTime) {
                   const hour = parseFloat(pressureDataPoint.label.split(':')[0]);
                   const sr = timeStringToHours(sunriseTime);
@@ -960,6 +975,12 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
             rows.forEach(r => {
               let icon = '';
               if (r.k === 'pressure') icon = '<i class="wi wi-barometer" style="margin-right:4px; color:#8e44ad;"></i>';
+              else if (r.k === 'weather') {
+                // Use the actual weather icon and apply theme-based color
+                const iconClass = r.iconClass || 'wi wi-cloud';
+                const iconColor = isDarkMode() ? '#f2f2f2' : '#3498db'; // White for dark theme, blue for normal theme
+                icon = `<i class="${iconClass}" style="margin-right:4px; color:${iconColor};"></i>`;
+              }
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
               html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`;
