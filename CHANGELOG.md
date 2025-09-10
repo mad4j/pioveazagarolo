@@ -2,6 +2,23 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.8.1] - 2025-09-10
+
+### Features
+- Add Air Quality visualization mode with EAQI bar charts (75bdf20d)
+
+### Fix
+- Fix air quality tooltip text and navigation dots functionality (c7eaa911)
+
+### Other
+- chore(release): prepare 1.8.1 (641af93b)
+- chore: aggiornamento dati meteo (rolling) (22349f5a)
+- Standardize Air Quality chart tooltips to match other chart formats (148a1801)
+- Implement Air Quality visualization mode with EAQI bar charts (f473753d)
+- Initial analysis and planning for Air Quality visualization mode (9a6b1072)
+- Initial plan (0d481773)
+- chore: auto-update CHANGELOG for 1.8.0 (49965227)
+
 ## [1.8.0] - 2025-09-10
 
 ### Features
