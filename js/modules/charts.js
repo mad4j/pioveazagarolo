@@ -291,14 +291,8 @@ function drawWeatherIcon(ctx, xScale, area, hourIndex, weatherCode, isDay) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  // Dynamic color based on day/night: blue for day, white for night
-  if (isDay === 1) {
-    ctx.fillStyle = '#3498db'; // Blue for day mode
-  } else if (isDay === 0) {
-    ctx.fillStyle = '#f2f2f2'; // White for night mode
-  } else {
-    ctx.fillStyle = '#3498db'; // Default to blue if isDay not specified
-  }
+  // Theme-based color: blue for normal theme, white for dark theme
+  ctx.fillStyle = isDarkMode() ? '#f2f2f2' : '#3498db';
   
   // Position icons at the top of the chart area, but inside the visible area
   const y = area.top + 15;
@@ -982,9 +976,9 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
               let icon = '';
               if (r.k === 'pressure') icon = '<i class="wi wi-barometer" style="margin-right:4px; color:#8e44ad;"></i>';
               else if (r.k === 'weather') {
-                // Use the actual weather icon and apply dynamic color based on day/night
+                // Use the actual weather icon and apply theme-based color
                 const iconClass = r.iconClass || 'wi wi-cloud';
-                const iconColor = r.isDay === 1 ? '#3498db' : '#f2f2f2'; // Blue for day, white for night
+                const iconColor = isDarkMode() ? '#f2f2f2' : '#3498db'; // White for dark theme, blue for normal theme
                 icon = `<i class="${iconClass}" style="margin-right:4px; color:${iconColor};"></i>`;
               }
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
