@@ -290,7 +290,7 @@ function isTouchDevice() { return 'ontouchstart' in window || navigator.maxTouch
 
 function isDarkMode() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
 
-function getWindDirectionColor() { return isDarkMode() ? '#f2f2f2' : '#2c3e50'; }
+function getWindDirectionColor() { return isDarkMode() ? '#f2f2f2' : '#3498db'; }
 
 export function buildChart(target, probabilityData, precipitationData, sunriseTime = null, sunsetTime = null) {
   const el = document.getElementById(target); if (!el) return; if (chartInstances[target]) chartInstances[target].destroy();
