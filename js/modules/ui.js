@@ -4,6 +4,7 @@ import { buildChart, getDaySlice } from './charts.js';
 import { precipitationManager } from './precipitation.js';
 import { updateAirQualityDisplay } from './air-quality.js';
 import { setupChartToggleListeners, buildAppropriateChart, showChartModeTooltip } from './chart-toggle.js';
+import { setupNavigationDots, syncNavigationDotsWithChartMode } from './navigation-dots.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
 
@@ -229,6 +230,9 @@ export function displayData(data){
   
   // Setup chart toggle listeners once after all charts are built
   setupChartToggleListeners(data);
+  
+  // Setup navigation dots
+  setupNavigationDots(data);
   
   // Show mode change tooltip on page load/refresh
   const currentMode = chartModes['today-chart'];

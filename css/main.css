@@ -135,6 +135,123 @@
   opacity: 1;
 }
 
+/* Chart Mode Navigation Dots */
+.chart-mode-navigation {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.nav-dot {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.nav-dot:hover {
+  transform: scale(1.1);
+}
+
+.nav-dot:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
+.dot-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.nav-dot.active .dot-icon {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+}
+
+.nav-dot:hover .dot-icon {
+  background-color: var(--text-secondary);
+  transform: scale(1.2);
+}
+
+.nav-dot.active:hover .dot-icon {
+  background-color: var(--secondary-color);
+  box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
+}
+
+/* Mode-specific colors for active dots */
+.nav-dot[data-mode="precipitation"].active .dot-icon {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+}
+
+.nav-dot[data-mode="temperature"].active .dot-icon {
+  background-color: #e74c3c;
+  border-color: #e74c3c;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+}
+
+.nav-dot[data-mode="wind"].active .dot-icon {
+  background-color: #27ae60;
+  border-color: #27ae60;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.4);
+}
+
+.nav-dot[data-mode="pressure"].active .dot-icon {
+  background-color: #8e44ad;
+  border-color: #8e44ad;
+  box-shadow: 0 0 8px rgba(142, 68, 173, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  .nav-dot[data-mode="temperature"].active .dot-icon {
+    background-color: #e67e22;
+    border-color: #e67e22;
+    box-shadow: 0 0 8px rgba(230, 126, 34, 0.4);
+  }
+  
+  .nav-dot[data-mode="wind"].active .dot-icon {
+    background-color: #2ecc71;
+    border-color: #2ecc71;
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+  }
+  
+  .nav-dot[data-mode="pressure"].active .dot-icon {
+    background-color: #9b59b6;
+    border-color: #9b59b6;
+    box-shadow: 0 0 8px rgba(155, 89, 182, 0.4);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chart-mode-navigation {
+    gap: 0.3rem;
+    margin-right: 0.5rem;
+  }
+  
+  .nav-dot {
+    padding: 0.2rem;
+  }
+  
+  .dot-icon {
+    width: 6px;
+    height: 6px;
+  }
+}
+
 @keyframes toast-in {
   to {
     opacity: 1;
