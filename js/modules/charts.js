@@ -162,31 +162,9 @@ export const pressureWeatherIconsPlugin = {
  */
 function selectWeatherCodeForInterval(codes) {
   if (codes.length === 0) return 0;
-  if (codes.length === 1) return codes[0];
   
-  // Count occurrences of each weather code
-  const codeCount = {};
-  codes.forEach(code => {
-    codeCount[code] = (codeCount[code] || 0) + 1;
-  });
-  
-  // Find the most frequent code
-  let maxCount = 0;
-  let mostFrequentCode = codes[0];
-  
-  Object.entries(codeCount).forEach(([code, count]) => {
-    if (count > maxCount) {
-      maxCount = count;
-      mostFrequentCode = parseInt(code);
-    }
-  });
-  
-  // If all codes are different (maxCount === 1), use the middle hour's code
-  if (maxCount === 1 && codes.length >= 3) {
-    return codes[1]; // Middle hour (index 1 of 0,1,2)
-  }
-  
-  return mostFrequentCode;
+  // Choose the highest weather code in the interval
+  return Math.max(...codes);
 }
 
 function timeStringToHours(str) { try { const t = str.split('T')[1]; if (!t) return null; const [h, m] = t.split(':').map(Number); return h + m / 60; } catch { return null; } }
