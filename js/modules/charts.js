@@ -1138,56 +1138,55 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
             if (tooltip.dataPoints?.length) {
               const dp = tooltip.dataPoints[0];
               const eaqiValue = Math.round(dp.parsed.y);
-              const hourIndex = dp.dataIndex;
               
               // Determina il livello di qualità dell'aria
-              let eaqiLevel = 'Eccellente';
+              let eaqiLevel = 'Buona';
               if (eaqiValue > 100) eaqiLevel = 'Estremamente pessima';
               else if (eaqiValue > 80) eaqiLevel = 'Pessima';
               else if (eaqiValue > 60) eaqiLevel = 'Scarsa';
               else if (eaqiValue > 40) eaqiLevel = 'Moderata';
               else if (eaqiValue > 20) eaqiLevel = 'Discreta';
               
-              rows.push({ k: 'eaqi', t: `EAQI: ${eaqiValue} (${eaqiLevel})` });
+              rows.push({ k: 'eaqi', t: `Qualità dell'aria: ${eaqiValue} (${eaqiLevel})` });
 
               if (sunriseTime && sunsetTime) {
                 const hour = parseFloat(dp.label.split(':')[0]);
                 const sr = timeStringToHours(sunriseTime);
                 const ss = timeStringToHours(sunsetTime);
                 if (sr && ss) {
-                  if (hour >= sr && hour < ss) {
-                    rows.push({ k: 'day', t: 'Giorno' });
-                  } else {
-                    rows.push({ k: 'night', t: 'Notte' });
+                  const daylight = ss - sr;
+                  if (Math.abs(hour - sr) < 1) {
+                    rows.push({ k: 'sunrise', t: `Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)` });
+                  } else if (Math.abs(hour - ss) < 1) {
+                    rows.push({ k: 'sunset', t: `Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)` });
                   }
                 }
               }
             }
 
-            const html = rows.map(row => 
-              `<div class="tooltip-row">${row.t}</div>`
-            ).join('');
+            const title = tooltip.title?.[0] ? `Ore ${tooltip.title[0]}` : '';
+            let html = `<div style="font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;">`;
+            if (title) html += `<div style="font-weight:600; margin-bottom:4px;">${title}</div>`;
+            html += '<div style="display:flex; flex-direction:column; gap:2px;">';
+            rows.forEach(r => {
+              let icon = '';
+              if (r.k === 'eaqi') icon = '<i class="wi wi-smog" style="margin-right:4px; color:#50ccaa;"></i>';
+              else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
+              else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
+              html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`;
+            });
+            html += '</div></div>';
 
             tip.innerHTML = html;
-            tip.className = 'chart-tooltip';
 
-            // Position tooltip
-            const canvas = chart.canvas;
-            const rect = canvas.getBoundingClientRect();
-            
-            // Basic positioning - keep within viewport
-            let left = rect.left + tooltip.caretX;
-            let top = rect.top + tooltip.caretY - 10;
-            
-            // Adjust to stay within viewport
-            if (left + 150 > window.innerWidth) left -= 160;
-            if (top < 10) top = rect.top + tooltip.caretY + 10;
-            
-            Object.assign(tip.style, {
-              left: left + 'px',
-              top: top + 'px',
-              opacity: 1
-            });
+            const rect = chart.canvas.getBoundingClientRect();
+            const bodyRect = document.body.getBoundingClientRect();
+            const left = rect.left + window.pageXOffset + tooltip.caretX + 10;
+            const top = rect.top + window.pageYOffset + tooltip.caretY - 10;
+
+            tip.style.left = Math.min(left, bodyRect.width - 260) + 'px';
+            tip.style.top = top + 'px';
+            tip.style.opacity = 1;
           }
         }
       }
