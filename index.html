@@ -19,24 +19,8 @@
 <body>
   <div class="dashboard-container">
     <div class="header">
-      <!-- Navigation dots for chart modes -->
-      <div class="chart-mode-navigation" aria-label="Modalità grafici disponibili">
-        <button class="nav-dot" data-mode="precipitation" title="Modalità precipitazioni" aria-label="Precipitazioni">
-          <span class="dot-icon"></span>
-        </button>
-        <button class="nav-dot" data-mode="temperature" title="Modalità temperature" aria-label="Temperature">
-          <span class="dot-icon"></span>
-        </button>
-        <button class="nav-dot" data-mode="wind" title="Modalità vento" aria-label="Vento">
-          <span class="dot-icon"></span>
-        </button>
-        <button class="nav-dot" data-mode="pressure" title="Modalità pressione" aria-label="Pressione">
-          <span class="dot-icon"></span>
-        </button>
-      </div>
-      
       <div class="header-title">
-        <h1 class="mb-0">Piove a Zagarolo?</h1>
+        <h1 class="mb-0" id="page-title">Piove a Zagarolo?</h1>
       </div>
       
       <div class="header-buttons">
@@ -78,6 +62,10 @@
   <!-- Badge stato offline -->
   <div id="offline-badge" role="status" aria-live="polite" hidden>
     <i class="wi wi-na" aria-hidden="true"></i><span>Offline</span>
+  </div>
+  <!-- Version tooltip -->
+  <div id="version-tooltip" class="version-tooltip" hidden>
+    <span id="app-version">---</span>
   </div>
 
     <div class="row">
@@ -170,8 +158,24 @@
     </div>
 
     <footer>
-  <span class="last-updated"><a href="https://open-meteo.com/" class="footer-link" target="_blank" rel="noopener noreferrer">Open Meteo API</a> (<i class="wi wi-time-4" aria-hidden="true"></i><span id="last-updated">---</span>)</span>
-      <span class="version-info"><span id="app-version">---</span></span>
+      <span class="last-updated"><a href="https://open-meteo.com/" class="footer-link" target="_blank" rel="noopener noreferrer">Open Meteo API</a> (<i class="wi wi-time-4" aria-hidden="true"></i><span id="last-updated">---</span>)</span>
+      
+      <!-- Navigation dots for chart modes -->
+      <div class="chart-mode-navigation" aria-label="Modalità grafici disponibili">
+        <button class="nav-dot" data-mode="precipitation" title="Modalità precipitazioni" aria-label="Precipitazioni">
+          <span class="dot-icon"></span>
+        </button>
+        <button class="nav-dot" data-mode="temperature" title="Modalità temperature" aria-label="Temperature">
+          <span class="dot-icon"></span>
+        </button>
+        <button class="nav-dot" data-mode="wind" title="Modalità vento" aria-label="Vento">
+          <span class="dot-icon"></span>
+        </button>
+        <button class="nav-dot" data-mode="pressure" title="Modalità pressione" aria-label="Pressione">
+          <span class="dot-icon"></span>
+        </button>
+      </div>
+      
       <a href="mailto:daniele.olmisani@gmail.com" class="footer-link" target="_blank" rel="noopener noreferrer">Daniele Olmisani</a>
     </footer>
   </div>
