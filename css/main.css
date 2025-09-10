@@ -356,8 +356,14 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   min-height: 3rem;
+}
+
+.header-left {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
 }
 
 .header-title {
@@ -368,10 +374,7 @@ body {
 }
 
 .header-buttons {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  flex: 0 0 auto;
   display: flex;
   gap: 0.25rem;
   align-items: center;
@@ -597,8 +600,10 @@ footer .chart-mode-navigation {
 
 .last-updated {
   color: var(--text-muted);
-  text-align: left;
-  margin-top: 0;
+  font-size: 0.75rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
 }
 
 /* Stile orario aggiornamento (icona + testo) coerente con metriche barra corrente */
@@ -703,6 +708,15 @@ footer .chart-mode-navigation {
 
   .header h1 {
     font-size: 1.5rem;
+  }
+
+  .header-left .last-updated {
+    font-size: 0.65rem;
+  }
+
+  .header {
+    margin: 0.25rem 0;
+    min-height: 2.5rem;
   }
 
   .current-conditions-card {
