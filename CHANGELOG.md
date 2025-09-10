@@ -2,6 +2,17 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.8.2] - 2025-09-10
+
+### Features
+- Replace EAQI gauge with colored circle and add hover functionality (6118f65b)
+
+### Other
+- chore(release): prepare 1.8.2 (8867e17a)
+- Initial exploration and plan for EAQI gauge replacement (dd2961c7)
+- Initial plan (940a3af4)
+- chore: auto-update CHANGELOG for 1.8.1 (805ea60f)
+
 ## [1.8.1] - 2025-09-10
 
 ### Features
