@@ -72,6 +72,37 @@ export const weatherIconsPlugin = {
   }
 };
 
+// Plugin per linea 1013 hPa in modalità pressione
+export const pressure1013LinePlugin = {
+  id: 'pressure1013Line',
+  afterDraw(chart, args, opts) {
+    const yScale = chart.scales.y;
+    if (!yScale) return;
+    
+    const { ctx, chartArea } = chart;
+    const { left, right } = chartArea;
+    
+    // Get the y pixel position for 1013 hPa
+    const y1013 = yScale.getPixelForValue(1013);
+    
+    // Only draw the line if 1013 is within the visible range
+    if (y1013 >= chartArea.top && y1013 <= chartArea.bottom) {
+      ctx.save();
+      ctx.strokeStyle = opts?.color || '#e74c3c';
+      ctx.lineWidth = opts?.lineWidth || 2;
+      ctx.setLineDash(opts?.lineDash || []);
+      ctx.globalAlpha = opts?.opacity || 0.8;
+      
+      ctx.beginPath();
+      ctx.moveTo(left, y1013);
+      ctx.lineTo(right, y1013);
+      ctx.stroke();
+      
+      ctx.restore();
+    }
+  }
+};
+
 // Plugin per icone meteo in modalità pressione (ogni 3 ore)
 export const pressureWeatherIconsPlugin = {
   id: 'pressureWeatherIcons',
@@ -704,7 +735,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   const pressureColors = pressureData.map(getPressureLineColor);
   const minPressure = Math.min(...pressureData) - 2;
   const maxPressure = Math.max(...pressureData) + 2;
-  const plugins = [sunriseSunsetPlugin];
+  const plugins = [sunriseSunsetPlugin, pressure1013LinePlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
   if (weatherCodes && isDayData) plugins.push(pressureWeatherIconsPlugin);
 
@@ -747,8 +778,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
           max: maxPressure,
           position: 'left',
           grid: {
-            drawOnChartArea: true,
-            color: 'rgba(200,200,200,0.2)',
+            drawOnChartArea: false,
             drawTicks: false
           },
           ticks: { display: false }
@@ -765,6 +795,11 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
         }
       },
       plugins: {
+        pressure1013Line: {
+          color: '#e74c3c',
+          lineWidth: 2,
+          opacity: 0.8
+        },
         currentHourLine: {
           color: '#27ae60',
           overlayColor: 'rgba(128,128,128,0.18)'
