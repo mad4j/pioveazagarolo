@@ -785,11 +785,18 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
     maxPressure = center + 5;
   }
   
-  // Calculate delta scale range
+  // Calculate delta scale range - center delta bars on 1013 hPa line
   const maxDelta = Math.max(...pressureDeltas.map(Math.abs));
   const deltaRange = Math.max(maxDelta, 5); // Minimum range of 5 hPa
-  const minDelta = -deltaRange;
-  const maxDeltaValue = deltaRange;
+  
+  // Calculate where 1013 hPa falls in the pressure scale (as a fraction from 0 to 1)
+  const pressurePosition = (referencePoint - minPressure) / (maxPressure - minPressure);
+  
+  // Adjust delta scale so that 0 (zero delta) aligns with 1013 hPa position
+  // We want: (0 - minDelta) / (maxDeltaValue - minDelta) = pressurePosition
+  // Solving: minDelta = -pressurePosition * 2 * deltaRange, maxDeltaValue = (1 - pressurePosition) * 2 * deltaRange
+  const minDelta = -pressurePosition * 2 * deltaRange;
+  const maxDeltaValue = (1 - pressurePosition) * 2 * deltaRange;
   
   const plugins = [sunriseSunsetPlugin, pressure1013LinePlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
