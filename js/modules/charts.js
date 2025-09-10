@@ -660,7 +660,9 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
 
               if (typeof direction === 'number') {
                 const directionText = getWindDirectionText(direction);
-                rows.push({ k: 'direction', t: `Direzione: ${directionText}` });
+                const italianName = getItalianWindName(directionText);
+                const directionDisplay = italianName ? `${directionText} (${italianName})` : directionText;
+                rows.push({ k: 'direction', t: `Direzione: ${directionDisplay}` });
               }
 
               if (sunriseTime && sunsetTime) {
@@ -909,4 +911,18 @@ function getWindDirectionText(degrees) {
   ];
   const index = Math.round((degrees % 360) / 22.5) % 16;
   return directions[index];
+}
+
+function getItalianWindName(compassDirection) {
+  const windNames = {
+    'N': 'Tramontana',
+    'NE': 'Grecale', 
+    'E': 'Levante',
+    'SE': 'Scirocco',
+    'S': 'Ostro',
+    'SW': 'Libeccio',
+    'W': 'Ponente', 
+    'NW': 'Maestrale'
+  };
+  return windNames[compassDirection] || null;
 }
