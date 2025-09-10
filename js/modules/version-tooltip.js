@@ -8,7 +8,7 @@ let isTooltipVisible = false;
 
 const VERSION_TOOLTIP_ID = 'version-tooltip';
 const PAGE_TITLE_ID = 'page-title';
-const PRESS_DURATION = 5000; // 5 seconds
+const PRESS_DURATION = 2000; // 2 seconds
 const TOOLTIP_DURATION = 5000; // 5 seconds
 
 /**
