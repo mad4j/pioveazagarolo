@@ -1,5 +1,5 @@
 import { CHART_MODES, chartModes, $, saveChartMode } from './constants.js';
-import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, getDaySlice } from './charts.js';
+import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildEAQIChart, getDaySlice } from './charts.js';
 
 // Keep a reference to sync function to avoid import issues
 let syncNavigationDots = null;
@@ -45,7 +45,7 @@ export function toggleChartMode(triggeredChartId, weatherData) {
   // Get current mode from any chart (they should all be synchronized)
   const currentMode = chartModes['today-chart'];
   
-  // Cycle through modes: precipitation → temperature → wind → pressure → precipitation
+  // Cycle through modes: precipitation → temperature → wind → pressure → air-quality → precipitation
   let newMode;
   if (currentMode === CHART_MODES.PRECIPITATION) {
     newMode = CHART_MODES.TEMPERATURE;
@@ -53,6 +53,8 @@ export function toggleChartMode(triggeredChartId, weatherData) {
     newMode = CHART_MODES.WIND;
   } else if (currentMode === CHART_MODES.WIND) {
     newMode = CHART_MODES.PRESSURE;
+  } else if (currentMode === CHART_MODES.PRESSURE) {
+    newMode = CHART_MODES.AIR_QUALITY;
   } else {
     newMode = CHART_MODES.PRECIPITATION;
   }
@@ -80,6 +82,11 @@ export function toggleChartMode(triggeredChartId, weatherData) {
   } else if (newMode === CHART_MODES.PRESSURE) {
     if (!weatherData.hourly.pressure_msl) {
       // Pressure data not available, stay in precipitation mode
+      actualNewMode = CHART_MODES.PRECIPITATION;
+    }
+  } else if (newMode === CHART_MODES.AIR_QUALITY) {
+    if (!weatherData.air_quality?.hourly?.european_aqi) {
+      // Air quality data not available, stay in precipitation mode
       actualNewMode = CHART_MODES.PRECIPITATION;
     }
   }
@@ -113,6 +120,10 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
       const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
       buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
+    } else if (actualNewMode === CHART_MODES.AIR_QUALITY) {
+      // Switch to air quality chart
+      const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
+      buildEAQIChart(chartId, eaqiSlice, sunriseTime, sunsetTime);
     } else {
       // Switch to precipitation chart
       const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
@@ -239,6 +250,9 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
     const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
     buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
+  } else if (currentMode === CHART_MODES.AIR_QUALITY && weatherData.air_quality?.hourly?.european_aqi) {
+    const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
+    buildEAQIChart(chartId, eaqiSlice, sunriseTime, sunsetTime);
   } else {
     // Default to precipitation chart and ensure all charts are in precipitation mode
     chartModes[chartId] = CHART_MODES.PRECIPITATION;

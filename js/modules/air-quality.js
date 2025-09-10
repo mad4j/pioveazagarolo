@@ -15,6 +15,16 @@ const EAQI_LEVELS = [
 ];
 
 /**
+ * Ottiene il colore per un valore EAQI
+ * @param {number} eaqiValue - Valore EAQI (0-300+)
+ * @returns {string} Colore hex per il valore EAQI
+ */
+export function getEAQIBarColor(eaqiValue) {
+  const level = getEAQILevel(eaqiValue);
+  return level.color;
+}
+
+/**
  * Ottiene le informazioni di livello EAQI per un dato valore
  * @param {number} eaqiValue - Valore EAQI (0-300+)
  * @returns {Object} Oggetto con colore, livello e descrizione

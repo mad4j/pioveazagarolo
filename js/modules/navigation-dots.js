@@ -22,7 +22,8 @@ export function showChartModeTooltip(mode) {
     [CHART_MODES.PRECIPITATION]: 'Precipitazioni',
     [CHART_MODES.TEMPERATURE]: 'Temperature', 
     [CHART_MODES.WIND]: 'Vento',
-    [CHART_MODES.PRESSURE]: 'Pressione'
+    [CHART_MODES.PRESSURE]: 'Pressione',
+    [CHART_MODES.AIR_QUALITY]: 'Qualità dell\'aria'
   };
   
   tooltip.innerHTML = `
