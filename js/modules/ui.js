@@ -6,6 +6,7 @@ import { updateAirQualityDisplay } from './air-quality.js';
 import { setupChartToggleListeners, buildAppropriateChart } from './chart-toggle.js';
 import { setupNavigationDots, syncNavigationDotsWithChartMode } from './navigation-dots.js';
 import { setupVersionTooltip } from './version-tooltip.js';
+import { setupSwipeGestures } from './gesture-handler.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
 
@@ -373,6 +374,9 @@ export function displayData(data){
   
   // Setup navigation dots
   setupNavigationDots(data);
+  
+  // Setup swipe gestures for mode switching
+  setupSwipeGestures(data);
   
   // Setup version tooltip functionality
   setupVersionTooltip();

@@ -412,6 +412,34 @@ body {
   -webkit-touch-callout: none; /* iOS long press */
 }
 
+/* Swipe gesture visual feedback */
+.forecast-card.swipe-enabled {
+  position: relative;
+  touch-action: pan-y; /* Allow vertical scrolling but prevent horizontal panning */
+}
+
+.forecast-card.swipe-enabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(52, 152, 219, 0.03) 0%, 
+    transparent 15%, 
+    transparent 85%, 
+    rgba(26, 188, 156, 0.03) 100%);
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.forecast-card.swipe-enabled:active::after {
+  opacity: 1;
+}
+
 .day-title {
   font-weight: 600;
   color: var(--primary-color);
