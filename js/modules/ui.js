@@ -1,5 +1,5 @@
 import { DAY_CONFIGS, ARIA_LABEL_DAY, dayFormatter, $, chartModes } from './constants.js';
-import { getRainIconClass } from './icons.js';
+import { getRainIconClass, getWeatherDescription } from './icons.js';
 import { buildChart, getDaySlice } from './charts.js';
 import { precipitationManager } from './precipitation.js';
 import { updateAirQualityDisplay } from './air-quality.js';
@@ -84,6 +84,123 @@ export function showApparentTemperatureTooltip(tempElement, apparentTemp) {
   document.addEventListener('click', removeTooltip);
 }
 
+/**
+ * Add weather code tooltip functionality to a weather icon
+ * @param {HTMLElement} iconElement - Weather icon element
+ * @param {number} weatherCode - WMO weather code
+ */
+export function addWeatherIconTooltip(iconElement, weatherCode) {
+  if (!iconElement || typeof weatherCode !== 'number') return;
+  
+  // Remove any existing tooltip functionality for this element
+  if (iconElement._tooltipData) {
+    const { showTimeout, hideTimeout, tooltip } = iconElement._tooltipData;
+    if (showTimeout) clearTimeout(showTimeout);
+    if (hideTimeout) clearTimeout(hideTimeout);
+    if (tooltip) tooltip.remove();
+  }
+  
+  const description = getWeatherDescription(weatherCode);
+  let tooltip = null;
+  let showTimeout = null;
+  let hideTimeout = null;
+  
+  // Make icon container relative for tooltip positioning
+  const iconContainer = iconElement.closest('.rain-icon');
+  if (iconContainer) {
+    iconContainer.style.position = 'relative';
+  }
+  
+  function showTooltip() {
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
+      hideTimeout = null;
+    }
+    
+    // Remove any existing tooltip
+    if (tooltip) {
+      tooltip.remove();
+    }
+    
+    tooltip = document.createElement('div');
+    tooltip.className = 'weather-icon-tooltip';
+    tooltip.textContent = description;
+    
+    // Store tooltip reference for cleanup
+    iconElement._tooltipData.tooltip = tooltip;
+    
+    // Add tooltip to the icon container or parent
+    const container = iconContainer || iconElement.parentElement;
+    if (container) {
+      container.appendChild(tooltip);
+      
+      // Show tooltip with animation
+      requestAnimationFrame(() => {
+        tooltip.classList.add('show');
+      });
+    }
+  }
+  
+  function hideTooltip() {
+    if (showTimeout) {
+      clearTimeout(showTimeout);
+      showTimeout = null;
+    }
+    
+    if (tooltip) {
+      tooltip.classList.remove('show');
+      hideTimeout = setTimeout(() => {
+        if (tooltip) {
+          tooltip.remove();
+          tooltip = null;
+          if (iconElement._tooltipData) {
+            iconElement._tooltipData.tooltip = null;
+          }
+        }
+      }, 300); // Match CSS transition duration
+      if (iconElement._tooltipData) {
+        iconElement._tooltipData.hideTimeout = hideTimeout;
+      }
+    }
+  }
+  
+  // Store tooltip data on the element for cleanup
+  iconElement._tooltipData = {
+    showTimeout,
+    hideTimeout,
+    tooltip: null
+  };
+  
+  // Mouse events for desktop
+  iconElement.addEventListener('mouseenter', () => {
+    if (showTimeout) clearTimeout(showTimeout);
+    showTimeout = setTimeout(showTooltip, 200); // Small delay for better UX
+    iconElement._tooltipData.showTimeout = showTimeout;
+  });
+  
+  iconElement.addEventListener('mouseleave', hideTooltip);
+  
+  // Touch events for mobile
+  iconElement.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent mouse events on touch
+    if (tooltip && tooltip.classList.contains('show')) {
+      hideTooltip();
+    } else {
+      showTooltip();
+    }
+  });
+  
+  // Hide on touch outside
+  document.addEventListener('touchstart', (e) => {
+    if (tooltip && !iconElement.contains(e.target) && !tooltip.contains(e.target)) {
+      hideTooltip();
+    }
+  });
+  
+  // Add cursor pointer to indicate interactivity
+  iconElement.style.cursor = 'pointer';
+}
+
 export function updateCardClass(cardId, percentage) {
   const card = document.getElementById(cardId);
   if (!card) return;
@@ -152,14 +269,24 @@ export function displayData(data){
       if (humEl && typeof current.relative_humidity_2m==='number') humEl.textContent = `${Math.round(current.relative_humidity_2m)}%`;
       if (windEl && typeof current.wind_speed_10m==='number') windEl.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
       if (windDirIcon && typeof current.wind_direction_10m==='number') { const deg=Math.round(current.wind_direction_10m); windDirIcon.style.transform=`rotate(${deg}deg)`; windDirIcon.setAttribute('aria-label',`Direzione vento ${deg}°`); windDirIcon.title=`Direzione vento ${deg}°`; }
-      if (iconEl && typeof current.weather_code==='number') { iconEl.className = getRainIconClass(current.weather_code, current.is_day); iconEl.setAttribute('aria-label',`Condizioni attuali codice ${current.weather_code}`);} 
+      if (iconEl && typeof current.weather_code==='number') { 
+        iconEl.className = getRainIconClass(current.weather_code, current.is_day); 
+        iconEl.setAttribute('aria-label',`Condizioni attuali codice ${current.weather_code}`);
+        // Add weather code tooltip
+        addWeatherIconTooltip(iconEl, current.weather_code);
+      }
     }
   } catch {}
   const { daily, hourly } = data;
   DAY_CONFIGS.forEach(cfg => {
     const i = cfg.index;
     const iconEl = $(cfg.iconId);
-    if (iconEl){ iconEl.className = getRainIconClass(daily.weather_code[i]); iconEl.setAttribute('aria-label',`Meteo ${ARIA_LABEL_DAY[i]} codice ${daily.weather_code[i]}`);}    
+    if (iconEl){ 
+      iconEl.className = getRainIconClass(daily.weather_code[i]); 
+      iconEl.setAttribute('aria-label',`Meteo ${ARIA_LABEL_DAY[i]} codice ${daily.weather_code[i]}`);
+      // Add weather code tooltip
+      addWeatherIconTooltip(iconEl, daily.weather_code[i]);
+    }
     const maxEl = $(`${cfg.key}-temp-max`); if (maxEl) maxEl.textContent = `${Math.round(daily.temperature_2m_max[i])}°`;
     const minEl = $(`${cfg.key}-temp-min`); if (minEl) minEl.textContent = `${Math.round(daily.temperature_2m_min[i])}°`;
     const percEl = $(`${cfg.key}-percentage`);

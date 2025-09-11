@@ -587,6 +587,43 @@ footer .chart-mode-navigation {
   transform: translateY(0);
 }
 
+/* Weather icon tooltip - positioned above weather icons */
+.weather-icon-tooltip {
+  position: absolute;
+  background: linear-gradient(135deg, var(--primary-color), #1d2b36);
+  color: #fff;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  z-index: 1200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(8px);
+  white-space: nowrap;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  margin-bottom: 8px;
+}
+
+.weather-icon-tooltip.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.weather-icon-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--primary-color);
+}
+
 .footer-link {
   color: var(--secondary-color);
   text-decoration: none;
