@@ -587,6 +587,8 @@ footer .chart-mode-navigation {
   transform: translateY(0);
 }
 
+/* Weather icon tooltips are now created dynamically using the same style as air quality tooltips */
+
 .footer-link {
   color: var(--secondary-color);
   text-decoration: none;
