@@ -85,6 +85,81 @@ export function showApparentTemperatureTooltip(tempElement, apparentTemp) {
 }
 
 /**
+ * Show weather icon tooltip with weather description (matches air quality tooltip format)
+ * @param {HTMLElement} iconElement - Weather icon element
+ * @param {string} description - Weather description text
+ */
+function showWeatherIconTooltip(iconElement, description) {
+  // Remove existing weather icon tooltips
+  document.querySelectorAll('.weather-icon-tooltip').forEach(t => t.remove());
+  
+  const tooltip = document.createElement('div');
+  tooltip.className = 'weather-icon-tooltip';
+  tooltip.style.cssText = `
+    position: absolute;
+    z-index: 1000;
+    font: 12px 'Helvetica Neue', Arial;
+    color: #ecf0f1;
+    background: rgba(44,62,80,0.92);
+    padding: 6px 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.35);
+    max-width: 240px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  `;
+  
+  tooltip.innerHTML = `
+    <div style="font-weight: 600; margin-bottom: 4px;">
+      Condizioni meteo
+    </div>
+    <div style="font-size: 12px; line-height: 1.2;">
+      ${description}
+    </div>
+  `;
+  
+  document.body.appendChild(tooltip);
+  
+  // Position tooltip near the icon
+  const iconRect = iconElement.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  
+  let left = iconRect.left + iconRect.width / 2 - tooltipRect.width / 2;
+  let top = iconRect.top - tooltipRect.height - 8;
+  
+  // Adjust position if outside viewport
+  if (left < 8) left = 8;
+  if (left + tooltipRect.width > window.innerWidth - 8) {
+    left = window.innerWidth - tooltipRect.width - 8;
+  }
+  if (top < 8) {
+    top = iconRect.bottom + 8; // Show below if no space above
+  }
+  
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+  
+  // Animate appearance
+  requestAnimationFrame(() => {
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'translateY(0)';
+  });
+  
+  // Remove tooltip after 4 seconds or on document click
+  const removeTooltip = () => {
+    tooltip.style.opacity = '0';
+    tooltip.style.transform = 'translateY(-10px)';
+    setTimeout(() => tooltip.remove(), 300);
+    document.removeEventListener('click', removeTooltip);
+  };
+  
+  setTimeout(removeTooltip, 4000);
+  document.addEventListener('click', removeTooltip);
+}
+
+/**
  * Add weather code tooltip functionality to a weather icon
  * @param {HTMLElement} iconElement - Weather icon element
  * @param {number} weatherCode - WMO weather code
@@ -92,110 +167,47 @@ export function showApparentTemperatureTooltip(tempElement, apparentTemp) {
 export function addWeatherIconTooltip(iconElement, weatherCode) {
   if (!iconElement || typeof weatherCode !== 'number') return;
   
-  // Remove any existing tooltip functionality for this element
-  if (iconElement._tooltipData) {
-    const { showTimeout, hideTimeout, tooltip } = iconElement._tooltipData;
-    if (showTimeout) clearTimeout(showTimeout);
-    if (hideTimeout) clearTimeout(hideTimeout);
-    if (tooltip) tooltip.remove();
-  }
-  
   const description = getWeatherDescription(weatherCode);
-  let tooltip = null;
-  let showTimeout = null;
-  let hideTimeout = null;
   
-  // Make icon container relative for tooltip positioning
-  const iconContainer = iconElement.closest('.rain-icon');
-  if (iconContainer) {
-    iconContainer.style.position = 'relative';
+  // Remove any existing event listeners to avoid duplicates
+  if (iconElement._weatherTooltipHandler) {
+    iconElement.removeEventListener('mouseenter', iconElement._weatherTooltipHandler.mouseenter);
+    iconElement.removeEventListener('mouseleave', iconElement._weatherTooltipHandler.mouseleave);
+    iconElement.removeEventListener('touchstart', iconElement._weatherTooltipHandler.touchstart);
   }
   
-  function showTooltip() {
-    if (hideTimeout) {
-      clearTimeout(hideTimeout);
-      hideTimeout = null;
-    }
-    
-    // Remove any existing tooltip
-    if (tooltip) {
-      tooltip.remove();
-    }
-    
-    tooltip = document.createElement('div');
-    tooltip.className = 'weather-icon-tooltip';
-    tooltip.textContent = description;
-    
-    // Store tooltip reference for cleanup
-    iconElement._tooltipData.tooltip = tooltip;
-    
-    // Add tooltip to the icon container or parent
-    const container = iconContainer || iconElement.parentElement;
-    if (container) {
-      container.appendChild(tooltip);
-      
-      // Show tooltip with animation
-      requestAnimationFrame(() => {
-        tooltip.classList.add('show');
-      });
-    }
-  }
+  // Timer for mouse hover delay
+  let tooltipTimer = null;
   
-  function hideTooltip() {
-    if (showTimeout) {
-      clearTimeout(showTimeout);
-      showTimeout = null;
-    }
+  const handlers = {
+    mouseenter: () => {
+      clearTimeout(tooltipTimer);
+      showWeatherIconTooltip(iconElement, description);
+    },
     
-    if (tooltip) {
-      tooltip.classList.remove('show');
-      hideTimeout = setTimeout(() => {
-        if (tooltip) {
-          tooltip.remove();
-          tooltip = null;
-          if (iconElement._tooltipData) {
-            iconElement._tooltipData.tooltip = null;
-          }
-        }
-      }, 300); // Match CSS transition duration
-      if (iconElement._tooltipData) {
-        iconElement._tooltipData.hideTimeout = hideTimeout;
-      }
+    mouseleave: () => {
+      tooltipTimer = setTimeout(() => {
+        document.querySelectorAll('.weather-icon-tooltip').forEach(t => {
+          t.style.opacity = '0';
+          t.style.transform = 'translateY(-10px)';
+          setTimeout(() => t.remove(), 300);
+        });
+      }, 500); // Small delay before hiding
+    },
+    
+    touchstart: (e) => {
+      e.preventDefault(); // Prevent mouse events on touch
+      showWeatherIconTooltip(iconElement, description);
     }
-  }
-  
-  // Store tooltip data on the element for cleanup
-  iconElement._tooltipData = {
-    showTimeout,
-    hideTimeout,
-    tooltip: null
   };
   
-  // Mouse events for desktop
-  iconElement.addEventListener('mouseenter', () => {
-    if (showTimeout) clearTimeout(showTimeout);
-    showTimeout = setTimeout(showTooltip, 200); // Small delay for better UX
-    iconElement._tooltipData.showTimeout = showTimeout;
-  });
+  // Store handlers for cleanup
+  iconElement._weatherTooltipHandler = handlers;
   
-  iconElement.addEventListener('mouseleave', hideTooltip);
-  
-  // Touch events for mobile
-  iconElement.addEventListener('touchstart', (e) => {
-    e.preventDefault(); // Prevent mouse events on touch
-    if (tooltip && tooltip.classList.contains('show')) {
-      hideTooltip();
-    } else {
-      showTooltip();
-    }
-  });
-  
-  // Hide on touch outside
-  document.addEventListener('touchstart', (e) => {
-    if (tooltip && !iconElement.contains(e.target) && !tooltip.contains(e.target)) {
-      hideTooltip();
-    }
-  });
+  // Add event listeners
+  iconElement.addEventListener('mouseenter', handlers.mouseenter);
+  iconElement.addEventListener('mouseleave', handlers.mouseleave);
+  iconElement.addEventListener('touchstart', handlers.touchstart);
   
   // Add cursor pointer to indicate interactivity
   iconElement.style.cursor = 'pointer';
