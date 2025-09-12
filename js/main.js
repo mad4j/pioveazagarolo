@@ -11,6 +11,12 @@ async function retrieveData() {
     if (!response.ok) throw new Error('Errore nel caricamento dei dati meteo');
     const data = await response.json();
     
+    // Check if API returned error data instead of weather data
+    if (data.error || !data.daily || !data.hourly) {
+      const errorMsg = data.reason || 'Dati meteo non validi dal server';
+      throw new Error(`API Error: ${errorMsg}`);
+    }
+    
     // Load actual precipitation data
     await precipitationManager.loadActualData();
     
@@ -23,6 +29,7 @@ async function retrieveData() {
       // Try to load precipitation data even from cache
       await precipitationManager.loadActualData();
       displayData(cached.data);
+      showToast('Usando dati cached - server temporaneamente non disponibile', 'warning', 5000);
     } else {
       showToast('Errore rete. Ritento fra 60 secondi...', 'error');
     }
