@@ -84,8 +84,8 @@ function addPageInteractionHandlers() {
   
   // Add event listeners for various user interactions
   document.addEventListener('scroll', pageInteractionHandlers.scroll, { passive: true });
-  document.addEventListener('touchstart', pageInteractionHandlers.touchstart, { passive: false });
-  document.addEventListener('touchend', pageInteractionHandlers.touchend, { passive: false });
+  document.addEventListener('touchstart', pageInteractionHandlers.touchstart, { passive: true });
+  document.addEventListener('touchend', pageInteractionHandlers.touchend, { passive: true });
   document.addEventListener('mousedown', pageInteractionHandlers.mousedown);
   document.addEventListener('keydown', pageInteractionHandlers.keydown);
   
@@ -432,10 +432,13 @@ function createSwipeHandler(element, weatherData) {
     
     // Only prevent default if we're confident this is a horizontal swipe gesture
     // Use stricter thresholds to preserve pull-to-refresh functionality
-    // Require significant horizontal movement AND horizontal dominance
+    // Require significant horizontal movement AND horizontal dominance AND not near top of screen
+    const isNearTop = touch.clientY < 100; // Don't interfere with pull-to-refresh in top 100px
+    
     if (deltaX >= SWIPE_CONFIG.PREVENT_DEFAULT_THRESHOLD && 
         deltaX > deltaY * 1.5 && 
-        deltaY < SWIPE_CONFIG.MAX_VERTICAL) {
+        deltaY < SWIPE_CONFIG.MAX_VERTICAL &&
+        !isNearTop) { // Additional check to preserve pull-to-refresh
       e.preventDefault();
       
       // Add stronger visual feedback during confirmed swipe
