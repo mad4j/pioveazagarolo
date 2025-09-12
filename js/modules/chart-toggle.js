@@ -108,7 +108,8 @@ export function toggleChartMode(triggeredChartId, weatherData) {
       const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
       const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
       const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
-      buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime);
+      const cloudCoverageSlice = weatherData.hourly.cloud_cover_total ? getDaySlice(weatherData.hourly.cloud_cover_total, dayIndex) : null;
+      buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, cloudCoverageSlice);
     } else if (actualNewMode === CHART_MODES.WIND) {
       // Switch to wind chart
       const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
@@ -240,7 +241,8 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
     const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
     const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
-    buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime);
+    const cloudCoverageSlice = weatherData.hourly.cloud_cover_total ? getDaySlice(weatherData.hourly.cloud_cover_total, dayIndex) : null;
+    buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, cloudCoverageSlice);
   } else if (currentMode === CHART_MODES.WIND && weatherData.hourly.wind_speed_10m && weatherData.hourly.wind_direction_10m) {
     const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
     const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
