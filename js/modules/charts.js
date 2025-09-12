@@ -1,6 +1,6 @@
 import { DAY_CONFIGS } from './constants.js';
 import { getRainIconClass, getWeatherDescription, getCloudCoverIconClass, getCloudCoverDescription } from './icons.js';
-import { uvIndexPlugin } from './uv-index.js';
+import { getUVLevel } from './uv-index.js';
 
 export const chartInstances = {};
 
@@ -1149,27 +1149,44 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
 
   const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
-  
-  // Aggiungi plugin UV se i dati sono disponibili
+
+  // Prepara i datasets del grafico
+  const datasets = [
+    {
+      label: 'Qualità dell\'aria (EAQI)',
+      type: 'bar',
+      backgroundColor: eaqiColors,
+      borderColor: eaqiColors.map(color => color), // Same color for border
+      borderWidth: 1,
+      data: eaqiData,
+      maxBarThickness: 30,
+      yAxisID: 'y'
+    }
+  ];
+
+  // Aggiungi dataset UV se i dati sono disponibili
   if (uvData && Array.isArray(uvData) && uvData.some(uv => uv > 0)) {
-    plugins.push(uvIndexPlugin);
+    datasets.push({
+      label: 'Indice UV',
+      type: 'line',
+      borderColor: '#f39c12',
+      backgroundColor: 'rgba(243, 156, 18, 0.1)',
+      borderWidth: 2,
+      pointRadius: 3,
+      pointBackgroundColor: '#f39c12',
+      pointBorderColor: '#ffffff',
+      pointBorderWidth: 1,
+      data: uvData,
+      yAxisID: 'y1',
+      fill: false
+    });
   }
 
   chartInstances[target] = new Chart(el, {
     plugins,
     data: {
       labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
-      datasets: [
-        {
-          label: 'Qualità dell\'aria (EAQI)',
-          type: 'bar',
-          backgroundColor: eaqiColors,
-          borderColor: eaqiColors.map(color => color), // Same color for border
-          borderWidth: 1,
-          data: eaqiData,
-          maxBarThickness: 30
-        }
-      ]
+      datasets
     },
     options: {
       responsive: true,
@@ -1187,6 +1204,8 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
       },
       scales: {
         y: {
+          type: 'linear',
+          position: 'left',
           min: scaleMin,
           max: scaleMax,
           grid: {
@@ -1195,6 +1214,17 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
           },
           ticks: { display: false }
         },
+        y1: uvData && Array.isArray(uvData) && uvData.some(uv => uv > 0) ? {
+          type: 'linear',
+          position: 'right',
+          min: 0,
+          max: 12,
+          grid: {
+            drawOnChartArea: false,
+            drawTicks: false
+          },
+          ticks: { display: false }
+        } : undefined,
         x: {
           grid: { display: false },
           ticks: {
@@ -1214,9 +1244,6 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
         sunriseSunset: {
           sunrise: sunriseTime,
           sunset: sunsetTime
-        },
-        uvIndex: {
-          uvData: uvData
         },
         legend: { display: false },
         tooltip: {
@@ -1242,18 +1269,41 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
 
             const rows = [];
             if (tooltip.dataPoints?.length) {
-              const dp = tooltip.dataPoints[0];
-              const eaqiValue = Math.round(dp.parsed.y);
+              // Trova i dati EAQI e UV dai diversi dataset
+              let eaqiValue = null;
+              let uvValue = null;
               
-              // Determina il livello di qualità dell'aria
-              let eaqiLevel = 'Buona';
-              if (eaqiValue > 100) eaqiLevel = 'Estremamente pessima';
-              else if (eaqiValue > 80) eaqiLevel = 'Pessima';
-              else if (eaqiValue > 60) eaqiLevel = 'Scarsa';
-              else if (eaqiValue > 40) eaqiLevel = 'Moderata';
-              else if (eaqiValue > 20) eaqiLevel = 'Discreta';
+              tooltip.dataPoints.forEach(dp => {
+                if (dp.dataset.label === 'Qualità dell\'aria (EAQI)') {
+                  eaqiValue = Math.round(dp.parsed.y);
+                } else if (dp.dataset.label === 'Indice UV') {
+                  uvValue = Math.round(dp.parsed.y);
+                }
+              });
               
-              rows.push({ k: 'eaqi', t: `EAQI: ${eaqiValue} (${eaqiLevel})` });
+              // Se non abbiamo trovato EAQI dai dataPoints multipli, prendi dal primo
+              if (eaqiValue === null && tooltip.dataPoints[0]) {
+                eaqiValue = Math.round(tooltip.dataPoints[0].parsed.y);
+              }
+              
+              // Aggiungi informazioni EAQI
+              if (eaqiValue !== null) {
+                // Determina il livello di qualità dell'aria
+                let eaqiLevel = 'Buona';
+                if (eaqiValue > 100) eaqiLevel = 'Estremamente pessima';
+                else if (eaqiValue > 80) eaqiLevel = 'Pessima';
+                else if (eaqiValue > 60) eaqiLevel = 'Scarsa';
+                else if (eaqiValue > 40) eaqiLevel = 'Moderata';
+                else if (eaqiValue > 20) eaqiLevel = 'Discreta';
+                
+                rows.push({ k: 'eaqi', t: `EAQI: ${eaqiValue} (${eaqiLevel})` });
+              }
+              
+              // Aggiungi informazioni UV se disponibili
+              if (uvValue !== null && uvValue > 0) {
+                const uvLevel = getUVLevel(uvValue);
+                rows.push({ k: 'uv', t: `UV: ${uvValue} (${uvLevel.label})` });
+              }
 
               if (sunriseTime && sunsetTime) {
                 const hour = parseFloat(dp.label.split(':')[0]);
@@ -1277,6 +1327,7 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
             rows.forEach(r => {
               let icon = '';
               if (r.k === 'eaqi') icon = '<i class="wi wi-smog" style="margin-right:4px; color:#50ccaa;"></i>';
+              else if (r.k === 'uv') icon = '<i class="wi wi-day-sunny" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
               html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`;
