@@ -2,6 +2,31 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.8.3] - 2025-09-12
+
+### Features
+- Add swipe gesture support for mode switching (8124ebc6)
+- Add weather code icon tooltips with Italian descriptions (27315f1f)
+
+### Fix
+- Fix pull-to-refresh interference by adjusting swipe gesture thresholds (3f01bd07)
+- Fix tooltip hiding during swipe gesture mode switching (cd3b1209)
+- Fix weather icon tooltips to match air quality tooltip format and behavior (dfea42d9)
+
+### Other
+- chore(release): prepare 1.8.3 (2f76a0cc)
+- chore: aggiornamento dati meteo (rolling) (c397b4ba)
+- Initial plan (545e0b28)
+- Initial plan (7a59e85e)
+- chore: aggiornamento dati meteo (rolling) (03ce3c83)
+- chore: aggiornamento dati meteo (rolling) (5a6fe8bc)
+- Update humidity bar colors to darker, varied scheme per feedback (7e66d99a)
+- Update humidity bar colors to lighter scheme in temperature charts (7cdf518b)
+- Update humidity bar colors to lighter scheme for better temperature line visibility (dcc525a3)
+- Initial analysis of humidity bar colors in temperature charts (378f2604)
+- Initial plan (a30c590c)
+- chore: aggiornamento dati meteo (rolling) (8d44d363)
+
 ## [1.8.2] - 2025-09-10
 
 ### Features
