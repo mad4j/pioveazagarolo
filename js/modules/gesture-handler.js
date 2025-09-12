@@ -98,20 +98,22 @@ function addPageInteractionHandlers() {
  */
 export function hideEnhancedChartModeTooltip() {
   if (currentEnhancedTooltip) {
-    currentEnhancedTooltip.style.opacity = '0';
-    currentEnhancedTooltip.style.transform = 'translate(-50%, -50%) scale(0.9)';
-    setTimeout(() => {
-      if (currentEnhancedTooltip && currentEnhancedTooltip.parentNode) {
-        currentEnhancedTooltip.parentNode.removeChild(currentEnhancedTooltip);
-      }
-      currentEnhancedTooltip = null;
-    }, 400);
-    
-    // Clear any pending auto-hide timer
+    // Clear any pending auto-hide timer first
     if (enhancedTooltipTimer) {
       clearTimeout(enhancedTooltipTimer);
       enhancedTooltipTimer = null;
     }
+    
+    const tooltipToHide = currentEnhancedTooltip;
+    currentEnhancedTooltip = null; // Clear reference immediately to prevent double-hiding
+    
+    tooltipToHide.style.opacity = '0';
+    tooltipToHide.style.transform = 'translate(-50%, -50%) scale(0.9)';
+    setTimeout(() => {
+      if (tooltipToHide && tooltipToHide.parentNode) {
+        tooltipToHide.parentNode.removeChild(tooltipToHide);
+      }
+    }, 400);
     
     console.log('📊 Enhanced chart mode tooltip hidden');
   }
@@ -282,6 +284,12 @@ function switchToModeViaSwiping(targetMode, weatherData) {
   // Hide any visible tooltips immediately before switching modes
   hideAllChartTooltips();
   
+  // Also hide any existing enhanced tooltips 
+  hideEnhancedChartModeTooltip();
+  
+  // Remove and re-add page interaction handlers to ensure clean state
+  removePageInteractionHandlers();
+  
   // Add mode switching animation to all forecast cards
   const forecastCards = document.querySelectorAll('.forecast-card');
   forecastCards.forEach(card => card.classList.add('mode-switching'));
@@ -368,8 +376,24 @@ function switchToModeViaSwiping(targetMode, weatherData) {
       // Update navigation dots to reflect the change
       updateNavigationDots(actualMode);
       
-      // Show enhanced tooltip to indicate the active mode
-      showEnhancedChartModeTooltip(actualMode);
+      // Re-add page interaction handlers for tooltip management
+      addPageInteractionHandlers();
+      
+      // Show enhanced tooltip to indicate the active mode, but delay slightly 
+      // to ensure the swipe gesture handling is completely finished
+      // Also ensure any existing tooltip is fully cleared first
+      setTimeout(() => {
+        // Double-check that no tooltip is currently showing before showing new one
+        if (currentEnhancedTooltip) {
+          hideEnhancedChartModeTooltip();
+          // Wait for the hide animation to complete before showing new one
+          setTimeout(() => {
+            showEnhancedChartModeTooltip(actualMode);
+          }, 500);
+        } else {
+          showEnhancedChartModeTooltip(actualMode);
+        }
+      }, 200);
       
       console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
     });
