@@ -1,7 +1,7 @@
 {
-  "version": "1.8.2",
-  "buildTimestamp": "2025-09-11T21:19:30.182Z",
-  "gitCommit": "545e0b286cedd7feb28db8cf11de4eb1549d2c04",
-  "gitBranch": "copilot/fix-143",
-  "buildNumber": 1757625570
+  "version": "1.8.3",
+  "buildTimestamp": "2025-09-12T01:00:16.143Z",
+  "gitCommit": "18e00f0c9b986fa90e215ead9c20d48289d60b05",
+  "gitBranch": "copilot/fix-145",
+  "buildNumber": 1757638816
 }

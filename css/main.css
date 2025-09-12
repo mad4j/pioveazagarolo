@@ -418,6 +418,29 @@ body {
   touch-action: pan-y; /* Allow vertical scrolling but prevent horizontal panning */
 }
 
+/* Subtle swipe indicators on the sides */
+.forecast-card.swipe-enabled::before {
+  content: '‹ ›';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  color: rgba(52, 152, 219, 0.3);
+  font-weight: bold;
+  letter-spacing: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Show swipe indicators on hover (desktop) */
+.forecast-card.swipe-enabled:hover::before {
+  opacity: 1;
+}
+
+/* Active swipe overlay */
 .forecast-card.swipe-enabled::after {
   content: '';
   position: absolute;
@@ -438,6 +461,48 @@ body {
 
 .forecast-card.swipe-enabled:active::after {
   opacity: 1;
+}
+
+/* Swipe transition feedback */
+.forecast-card.swipe-enabled.swiping {
+  transform: scale(0.98);
+  transition: transform 0.2s ease;
+}
+
+/* Active swipe feedback */
+.forecast-card.swipe-enabled.swipe-active {
+  transform: scale(0.96);
+  box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+/* Successful swipe feedback */
+.forecast-card.swipe-enabled.swipe-success {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+}
+
+/* Mode switching animation */
+.forecast-card.mode-switching {
+  position: relative;
+  overflow: hidden;
+}
+
+.forecast-card.mode-switching::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.2), transparent);
+  animation: swipe-flash 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes swipe-flash {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
 .day-title {
