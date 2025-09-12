@@ -14,6 +14,159 @@ const SWIPE_CONFIG = {
   PREVENT_DEFAULT_THRESHOLD: 40 // Minimum horizontal movement before preventing default (preserves pull-to-refresh)
 };
 
+// Global reference to current enhanced tooltip for management
+let currentEnhancedTooltip = null;
+let enhancedTooltipTimer = null;
+let pageInteractionHandlersAdded = false;
+
+/**
+ * Adds global page interaction handlers to hide enhanced tooltip
+ */
+function addPageInteractionHandlers() {
+  if (pageInteractionHandlersAdded) return;
+  
+  const hideOnInteraction = (e) => {
+    // Don't hide if the interaction is on the tooltip itself
+    if (currentEnhancedTooltip && currentEnhancedTooltip.contains(e.target)) {
+      return;
+    }
+    hideEnhancedChartModeTooltip();
+  };
+  
+  // Add event listeners for various user interactions
+  document.addEventListener('scroll', hideEnhancedChartModeTooltip, { passive: true });
+  document.addEventListener('touchstart', hideOnInteraction, { passive: true });
+  document.addEventListener('mousedown', hideOnInteraction);
+  document.addEventListener('keydown', hideEnhancedChartModeTooltip);
+  
+  pageInteractionHandlersAdded = true;
+  console.log('📱 Page interaction handlers added for enhanced tooltip management');
+}
+
+/**
+ * Hides the enhanced chart mode tooltip if it's currently visible
+ */
+export function hideEnhancedChartModeTooltip() {
+  if (currentEnhancedTooltip) {
+    currentEnhancedTooltip.style.opacity = '0';
+    currentEnhancedTooltip.style.transform = 'translate(-50%, -50%) scale(0.9)';
+    setTimeout(() => {
+      if (currentEnhancedTooltip && currentEnhancedTooltip.parentNode) {
+        currentEnhancedTooltip.parentNode.removeChild(currentEnhancedTooltip);
+      }
+      currentEnhancedTooltip = null;
+    }, 400);
+    
+    // Clear any pending auto-hide timer
+    if (enhancedTooltipTimer) {
+      clearTimeout(enhancedTooltipTimer);
+      enhancedTooltipTimer = null;
+    }
+    
+    console.log('📊 Enhanced chart mode tooltip hidden');
+  }
+}
+
+/**
+ * Shows an enhanced tooltip with mode name and swipe direction hints
+ * @param {string} mode - The current chart mode
+ */
+export function showEnhancedChartModeTooltip(mode) {
+  // Hide any existing enhanced tooltips first
+  hideEnhancedChartModeTooltip();
+  
+  const tooltip = document.createElement('div');
+  tooltip.className = 'enhanced-chart-mode-tooltip';
+  tooltip.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, var(--primary-color), #1d2b36);
+    color: #fff;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    text-align: center;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+    transition: all 0.4s ease;
+    pointer-events: auto;
+    max-width: 280px;
+    cursor: pointer;
+  `;
+  
+  // Mode names and descriptions
+  const modeInfo = {
+    [CHART_MODES.PRECIPITATION]: { 
+      name: 'Precipitazioni', 
+      icon: '🌧️',
+      desc: 'Probabilità e intensità di pioggia'
+    },
+    [CHART_MODES.TEMPERATURE]: { 
+      name: 'Temperature', 
+      icon: '🌡️',
+      desc: 'Temperature reali e percepite'
+    },
+    [CHART_MODES.WIND]: { 
+      name: 'Vento', 
+      icon: '💨',
+      desc: 'Velocità e direzione del vento'
+    },
+    [CHART_MODES.PRESSURE]: { 
+      name: 'Pressione', 
+      icon: '🔘',
+      desc: 'Pressione atmosferica'
+    },
+    [CHART_MODES.AIR_QUALITY]: { 
+      name: 'Qualità dell\'aria', 
+      icon: '🍃',
+      desc: 'Indice qualità dell\'aria europea'
+    }
+  };
+  
+  const info = modeInfo[mode] || { name: mode, icon: '📊', desc: 'Modalità grafici' };
+  
+  tooltip.innerHTML = `
+    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${info.icon}</div>
+    <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.3rem;">
+      ${info.name}
+    </div>
+    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-bottom: 0.8rem;">
+      ${info.desc}
+    </div>
+    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">
+      ← Scorri per cambiare modalità →
+    </div>
+  `;
+  
+  document.body.appendChild(tooltip);
+  currentEnhancedTooltip = tooltip;
+  
+  // Add click handler to hide tooltip when clicked
+  tooltip.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    hideEnhancedChartModeTooltip();
+  });
+  
+  // Show tooltip with animation
+  setTimeout(() => {
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'translate(-50%, -50%) scale(1)';
+  }, 10);
+  
+  // Auto-hide after 3 seconds
+  enhancedTooltipTimer = setTimeout(() => {
+    hideEnhancedChartModeTooltip();
+  }, 3000);
+  
+  console.log(`📊 Enhanced chart mode tooltip shown: ${info.name}`);
+}
+
 // Chart modes in order for cycling
 const MODE_ORDER = [
   CHART_MODES.PRECIPITATION,
@@ -67,8 +220,18 @@ function hideAllChartTooltips() {
 function switchToModeViaSwiping(targetMode, weatherData) {
   // Hide any visible tooltips immediately before switching modes
   hideAllChartTooltips();
+  
+  // Add mode switching animation to all forecast cards
+  const forecastCards = document.querySelectorAll('.forecast-card');
+  forecastCards.forEach(card => card.classList.add('mode-switching'));
+  
+  // Remove animation class after animation completes
+  setTimeout(() => {
+    forecastCards.forEach(card => card.classList.remove('mode-switching'));
+  }, 600);
+  
   // Import and use the existing switchToMode function from navigation-dots
-  import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
+  import('./navigation-dots.js').then(({ updateNavigationDots }) => {
     // Import chart building functions directly
     import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice }) => {
       if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
@@ -144,8 +307,8 @@ function switchToModeViaSwiping(targetMode, weatherData) {
       // Update navigation dots to reflect the change
       updateNavigationDots(actualMode);
       
-      // Show tooltip to indicate the active mode
-      showChartModeTooltip(actualMode);
+      // Show enhanced tooltip to indicate the active mode
+      showEnhancedChartModeTooltip(actualMode);
       
       console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
     });
@@ -175,6 +338,9 @@ function createSwipeHandler(element, weatherData) {
     touchStartY = touch.clientY;
     touchStartTime = Date.now();
     touchMoved = false;
+    
+    // Add visual feedback class for touch start
+    element.classList.add('swiping');
   };
 
   const handleTouchMove = (e) => {
@@ -195,11 +361,19 @@ function createSwipeHandler(element, weatherData) {
         deltaX > deltaY * 1.5 && 
         deltaY < SWIPE_CONFIG.MAX_VERTICAL) {
       e.preventDefault();
+      
+      // Add stronger visual feedback during confirmed swipe
+      if (!element.classList.contains('swipe-active')) {
+        element.classList.add('swipe-active');
+      }
     }
   };
 
   const handleTouchEnd = (e) => {
     if (touchStartX === null || touchStartY === null || touchStartTime === null) return;
+    
+    // Remove visual feedback classes
+    element.classList.remove('swiping', 'swipe-active');
     
     const touch = e.changedTouches[0];
     const endX = touch.clientX;
@@ -240,6 +414,12 @@ function createSwipeHandler(element, weatherData) {
         e.preventDefault();
         e.stopPropagation();
         
+        // Add successful swipe feedback
+        element.classList.add('swipe-success');
+        setTimeout(() => {
+          element.classList.remove('swipe-success');
+        }, 300);
+        
         // Switch to new mode
         switchToModeViaSwiping(nextMode, weatherData);
       }
@@ -269,6 +449,9 @@ function createSwipeHandler(element, weatherData) {
 export function setupSwipeGestures(weatherData) {
   const handlers = [];
   const forecastCards = document.querySelectorAll('.forecast-card');
+  
+  // Add global page interaction handlers for tooltip management
+  addPageInteractionHandlers();
   
   forecastCards.forEach(card => {
     const handler = createSwipeHandler(card, weatherData);
