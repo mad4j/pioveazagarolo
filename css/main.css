@@ -177,6 +177,7 @@
   background-color: var(--secondary-color);
   border-color: var(--secondary-color);
   box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+  transform: scale(1.2);
 }
 
 .nav-dot:hover .dot-icon {
