@@ -353,14 +353,8 @@ function drawCloudCoverageIcon(ctx, xScale, area, hourIndex, cloudCoverage) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  // High-contrast colors for better visibility
-  let color = '#34495e'; // Default dark blue-gray
-  if (cloudCoverage >= 75) color = '#2c3e50';      // Dark blue-gray for heavy clouds
-  else if (cloudCoverage >= 50) color = '#34495e'; // Medium blue-gray
-  else if (cloudCoverage >= 25) color = '#3498db'; // Blue for light clouds
-  else color = '#f39c12';                          // Orange for clear skies
-  
-  ctx.fillStyle = isDarkMode() ? '#f2f2f2' : color;
+  // Use consistent color for all cloud coverage icons
+  ctx.fillStyle = isDarkMode() ? '#f2f2f2' : '#3498db';
   
   // Position icons at the very top of the chart area for better visibility
   const y = area.top + 5; // Position above weather icons
@@ -609,7 +603,7 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
               if (cloudCoveragePlugin && cloudCoveragePlugin.cloudCoverageData && cloudCoveragePlugin.cloudCoverageData[idx] != null) {
                 const cloudCoverage = Math.round(cloudCoveragePlugin.cloudCoverageData[idx]);
                 const cloudDesc = getCloudCoverDescription(cloudCoverage);
-                rows.push({ k: 'cloud', t: `Copertura: ${cloudCoverage}% (${cloudDesc})` });
+                rows.push({ k: 'cloud', t: `Copertura: ${cloudDesc}` });
               } 
               if (sunriseTime && sunsetTime) { 
                 const hour = parseFloat(dp.label.split(':')[0]); 
