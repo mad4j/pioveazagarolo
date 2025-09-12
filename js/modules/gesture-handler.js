@@ -284,11 +284,8 @@ function switchToModeViaSwiping(targetMode, weatherData) {
   // Hide any visible tooltips immediately before switching modes
   hideAllChartTooltips();
   
-  // Also hide any existing enhanced tooltips 
+  // Also hide any existing enhanced tooltips immediately
   hideEnhancedChartModeTooltip();
-  
-  // Remove and re-add page interaction handlers to ensure clean state
-  removePageInteractionHandlers();
   
   // Add mode switching animation to all forecast cards
   const forecastCards = document.querySelectorAll('.forecast-card');
@@ -376,24 +373,11 @@ function switchToModeViaSwiping(targetMode, weatherData) {
       // Update navigation dots to reflect the change
       updateNavigationDots(actualMode);
       
-      // Re-add page interaction handlers for tooltip management
-      addPageInteractionHandlers();
-      
-      // Show enhanced tooltip to indicate the active mode, but delay slightly 
-      // to ensure the swipe gesture handling is completely finished
-      // Also ensure any existing tooltip is fully cleared first
+      // Show enhanced tooltip to indicate the active mode immediately
+      // Simple timing: just wait for DOM updates to complete
       setTimeout(() => {
-        // Double-check that no tooltip is currently showing before showing new one
-        if (currentEnhancedTooltip) {
-          hideEnhancedChartModeTooltip();
-          // Wait for the hide animation to complete before showing new one
-          setTimeout(() => {
-            showEnhancedChartModeTooltip(actualMode);
-          }, 500);
-        } else {
-          showEnhancedChartModeTooltip(actualMode);
-        }
-      }, 200);
+        showEnhancedChartModeTooltip(actualMode);
+      }, 50);
       
       console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
     });
