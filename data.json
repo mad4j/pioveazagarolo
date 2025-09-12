@@ -1,7 +1,7 @@
 {
   "latitude": 41.8125,
   "longitude": 12.8125,
-  "generationtime_ms": 0.2090930938720703,
+  "generationtime_ms": 0.2200603485107422,
   "utc_offset_seconds": 7200,
   "timezone": "Europe/Rome",
   "timezone_abbreviation": "GMT+2",
@@ -21,18 +21,18 @@
     "wind_direction_10m": "°"
   },
   "current": {
-    "time": "2025-09-12T03:30",
+    "time": "2025-09-12T05:30",
     "interval": 900,
-    "temperature_2m": 17.6,
+    "temperature_2m": 17.5,
     "rain": 0.00,
     "weather_code": 2,
-    "pressure_msl": 1017.8,
+    "pressure_msl": 1017.6,
     "precipitation": 0.00,
-    "relative_humidity_2m": 92,
+    "relative_humidity_2m": 90,
     "is_day": 0,
-    "apparent_temperature": 18.8,
+    "apparent_temperature": 18.5,
     "wind_speed_10m": 6.4,
-    "wind_direction_10m": 137
+    "wind_direction_10m": 128
   },
   "hourly_units": {
     "time": "iso8601",
@@ -248,25 +248,25 @@
       0,
       0,
       0,
-      2,
-      4,
-      5,
-      4,
-      1,
       0,
-      2,
-      5,
-      8,
-      13,
-      17,
-      20,
-      18,
-      14,
-      10,
-      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
       7,
-      5,
-      4,
+      17,
+      23,
+      23,
+      19,
+      15,
+      11,
+      6,
+      3,
+      2,
       3,
       3
     ],
@@ -912,14 +912,14 @@
     "precipitation_probability_max": [
       0,
       0,
-      20
+      23
     ]
   },
-  "last_update": "2025-09-12 03:43",
+  "last_update": "2025-09-12 05:31",
   "air_quality": {
     "latitude": 41.8,
     "longitude": 12.799999,
-    "generationtime_ms": 0.4296302795410156,
+    "generationtime_ms": 0.2592802047729492,
     "utc_offset_seconds": 7200,
     "timezone": "Europe/Rome",
     "timezone_abbreviation": "GMT+2",
@@ -930,9 +930,9 @@
       "european_aqi": "EAQI"
     },
     "current": {
-      "time": "2025-09-12T03:00",
+      "time": "2025-09-12T05:00",
       "interval": 3600,
-      "european_aqi": 20
+      "european_aqi": 19
     },
     "hourly_units": {
       "time": "iso8601",
