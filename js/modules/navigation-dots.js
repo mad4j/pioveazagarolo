@@ -208,7 +208,7 @@ function switchToMode(targetMode, weatherData) {
         const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
         const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
         const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
-        const cloudCoverageSlice = weatherData.hourly.cloud_cover_total ? getDaySlice(weatherData.hourly.cloud_cover_total, dayIndex) : null;
+        const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
         buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, cloudCoverageSlice);
       } else if (actualMode === CHART_MODES.WIND) {
         // Switch to wind chart
