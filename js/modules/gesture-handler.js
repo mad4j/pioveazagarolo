@@ -45,11 +45,27 @@ function getNextMode(currentMode, direction) {
 }
 
 /**
+ * Removes all visible chart tooltips immediately
+ */
+function hideAllChartTooltips() {
+  // Hide all chart tooltips by finding tooltip DOM elements
+  const chartIds = ['today-chart', 'tomorrow-chart', 'dayaftertomorrow-chart'];
+  chartIds.forEach(chartId => {
+    const tooltip = document.getElementById(`chartjs-tooltip-${chartId}`);
+    if (tooltip) {
+      tooltip.style.opacity = '0';
+    }
+  });
+}
+
+/**
  * Switches to a specific chart mode using the existing navigation system
  * @param {string} targetMode - The mode to switch to
  * @param {Object} weatherData - Weather data object
  */
 function switchToModeViaSwiping(targetMode, weatherData) {
+  // Hide any visible tooltips immediately before switching modes
+  hideAllChartTooltips();
   // Import and use the existing switchToMode function from navigation-dots
   import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
     // Import chart building functions directly
