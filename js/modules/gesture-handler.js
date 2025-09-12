@@ -18,7 +18,7 @@ const SWIPE_CONFIG = {
  * Shows an enhanced tooltip with mode name and swipe direction hints
  * @param {string} mode - The current chart mode
  */
-function showEnhancedChartModeTooltip(mode) {
+export function showEnhancedChartModeTooltip(mode) {
   // Remove any existing enhanced tooltips
   document.querySelectorAll('.enhanced-chart-mode-tooltip').forEach(t => t.remove());
   
@@ -175,7 +175,7 @@ function switchToModeViaSwiping(targetMode, weatherData) {
   }, 600);
   
   // Import and use the existing switchToMode function from navigation-dots
-  import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
+  import('./navigation-dots.js').then(({ updateNavigationDots }) => {
     // Import chart building functions directly
     import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice }) => {
       if (!weatherData || !weatherData.daily || !weatherData.hourly) return;

@@ -418,27 +418,7 @@ body {
   touch-action: pan-y; /* Allow vertical scrolling but prevent horizontal panning */
 }
 
-/* Subtle swipe indicators on the sides */
-.forecast-card.swipe-enabled::before {
-  content: '‹ ›';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1.2rem;
-  color: rgba(52, 152, 219, 0.3);
-  font-weight: bold;
-  letter-spacing: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* Show swipe indicators on hover (desktop) */
-.forecast-card.swipe-enabled:hover::before {
-  opacity: 1;
-}
+/* Swipe indicators removed - using enhanced tooltips instead */
 
 /* Active swipe overlay */
 .forecast-card.swipe-enabled::after {
@@ -657,28 +637,7 @@ footer .chart-mode-navigation {
   pointer-events: auto;
 }
 
-/* Chart mode tooltip - positioned above navigation dots */
-.chart-mode-tooltip {
-  position: fixed;
-  background: linear-gradient(135deg, var(--primary-color), #1d2b36);
-  color: #fff;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  z-index: 1200;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  transform: translateY(8px);
-  white-space: nowrap;
-}
-
-.chart-mode-tooltip.show {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* Basic chart mode tooltip removed - now using enhanced tooltips only */
 
 /* Weather icon tooltips are now created dynamically using the same style as air quality tooltips */
 
