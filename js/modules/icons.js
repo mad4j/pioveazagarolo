@@ -29,3 +29,19 @@ export function getWeatherDescription(weatherCode) {
   if ([0, 1].includes(weatherCode)) return 'Sereno';
   return 'Variabile';
 }
+
+// Mapping copertura nuvolosa -> classi icone
+export function getCloudCoverIconClass(cloudCoverPercentage) {
+  if (cloudCoverPercentage >= 75) return 'wi wi-cloud';           // Coperto
+  if (cloudCoverPercentage >= 50) return 'wi wi-cloudy';          // Molto nuvoloso
+  if (cloudCoverPercentage >= 25) return 'wi wi-day-cloudy';      // Parzialmente nuvoloso
+  return 'wi wi-day-sunny-overcast';                              // Poco nuvoloso/sereno
+}
+
+// Mapping copertura nuvolosa -> descrizioni italiane
+export function getCloudCoverDescription(cloudCoverPercentage) {
+  if (cloudCoverPercentage >= 75) return 'Coperto';
+  if (cloudCoverPercentage >= 50) return 'Molto nuvoloso';
+  if (cloudCoverPercentage >= 25) return 'Parzialmente nuvoloso';
+  return 'Poco nuvoloso';
+}

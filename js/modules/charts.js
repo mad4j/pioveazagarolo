@@ -1,5 +1,5 @@
 import { DAY_CONFIGS } from './constants.js';
-import { getRainIconClass, getWeatherDescription } from './icons.js';
+import { getRainIconClass, getWeatherDescription, getCloudCoverIconClass, getCloudCoverDescription } from './icons.js';
 
 export const chartInstances = {};
 
@@ -167,6 +167,52 @@ function selectWeatherCodeForInterval(codes) {
   return Math.max(...codes);
 }
 
+// Plugin per icone copertura nuvolosa in modalità temperature (ogni 3 ore)
+export const cloudCoverageIconsPlugin = {
+  id: 'cloudCoverageIcons',
+  afterDraw(chart, args, opts) {
+    if (!opts || !opts.cloudCoverageData) return;
+    const xScale = chart.scales.x;
+    if (!xScale) return;
+    const { ctx, chartArea } = chart;
+    ctx.save();
+    
+    // Intervalli di 3 ore: 0-2, 3-5, 6-8, 9-11, 12-14, 15-17, 18-20, 21-23
+    const threeHourIntervals = [
+      { start: 0, center: 1 },   // 00:00-02:59, centered at 01:30
+      { start: 3, center: 4 },   // 03:00-05:59, centered at 04:30  
+      { start: 6, center: 7 },   // 06:00-08:59, centered at 07:30
+      { start: 9, center: 10 },  // 09:00-11:59, centered at 10:30
+      { start: 12, center: 13 }, // 12:00-14:59, centered at 13:30
+      { start: 15, center: 16 }, // 15:00-17:59, centered at 16:30
+      { start: 18, center: 19 }, // 18:00-20:59, centered at 19:30
+      { start: 21, center: 22 }  // 21:00-23:59, centered at 22:30
+    ];
+    
+    threeHourIntervals.forEach(interval => {
+      const { start, center } = interval;
+      const cloudValues = [];
+      
+      // Collect cloud coverage values for this 3-hour interval
+      for (let i = start; i < start + 3 && i < opts.cloudCoverageData.length; i++) {
+        if (typeof opts.cloudCoverageData[i] === 'number') {
+          cloudValues.push(opts.cloudCoverageData[i]);
+        }
+      }
+      
+      if (cloudValues.length === 0) return;
+      
+      // Calculate average cloud coverage for this interval
+      const avgCloudCoverage = cloudValues.reduce((sum, val) => sum + val, 0) / cloudValues.length;
+      
+      // Draw the cloud coverage icon centered in the 3-hour interval
+      drawCloudCoverageIcon(ctx, xScale, chartArea, center, avgCloudCoverage);
+    });
+    
+    ctx.restore();
+  }
+};
+
 function timeStringToHours(str) { try { const t = str.split('T')[1]; if (!t) return null; const [h, m] = t.split(':').map(Number); return h + m / 60; } catch { return null; } }
 function formatTime(str) { try { const t = str.split('T')[1]; return t ? t.substring(0, 5) : str; } catch { return str; } }
 function formatDaylightHours(decimalHours) {
@@ -287,6 +333,44 @@ function drawWeatherIcon(ctx, xScale, area, hourIndex, weatherCode, isDay) {
   ctx.restore();
 }
 
+function drawCloudCoverageIcon(ctx, xScale, area, hourIndex, cloudCoverage) {
+  const x = xScale.getPixelForValue(hourIndex);
+  if (x < area.left || x > area.right) return;
+  
+  // Get the appropriate icon class for the cloud coverage percentage
+  const iconClass = getCloudCoverIconClass(cloudCoverage);
+  
+  // Extract the icon code from the class (e.g., 'wi wi-cloud' -> get the unicode)
+  let glyph = '';
+  if (iconClass.includes('wi-cloud')) glyph = '\uf013';
+  else if (iconClass.includes('wi-cloudy')) glyph = '\uf002';
+  else if (iconClass.includes('wi-day-cloudy')) glyph = '\uf002';
+  else if (iconClass.includes('wi-day-sunny-overcast')) glyph = '\uf00c';
+  else glyph = '\uf013'; // Default to cloud icon
+  
+  ctx.save();
+  ctx.font = '14px weathericons';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // Use consistent color for all cloud coverage icons
+  ctx.fillStyle = isDarkMode() ? '#f2f2f2' : '#3498db';
+  
+  // Position icons at the very top of the chart area for better visibility
+  const y = area.top + 5; // Position above weather icons
+  
+  try {
+    ctx.fillText(glyph, x, y);
+  } catch {
+    // Fallback: draw a simple circle if font not ready
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+  
+  ctx.restore();
+}
+
 export function getPrecipitationBarColor(v) { if (v > 30) return '#6c3483'; if (v > 10) return '#b03a2e'; if (v > 6) return '#e74c3c'; if (v > 4) return '#f39c12'; if (v > 2) return '#27ae60'; if (v > 1) return '#3498db'; return '#85c1e9'; }
 
 export function getTemperatureLineColor(v) { if (v > 30) return '#e74c3c'; if (v > 25) return '#f39c12'; if (v > 20) return '#f1c40f'; if (v > 15) return '#27ae60'; if (v > 10) return '#3498db'; if (v > 5) return '#2980b9'; return '#34495e'; }
@@ -338,7 +422,7 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
   }
 }
 
-export function buildTemperatureChart(target, temperatureData, apparentTemperatureData, humidityData = null, sunriseTime = null, sunsetTime = null) {
+export function buildTemperatureChart(target, temperatureData, apparentTemperatureData, humidityData = null, sunriseTime = null, sunsetTime = null, cloudCoverageData = null) {
   const el = document.getElementById(target); 
   if (!el) return; 
   if (chartInstances[target]) chartInstances[target].destroy();
@@ -348,6 +432,7 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
   const maxTemp = Math.max(...temperatureData, ...apparentTemperatureData) + 2;
   const plugins = [sunriseSunsetPlugin]; 
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
+  if (cloudCoverageData) plugins.push(cloudCoverageIconsPlugin);
   
   // Build datasets array - always include temperature lines
   const datasets = [
@@ -473,7 +558,10 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
         sunriseSunset: { 
           sunrise: sunriseTime, 
           sunset: sunsetTime 
-        }, 
+        },
+        cloudCoverageIcons: cloudCoverageData ? {
+          cloudCoverageData: cloudCoverageData
+        } : undefined, 
         legend: { display: false }, 
         tooltip: { 
           enabled: false, 
@@ -509,6 +597,13 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
               if (ds3 && ds3.data && ds3.data[idx] != null) { 
                 const humidity = Math.round(ds3.data[idx]); 
                 rows.push({ k: 'humidity', t: `Umidità: ${humidity}%` }); 
+              }
+              // Add cloud coverage info if available
+              const cloudCoveragePlugin = chart.options.plugins.cloudCoverageIcons;
+              if (cloudCoveragePlugin && cloudCoveragePlugin.cloudCoverageData && cloudCoveragePlugin.cloudCoverageData[idx] != null) {
+                const cloudCoverage = Math.round(cloudCoveragePlugin.cloudCoverageData[idx]);
+                const cloudDesc = getCloudCoverDescription(cloudCoverage);
+                rows.push({ k: 'cloud', t: `Copertura: ${cloudDesc}` });
               } 
               if (sunriseTime && sunsetTime) { 
                 const hour = parseFloat(dp.label.split(':')[0]); 
@@ -529,7 +624,8 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
               let icon = ''; 
               if (r.k === 'temp') icon = '<i class="wi wi-thermometer" style="margin-right:4px; color:#e74c3c;"></i>'; 
               else if (r.k === 'apparent') icon = '<i class="wi wi-thermometer-exterior" style="margin-right:4px; color:#e91e63;"></i>'; 
-              else if (r.k === 'humidity') icon = '<i class="wi wi-humidity" style="margin-right:4px; color:#3498db;"></i>'; 
+              else if (r.k === 'humidity') icon = '<i class="wi wi-humidity" style="margin-right:4px; color:#3498db;"></i>';
+              else if (r.k === 'cloud') icon = '<i class="wi wi-cloud" style="margin-right:4px; color:#95a5a6;"></i>'; 
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>'; 
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>'; 
               html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`; 
