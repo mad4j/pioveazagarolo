@@ -1,11 +1,11 @@
 {
   "error": true,
   "reason": "Data corrupted at path ''. Cannot initialize SurfacePressureAndHeightVariable<VariableAndPreviousDay, ForecastPressureVariable, ForecastHeightVariable> from invalid String value cloud_cover_total.",
-  "last_update": "2025-09-12 18:28",
+  "last_update": "2025-09-12 18:32",
   "air_quality": {
     "latitude": 41.8,
     "longitude": 12.799999,
-    "generationtime_ms": 0.5649328231811523,
+    "generationtime_ms": 0.2573728561401367,
     "utc_offset_seconds": 7200,
     "timezone": "Europe/Rome",
     "timezone_abbreviation": "GMT+2",
