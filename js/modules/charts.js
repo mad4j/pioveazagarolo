@@ -353,17 +353,17 @@ function drawCloudCoverageIcon(ctx, xScale, area, hourIndex, cloudCoverage) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  // Theme-based color: gray for clouds, lighter for less clouds
-  let color = '#95a5a6'; // Default gray
-  if (cloudCoverage >= 75) color = '#7f8c8d';      // Dark gray for heavy clouds
-  else if (cloudCoverage >= 50) color = '#95a5a6'; // Medium gray
-  else if (cloudCoverage >= 25) color = '#bdc3c7'; // Light gray
-  else color = '#ecf0f1';                          // Very light for clear
+  // High-contrast colors for better visibility
+  let color = '#34495e'; // Default dark blue-gray
+  if (cloudCoverage >= 75) color = '#2c3e50';      // Dark blue-gray for heavy clouds
+  else if (cloudCoverage >= 50) color = '#34495e'; // Medium blue-gray
+  else if (cloudCoverage >= 25) color = '#3498db'; // Blue for light clouds
+  else color = '#f39c12';                          // Orange for clear skies
   
   ctx.fillStyle = isDarkMode() ? '#f2f2f2' : color;
   
-  // Position icons at the top of the chart area, slightly higher than weather icons
-  const y = area.top + 30; // Position below weather icons if they exist
+  // Position icons at the very top of the chart area for better visibility
+  const y = area.top + 5; // Position above weather icons
   
   try {
     ctx.fillText(glyph, x, y);
