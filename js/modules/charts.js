@@ -147,8 +147,8 @@ export const pressureWeatherIconsPlugin = {
       const middleIndex = Math.floor(codes.length / 2);
       const selectedIsDay = isDayValues[middleIndex] !== undefined ? isDayValues[middleIndex] : isDayValues[0];
       
-      // Draw the icon centered in the 3-hour interval with higher positioning to match temperature chart
-      drawWeatherIcon(ctx, xScale, chartArea, center, selectedWeatherCode, selectedIsDay, 5);
+      // Draw the icon centered in the 3-hour interval
+      drawWeatherIcon(ctx, xScale, chartArea, center, selectedWeatherCode, selectedIsDay);
     });
     
     ctx.restore();
@@ -290,7 +290,7 @@ function drawWindArrow(ctx, xScale, area, hourIndex, direction) {
   ctx.restore();
 }
 
-function drawWeatherIcon(ctx, xScale, area, hourIndex, weatherCode, isDay, yOffset = 15) {
+function drawWeatherIcon(ctx, xScale, area, hourIndex, weatherCode, isDay) {
   const x = xScale.getPixelForValue(hourIndex);
   if (x < area.left || x > area.right) return;
   
@@ -318,8 +318,8 @@ function drawWeatherIcon(ctx, xScale, area, hourIndex, weatherCode, isDay, yOffs
   // Theme-based color: blue for normal theme, white for dark theme
   ctx.fillStyle = isDarkMode() ? '#f2f2f2' : '#3498db';
   
-  // Position icons with configurable y-offset from the top of the chart area
-  const y = area.top + yOffset;
+  // Position icons at the top of the chart area, but inside the visible area
+  const y = area.top + 15;
   
   try {
     ctx.fillText(glyph, x, y);
