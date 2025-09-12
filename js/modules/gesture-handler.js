@@ -9,8 +9,9 @@ import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
 const SWIPE_CONFIG = {
   MIN_DISTANCE: 50,      // Minimum swipe distance in pixels
   MAX_DURATION: 300,     // Maximum swipe duration in ms
-  MAX_VERTICAL: 80,      // Maximum vertical movement to still be considered horizontal swipe
-  VELOCITY_THRESHOLD: 0.1 // Minimum velocity (pixels/ms)
+  MAX_VERTICAL: 60,      // Maximum vertical movement to still be considered horizontal swipe (reduced to be more strict)
+  VELOCITY_THRESHOLD: 0.15, // Minimum velocity (pixels/ms) - increased for more confident swipes
+  PREVENT_DEFAULT_THRESHOLD: 40 // Minimum horizontal movement before preventing default (preserves pull-to-refresh)
 };
 
 // Chart modes in order for cycling
@@ -187,8 +188,12 @@ function createSwipeHandler(element, weatherData) {
     const deltaX = Math.abs(touch.clientX - touchStartX);
     const deltaY = Math.abs(touch.clientY - touchStartY);
     
-    // If horizontal movement is dominant, prevent scrolling
-    if (deltaX > deltaY && deltaX > 20) {
+    // Only prevent default if we're confident this is a horizontal swipe gesture
+    // Use stricter thresholds to preserve pull-to-refresh functionality
+    // Require significant horizontal movement AND horizontal dominance
+    if (deltaX >= SWIPE_CONFIG.PREVENT_DEFAULT_THRESHOLD && 
+        deltaX > deltaY * 1.5 && 
+        deltaY < SWIPE_CONFIG.MAX_VERTICAL) {
       e.preventDefault();
     }
   };
