@@ -723,7 +723,10 @@ footer .chart-mode-navigation {
   body {
     height: 100svh !important;
     max-height: 100svh !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important; /* Prevent horizontal scroll only */
+    overflow-y: auto !important; /* Allow vertical scroll for pull-to-refresh */
+    overscroll-behavior-y: contain; /* Enable pull-to-refresh on supported browsers */
+    touch-action: manipulation; /* Enable pull-to-refresh while preventing double-tap zoom */
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
@@ -735,7 +738,8 @@ footer .chart-mode-navigation {
     height: 100svh !important;
     display: flex !important;
     flex-direction: column !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important; /* Prevent horizontal scroll only */
+    overflow-y: auto !important; /* Allow vertical scroll for contained elements if needed */
     padding: 0.45rem 0.5rem 0.35rem;
     gap: 0.25rem;
     min-height: 100svh;
