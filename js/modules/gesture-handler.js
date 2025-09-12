@@ -1,4 +1,5 @@
 import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
+import { getUVDataForDay } from './uv-mock.js';
 
 /**
  * Gesture detection module for swipe-based mode switching
@@ -129,7 +130,8 @@ function switchToModeViaSwiping(targetMode, weatherData) {
         } else if (actualMode === CHART_MODES.AIR_QUALITY) {
           // Switch to air quality chart
           const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
-          buildAirQualityChart(chartId, eaqiSlice, sunriseTime, sunsetTime);
+          const uvSlice = getUVDataForDay(weatherData, dayIndex);
+          buildAirQualityChart(chartId, eaqiSlice, sunriseTime, sunsetTime, uvSlice);
         } else {
           // Switch to precipitation chart
           const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);

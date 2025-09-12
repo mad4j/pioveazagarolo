@@ -1,5 +1,6 @@
 import { CHART_MODES, chartModes, $, saveChartMode } from './constants.js';
 import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice } from './charts.js';
+import { getUVDataForDay } from './uv-mock.js';
 
 // Keep a reference to sync function to avoid import issues
 let syncNavigationDots = null;
@@ -124,7 +125,8 @@ export function toggleChartMode(triggeredChartId, weatherData) {
     } else if (actualNewMode === CHART_MODES.AIR_QUALITY) {
       // Switch to air quality chart
       const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
-      buildAirQualityChart(chartId, eaqiSlice, sunriseTime, sunsetTime);
+      const uvSlice = getUVDataForDay(weatherData, dayIndex);
+      buildAirQualityChart(chartId, eaqiSlice, sunriseTime, sunsetTime, uvSlice);
     } else {
       // Switch to precipitation chart
       const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
@@ -254,7 +256,8 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
   } else if (currentMode === CHART_MODES.AIR_QUALITY && weatherData.air_quality && weatherData.air_quality.hourly && weatherData.air_quality.hourly.european_aqi) {
     const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
-    buildAirQualityChart(chartId, eaqiSlice, sunriseTime, sunsetTime);
+    const uvSlice = getUVDataForDay(weatherData, dayIndex);
+    buildAirQualityChart(chartId, eaqiSlice, sunriseTime, sunsetTime, uvSlice);
   } else {
     // Default to precipitation chart and ensure all charts are in precipitation mode
     chartModes[chartId] = CHART_MODES.PRECIPITATION;

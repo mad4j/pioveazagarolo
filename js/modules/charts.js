@@ -1,5 +1,6 @@
 import { DAY_CONFIGS } from './constants.js';
 import { getRainIconClass, getWeatherDescription, getCloudCoverIconClass, getCloudCoverDescription } from './icons.js';
+import { uvIndexPlugin } from './uv-index.js';
 
 export const chartInstances = {};
 
@@ -1128,8 +1129,9 @@ function getItalianWindName(compassDirection) {
  * @param {Array} eaqiData - Array di valori EAQI orari (24 elementi)
  * @param {string} sunriseTime - Orario alba (opzionale)
  * @param {string} sunsetTime - Orario tramonto (opzionale) 
+ * @param {Array} uvData - Array di valori UV orari (opzionale)
  */
-export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunsetTime = null) {
+export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunsetTime = null, uvData = null) {
   const el = document.getElementById(target);
   if (!el) return;
   if (chartInstances[target]) chartInstances[target].destroy();
@@ -1147,6 +1149,11 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
 
   const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
+  
+  // Aggiungi plugin UV se i dati sono disponibili
+  if (uvData && Array.isArray(uvData) && uvData.some(uv => uv > 0)) {
+    plugins.push(uvIndexPlugin);
+  }
 
   chartInstances[target] = new Chart(el, {
     plugins,
@@ -1167,7 +1174,7 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: 2 },
+      layout: { padding: { top: 30, bottom: 2, left: 2, right: 2 } },
       onHover: (e, a, chart) => {
         if (isTouchDevice() && a.length) {
           if (chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout);
@@ -1207,6 +1214,9 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
         sunriseSunset: {
           sunrise: sunriseTime,
           sunset: sunsetTime
+        },
+        uvIndex: {
+          uvData: uvData
         },
         legend: { display: false },
         tooltip: {
