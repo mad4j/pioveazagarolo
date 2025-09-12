@@ -248,25 +248,25 @@
       0,
       0,
       0,
-      2,
-      4,
-      5,
-      4,
-      1,
       0,
-      2,
-      5,
-      8,
-      13,
-      17,
-      20,
-      18,
-      14,
-      10,
-      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
       7,
-      5,
-      4,
+      17,
+      23,
+      23,
+      19,
+      15,
+      11,
+      6,
+      3,
+      2,
       3,
       3
     ],
@@ -645,6 +645,7 @@
       94,
       93,
       93,
+      93,
       91,
       90,
       90,
@@ -912,14 +913,15 @@
     "precipitation_probability_max": [
       0,
       0,
-      20
+      23
     ]
   },
-  "last_update": "2025-09-12 03:43",
+
+  "last_update": "2025-09-12 05:31",
   "air_quality": {
     "latitude": 41.8,
     "longitude": 12.799999,
-    "generationtime_ms": 0.4296302795410156,
+    "generationtime_ms": 0.2592802047729492,
     "utc_offset_seconds": 7200,
     "timezone": "Europe/Rome",
     "timezone_abbreviation": "GMT+2",
@@ -930,9 +932,9 @@
       "european_aqi": "EAQI"
     },
     "current": {
-      "time": "2025-09-12T03:00",
+      "time": "2025-09-12T05:00",
       "interval": 3600,
-      "european_aqi": 20
+      "european_aqi": 19
     },
     "hourly_units": {
       "time": "iso8601",
