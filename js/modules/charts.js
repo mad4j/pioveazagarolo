@@ -479,6 +479,7 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
         tooltip: { 
           enabled: false, 
           external: ({ chart, tooltip }) => { 
+            hideEnhancedChartModeTooltip();
             let tip = document.getElementById('chartjs-tooltip-' + target); 
             if (!tip) { 
               tip = document.createElement('div'); 
@@ -636,6 +637,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
         tooltip: {
           enabled: false,
           external: ({ chart, tooltip }) => {
+            hideEnhancedChartModeTooltip();
             let tip = document.getElementById('chartjs-tooltip-' + target);
             if (!tip) {
               tip = document.createElement('div');
@@ -904,6 +906,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
             return tooltipItem.datasetIndex !== 1;
           },
           external: ({ chart, tooltip }) => {
+            hideEnhancedChartModeTooltip();
             let tip = document.getElementById('chartjs-tooltip-' + target);
             if (!tip) {
               tip = document.createElement('div');
@@ -1117,6 +1120,7 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
         tooltip: {
           enabled: false,
           external: ({ chart, tooltip }) => {
+            hideEnhancedChartModeTooltip();
             let tip = document.getElementById('chartjs-tooltip-' + target);
             if (!tip) {
               tip = document.createElement('div');

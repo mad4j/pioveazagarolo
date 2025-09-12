@@ -17,6 +17,31 @@ const SWIPE_CONFIG = {
 // Global reference to current enhanced tooltip for management
 let currentEnhancedTooltip = null;
 let enhancedTooltipTimer = null;
+let pageInteractionHandlersAdded = false;
+
+/**
+ * Adds global page interaction handlers to hide enhanced tooltip
+ */
+function addPageInteractionHandlers() {
+  if (pageInteractionHandlersAdded) return;
+  
+  const hideOnInteraction = (e) => {
+    // Don't hide if the interaction is on the tooltip itself
+    if (currentEnhancedTooltip && currentEnhancedTooltip.contains(e.target)) {
+      return;
+    }
+    hideEnhancedChartModeTooltip();
+  };
+  
+  // Add event listeners for various user interactions
+  document.addEventListener('scroll', hideEnhancedChartModeTooltip, { passive: true });
+  document.addEventListener('touchstart', hideOnInteraction, { passive: true });
+  document.addEventListener('mousedown', hideOnInteraction);
+  document.addEventListener('keydown', hideEnhancedChartModeTooltip);
+  
+  pageInteractionHandlersAdded = true;
+  console.log('📱 Page interaction handlers added for enhanced tooltip management');
+}
 
 /**
  * Hides the enhanced chart mode tooltip if it's currently visible
@@ -424,6 +449,9 @@ function createSwipeHandler(element, weatherData) {
 export function setupSwipeGestures(weatherData) {
   const handlers = [];
   const forecastCards = document.querySelectorAll('.forecast-card');
+  
+  // Add global page interaction handlers for tooltip management
+  addPageInteractionHandlers();
   
   forecastCards.forEach(card => {
     const handler = createSwipeHandler(card, weatherData);
