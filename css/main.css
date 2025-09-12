@@ -173,10 +173,15 @@
   border: 1px solid transparent;
 }
 
+.nav-dot.active {
+  transform: scale(1.15);
+}
+
 .nav-dot.active .dot-icon {
   background-color: var(--secondary-color);
   border-color: var(--secondary-color);
   box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+  transform: scale(1.1);
 }
 
 .nav-dot:hover .dot-icon {
@@ -184,9 +189,14 @@
   transform: scale(1.2);
 }
 
+.nav-dot.active:hover {
+  transform: scale(1.2);
+}
+
 .nav-dot.active:hover .dot-icon {
   background-color: var(--secondary-color);
   box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
+  transform: scale(1.2);
 }
 
 /* Responsive adjustments */
@@ -412,6 +422,79 @@ body {
   -webkit-touch-callout: none; /* iOS long press */
 }
 
+/* Swipe gesture visual feedback */
+.forecast-card.swipe-enabled {
+  position: relative;
+  touch-action: pan-y; /* Allow vertical scrolling but prevent horizontal panning */
+}
+
+/* Swipe indicators removed - using enhanced tooltips instead */
+
+/* Active swipe overlay */
+.forecast-card.swipe-enabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(52, 152, 219, 0.03) 0%, 
+    transparent 15%, 
+    transparent 85%, 
+    rgba(26, 188, 156, 0.03) 100%);
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.forecast-card.swipe-enabled:active::after {
+  opacity: 1;
+}
+
+/* Swipe transition feedback */
+.forecast-card.swipe-enabled.swiping {
+  transform: scale(0.98);
+  transition: transform 0.2s ease;
+}
+
+/* Active swipe feedback */
+.forecast-card.swipe-enabled.swipe-active {
+  transform: scale(0.96);
+  box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+/* Successful swipe feedback */
+.forecast-card.swipe-enabled.swipe-success {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+}
+
+/* Mode switching animation */
+.forecast-card.mode-switching {
+  position: relative;
+  overflow: hidden;
+}
+
+.forecast-card.mode-switching::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.2), transparent);
+  animation: swipe-flash 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes swipe-flash {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
 .day-title {
   font-weight: 600;
   color: var(--primary-color);
@@ -564,28 +647,9 @@ footer .chart-mode-navigation {
   pointer-events: auto;
 }
 
-/* Chart mode tooltip - positioned above navigation dots */
-.chart-mode-tooltip {
-  position: fixed;
-  background: linear-gradient(135deg, var(--primary-color), #1d2b36);
-  color: #fff;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  z-index: 1200;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  transform: translateY(8px);
-  white-space: nowrap;
-}
+/* Basic chart mode tooltip removed - now using enhanced tooltips only */
 
-.chart-mode-tooltip.show {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* Weather icon tooltips are now created dynamically using the same style as air quality tooltips */
 
 .footer-link {
   color: var(--secondary-color);

@@ -1,11 +1,12 @@
 import { DAY_CONFIGS, ARIA_LABEL_DAY, dayFormatter, $, chartModes } from './constants.js';
-import { getRainIconClass } from './icons.js';
+import { getRainIconClass, getWeatherDescription } from './icons.js';
 import { buildChart, getDaySlice } from './charts.js';
 import { precipitationManager } from './precipitation.js';
 import { updateAirQualityDisplay } from './air-quality.js';
 import { setupChartToggleListeners, buildAppropriateChart } from './chart-toggle.js';
 import { setupNavigationDots, syncNavigationDotsWithChartMode } from './navigation-dots.js';
 import { setupVersionTooltip } from './version-tooltip.js';
+import { setupSwipeGestures, hideEnhancedChartModeTooltip } from './gesture-handler.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
 
@@ -15,6 +16,9 @@ export function formatDate(dateString){ return dayFormatter.format(new Date(date
  * @param {number} apparentTemp - Valore temperatura percepita
  */
 export function showApparentTemperatureTooltip(tempElement, apparentTemp) {
+  // Hide enhanced chart mode tooltip when showing apparent temperature tooltip
+  hideEnhancedChartModeTooltip();
+  
   // Rimuovi tooltip esistenti
   document.querySelectorAll('.apparent-temp-tooltip').forEach(t => t.remove());
   
@@ -82,6 +86,138 @@ export function showApparentTemperatureTooltip(tempElement, apparentTemp) {
   
   setTimeout(removeTooltip, 4000);
   document.addEventListener('click', removeTooltip);
+}
+
+/**
+ * Show weather icon tooltip with weather description (matches air quality tooltip format)
+ * @param {HTMLElement} iconElement - Weather icon element
+ * @param {string} description - Weather description text
+ */
+function showWeatherIconTooltip(iconElement, description) {
+  // Hide enhanced chart mode tooltip when showing weather icon tooltip
+  hideEnhancedChartModeTooltip();
+  
+  // Remove existing weather icon tooltips
+  document.querySelectorAll('.weather-icon-tooltip').forEach(t => t.remove());
+  
+  const tooltip = document.createElement('div');
+  tooltip.className = 'weather-icon-tooltip';
+  tooltip.style.cssText = `
+    position: absolute;
+    z-index: 1000;
+    font: 12px 'Helvetica Neue', Arial;
+    color: #ecf0f1;
+    background: rgba(44,62,80,0.92);
+    padding: 6px 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.35);
+    max-width: 240px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  `;
+  
+  tooltip.innerHTML = `
+    <div style="font-weight: 600; margin-bottom: 4px;">
+      Condizioni meteo
+    </div>
+    <div style="font-size: 12px; line-height: 1.2;">
+      ${description}
+    </div>
+  `;
+  
+  document.body.appendChild(tooltip);
+  
+  // Position tooltip near the icon
+  const iconRect = iconElement.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  
+  let left = iconRect.left + iconRect.width / 2 - tooltipRect.width / 2;
+  let top = iconRect.top - tooltipRect.height - 8;
+  
+  // Adjust position if outside viewport
+  if (left < 8) left = 8;
+  if (left + tooltipRect.width > window.innerWidth - 8) {
+    left = window.innerWidth - tooltipRect.width - 8;
+  }
+  if (top < 8) {
+    top = iconRect.bottom + 8; // Show below if no space above
+  }
+  
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+  
+  // Animate appearance
+  requestAnimationFrame(() => {
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'translateY(0)';
+  });
+  
+  // Remove tooltip after 4 seconds or on document click
+  const removeTooltip = () => {
+    tooltip.style.opacity = '0';
+    tooltip.style.transform = 'translateY(-10px)';
+    setTimeout(() => tooltip.remove(), 300);
+    document.removeEventListener('click', removeTooltip);
+  };
+  
+  setTimeout(removeTooltip, 4000);
+  document.addEventListener('click', removeTooltip);
+}
+
+/**
+ * Add weather code tooltip functionality to a weather icon
+ * @param {HTMLElement} iconElement - Weather icon element
+ * @param {number} weatherCode - WMO weather code
+ */
+export function addWeatherIconTooltip(iconElement, weatherCode) {
+  if (!iconElement || typeof weatherCode !== 'number') return;
+  
+  const description = getWeatherDescription(weatherCode);
+  
+  // Remove any existing event listeners to avoid duplicates
+  if (iconElement._weatherTooltipHandler) {
+    iconElement.removeEventListener('mouseenter', iconElement._weatherTooltipHandler.mouseenter);
+    iconElement.removeEventListener('mouseleave', iconElement._weatherTooltipHandler.mouseleave);
+    iconElement.removeEventListener('touchstart', iconElement._weatherTooltipHandler.touchstart);
+  }
+  
+  // Timer for mouse hover delay
+  let tooltipTimer = null;
+  
+  const handlers = {
+    mouseenter: () => {
+      clearTimeout(tooltipTimer);
+      showWeatherIconTooltip(iconElement, description);
+    },
+    
+    mouseleave: () => {
+      tooltipTimer = setTimeout(() => {
+        document.querySelectorAll('.weather-icon-tooltip').forEach(t => {
+          t.style.opacity = '0';
+          t.style.transform = 'translateY(-10px)';
+          setTimeout(() => t.remove(), 300);
+        });
+      }, 500); // Small delay before hiding
+    },
+    
+    touchstart: (e) => {
+      e.preventDefault(); // Prevent mouse events on touch
+      showWeatherIconTooltip(iconElement, description);
+    }
+  };
+  
+  // Store handlers for cleanup
+  iconElement._weatherTooltipHandler = handlers;
+  
+  // Add event listeners
+  iconElement.addEventListener('mouseenter', handlers.mouseenter);
+  iconElement.addEventListener('mouseleave', handlers.mouseleave);
+  iconElement.addEventListener('touchstart', handlers.touchstart);
+  
+  // Add cursor pointer to indicate interactivity
+  iconElement.style.cursor = 'pointer';
 }
 
 export function updateCardClass(cardId, percentage) {
@@ -152,14 +288,24 @@ export function displayData(data){
       if (humEl && typeof current.relative_humidity_2m==='number') humEl.textContent = `${Math.round(current.relative_humidity_2m)}%`;
       if (windEl && typeof current.wind_speed_10m==='number') windEl.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
       if (windDirIcon && typeof current.wind_direction_10m==='number') { const deg=Math.round(current.wind_direction_10m); windDirIcon.style.transform=`rotate(${deg}deg)`; windDirIcon.setAttribute('aria-label',`Direzione vento ${deg}°`); windDirIcon.title=`Direzione vento ${deg}°`; }
-      if (iconEl && typeof current.weather_code==='number') { iconEl.className = getRainIconClass(current.weather_code, current.is_day); iconEl.setAttribute('aria-label',`Condizioni attuali codice ${current.weather_code}`);} 
+      if (iconEl && typeof current.weather_code==='number') { 
+        iconEl.className = getRainIconClass(current.weather_code, current.is_day); 
+        iconEl.setAttribute('aria-label',`Condizioni attuali codice ${current.weather_code}`);
+        // Add weather code tooltip
+        addWeatherIconTooltip(iconEl, current.weather_code);
+      }
     }
   } catch {}
   const { daily, hourly } = data;
   DAY_CONFIGS.forEach(cfg => {
     const i = cfg.index;
     const iconEl = $(cfg.iconId);
-    if (iconEl){ iconEl.className = getRainIconClass(daily.weather_code[i]); iconEl.setAttribute('aria-label',`Meteo ${ARIA_LABEL_DAY[i]} codice ${daily.weather_code[i]}`);}    
+    if (iconEl){ 
+      iconEl.className = getRainIconClass(daily.weather_code[i]); 
+      iconEl.setAttribute('aria-label',`Meteo ${ARIA_LABEL_DAY[i]} codice ${daily.weather_code[i]}`);
+      // Add weather code tooltip
+      addWeatherIconTooltip(iconEl, daily.weather_code[i]);
+    }
     const maxEl = $(`${cfg.key}-temp-max`); if (maxEl) maxEl.textContent = `${Math.round(daily.temperature_2m_max[i])}°`;
     const minEl = $(`${cfg.key}-temp-min`); if (minEl) minEl.textContent = `${Math.round(daily.temperature_2m_min[i])}°`;
     const percEl = $(`${cfg.key}-percentage`);
@@ -234,6 +380,9 @@ export function displayData(data){
   
   // Setup navigation dots
   setupNavigationDots(data);
+  
+  // Setup swipe gestures for mode switching
+  setupSwipeGestures(data);
   
   // Setup version tooltip functionality
   setupVersionTooltip();

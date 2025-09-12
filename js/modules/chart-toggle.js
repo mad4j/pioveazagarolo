@@ -1,21 +1,27 @@
 import { CHART_MODES, chartModes, $, saveChartMode } from './constants.js';
 import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice } from './charts.js';
 
-// Keep a reference to sync function to avoid import issues
+// Keep a reference to sync function and enhanced tooltip to avoid import issues
 let syncNavigationDots = null;
-let showTooltip = null;
+let showEnhancedTooltip = null;
 
 // Initialize sync function when module loads
 document.addEventListener('DOMContentLoaded', () => {
-  import('./navigation-dots.js').then(({ syncNavigationDotsWithChartMode, showChartModeTooltip }) => {
+  import('./navigation-dots.js').then(({ syncNavigationDotsWithChartMode }) => {
     syncNavigationDots = syncNavigationDotsWithChartMode;
-    showTooltip = showChartModeTooltip;
   }).catch(err => {
     console.warn('Could not load navigation dots sync:', err);
   });
+  
+  // Import enhanced tooltip from gesture handler
+  import('./gesture-handler.js').then(({ showEnhancedChartModeTooltip }) => {
+    showEnhancedTooltip = showEnhancedChartModeTooltip;
+  }).catch(err => {
+    console.warn('Could not load enhanced tooltip:', err);
+  });
 });
 
-// Chart tooltip functionality removed - now handled by navigation-dots.js
+// Enhanced tooltip functionality now handled by gesture-handler.js
 
 /**
  * Removes all visible chart tooltips immediately
@@ -132,7 +138,7 @@ export function toggleChartMode(triggeredChartId, weatherData) {
     }
   });
   
-  // Mode indicator tooltip is now handled by navigation dots only
+  // Enhanced mode indicator tooltip handled by gesture-handler.js
   
   // Sync navigation dots with the new mode
   if (syncNavigationDots) {
@@ -146,15 +152,15 @@ export function toggleChartMode(triggeredChartId, weatherData) {
     });
   }
   
-  // Show tooltip to indicate the new mode
-  if (showTooltip) {
-    showTooltip(actualNewMode);
+  // Show enhanced tooltip to indicate the new mode
+  if (showEnhancedTooltip) {
+    showEnhancedTooltip(actualNewMode);
   } else {
-    // Fallback: try to import and call tooltip function
-    import('./navigation-dots.js').then(({ showChartModeTooltip }) => {
-      showChartModeTooltip(actualNewMode);
+    // Fallback: try to import and call enhanced tooltip function
+    import('./gesture-handler.js').then(({ showEnhancedChartModeTooltip }) => {
+      showEnhancedChartModeTooltip(actualNewMode);
     }).catch(err => {
-      console.warn('Could not show chart mode tooltip:', err);
+      console.warn('Could not show enhanced chart mode tooltip:', err);
     });
   }
 }
