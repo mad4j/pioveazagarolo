@@ -249,7 +249,7 @@ function drawWindArrow(ctx, xScale, area, hourIndex, direction) {
   const x = xScale.getPixelForValue(hourIndex);
   if (x < area.left || x > area.right) return;
 
-  const y = area.top + area.height * 0.15; // Position arrows in upper portion of chart
+  const y = area.top + 5; // Position arrows at same height as temperature chart icons
   const arrowLength = 12;
   const arrowHeadSize = 4;
 
@@ -318,8 +318,8 @@ function drawWeatherIcon(ctx, xScale, area, hourIndex, weatherCode, isDay) {
   // Theme-based color: blue for normal theme, white for dark theme
   ctx.fillStyle = isDarkMode() ? '#f2f2f2' : '#3498db';
   
-  // Position icons at the top of the chart area, but inside the visible area
-  const y = area.top + 15;
+  // Position icons at the same height as temperature chart icons
+  const y = area.top + 5;
   
   try {
     ctx.fillText(glyph, x, y);
