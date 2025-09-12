@@ -6,7 +6,7 @@ import { updateAirQualityDisplay } from './air-quality.js';
 import { setupChartToggleListeners, buildAppropriateChart } from './chart-toggle.js';
 import { setupNavigationDots, syncNavigationDotsWithChartMode } from './navigation-dots.js';
 import { setupVersionTooltip } from './version-tooltip.js';
-import { setupSwipeGestures } from './gesture-handler.js';
+import { setupSwipeGestures, hideEnhancedChartModeTooltip } from './gesture-handler.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
 
@@ -16,6 +16,9 @@ export function formatDate(dateString){ return dayFormatter.format(new Date(date
  * @param {number} apparentTemp - Valore temperatura percepita
  */
 export function showApparentTemperatureTooltip(tempElement, apparentTemp) {
+  // Hide enhanced chart mode tooltip when showing apparent temperature tooltip
+  hideEnhancedChartModeTooltip();
+  
   // Rimuovi tooltip esistenti
   document.querySelectorAll('.apparent-temp-tooltip').forEach(t => t.remove());
   
@@ -91,6 +94,9 @@ export function showApparentTemperatureTooltip(tempElement, apparentTemp) {
  * @param {string} description - Weather description text
  */
 function showWeatherIconTooltip(iconElement, description) {
+  // Hide enhanced chart mode tooltip when showing weather icon tooltip
+  hideEnhancedChartModeTooltip();
+  
   // Remove existing weather icon tooltips
   document.querySelectorAll('.weather-icon-tooltip').forEach(t => t.remove());
   

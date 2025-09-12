@@ -14,13 +14,41 @@ const SWIPE_CONFIG = {
   PREVENT_DEFAULT_THRESHOLD: 40 // Minimum horizontal movement before preventing default (preserves pull-to-refresh)
 };
 
+// Global reference to current enhanced tooltip for management
+let currentEnhancedTooltip = null;
+let enhancedTooltipTimer = null;
+
+/**
+ * Hides the enhanced chart mode tooltip if it's currently visible
+ */
+export function hideEnhancedChartModeTooltip() {
+  if (currentEnhancedTooltip) {
+    currentEnhancedTooltip.style.opacity = '0';
+    currentEnhancedTooltip.style.transform = 'translate(-50%, -50%) scale(0.9)';
+    setTimeout(() => {
+      if (currentEnhancedTooltip && currentEnhancedTooltip.parentNode) {
+        currentEnhancedTooltip.parentNode.removeChild(currentEnhancedTooltip);
+      }
+      currentEnhancedTooltip = null;
+    }, 400);
+    
+    // Clear any pending auto-hide timer
+    if (enhancedTooltipTimer) {
+      clearTimeout(enhancedTooltipTimer);
+      enhancedTooltipTimer = null;
+    }
+    
+    console.log('📊 Enhanced chart mode tooltip hidden');
+  }
+}
+
 /**
  * Shows an enhanced tooltip with mode name and swipe direction hints
  * @param {string} mode - The current chart mode
  */
 export function showEnhancedChartModeTooltip(mode) {
-  // Remove any existing enhanced tooltips
-  document.querySelectorAll('.enhanced-chart-mode-tooltip').forEach(t => t.remove());
+  // Hide any existing enhanced tooltips first
+  hideEnhancedChartModeTooltip();
   
   const tooltip = document.createElement('div');
   tooltip.className = 'enhanced-chart-mode-tooltip';
@@ -41,8 +69,9 @@ export function showEnhancedChartModeTooltip(mode) {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.9);
     transition: all 0.4s ease;
-    pointer-events: none;
+    pointer-events: auto;
     max-width: 280px;
+    cursor: pointer;
   `;
   
   // Mode names and descriptions
@@ -90,6 +119,14 @@ export function showEnhancedChartModeTooltip(mode) {
   `;
   
   document.body.appendChild(tooltip);
+  currentEnhancedTooltip = tooltip;
+  
+  // Add click handler to hide tooltip when clicked
+  tooltip.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    hideEnhancedChartModeTooltip();
+  });
   
   // Show tooltip with animation
   setTimeout(() => {
@@ -98,14 +135,8 @@ export function showEnhancedChartModeTooltip(mode) {
   }, 10);
   
   // Auto-hide after 3 seconds
-  setTimeout(() => {
-    tooltip.style.opacity = '0';
-    tooltip.style.transform = 'translate(-50%, -50%) scale(0.9)';
-    setTimeout(() => {
-      if (tooltip.parentNode) {
-        tooltip.parentNode.removeChild(tooltip);
-      }
-    }, 400);
+  enhancedTooltipTimer = setTimeout(() => {
+    hideEnhancedChartModeTooltip();
   }, 3000);
   
   console.log(`📊 Enhanced chart mode tooltip shown: ${info.name}`);
