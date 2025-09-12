@@ -173,10 +173,15 @@
   border: 1px solid transparent;
 }
 
+.nav-dot.active {
+  transform: scale(1.15);
+}
+
 .nav-dot.active .dot-icon {
   background-color: var(--secondary-color);
   border-color: var(--secondary-color);
   box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+  transform: scale(1.1);
 }
 
 .nav-dot:hover .dot-icon {
@@ -184,9 +189,14 @@
   transform: scale(1.2);
 }
 
+.nav-dot.active:hover {
+  transform: scale(1.2);
+}
+
 .nav-dot.active:hover .dot-icon {
   background-color: var(--secondary-color);
   box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
+  transform: scale(1.2);
 }
 
 /* Responsive adjustments */
