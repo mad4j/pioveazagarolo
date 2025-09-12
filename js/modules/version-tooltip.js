@@ -2,9 +2,6 @@
  * Version tooltip functionality - shows version when title is pressed/held for 5 seconds
  */
 
-// Import tooltip management function
-import { hideEnhancedChartModeTooltip } from './gesture-handler.js';
-
 let pressTimer = null;
 let tooltipTimer = null;
 let isTooltipVisible = false;
@@ -20,9 +17,6 @@ const TOOLTIP_DURATION = 5000; // 5 seconds
 function showVersionTooltip() {
   const tooltip = document.getElementById(VERSION_TOOLTIP_ID);
   if (!tooltip || isTooltipVisible) return;
-  
-  // Hide enhanced chart mode tooltip when showing version tooltip
-  hideEnhancedChartModeTooltip();
   
   tooltip.hidden = false;
   tooltip.classList.add('show');

@@ -9,226 +9,9 @@ import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
 const SWIPE_CONFIG = {
   MIN_DISTANCE: 50,      // Minimum swipe distance in pixels
   MAX_DURATION: 300,     // Maximum swipe duration in ms
-  MAX_VERTICAL: 60,      // Maximum vertical movement to still be considered horizontal swipe (reduced to be more strict)
-  VELOCITY_THRESHOLD: 0.15, // Minimum velocity (pixels/ms) - increased for more confident swipes
-  PREVENT_DEFAULT_THRESHOLD: 40 // Minimum horizontal movement before preventing default (preserves pull-to-refresh)
+  MAX_VERTICAL: 80,      // Maximum vertical movement to still be considered horizontal swipe
+  VELOCITY_THRESHOLD: 0.1 // Minimum velocity (pixels/ms)
 };
-
-// Global reference to current enhanced tooltip for management
-let currentEnhancedTooltip = null;
-let enhancedTooltipTimer = null;
-let pageInteractionHandlersAdded = false;
-let pageInteractionHandlers = null;
-
-/**
- * Removes global page interaction handlers for tooltip management
- */
-function removePageInteractionHandlers() {
-  if (!pageInteractionHandlersAdded || !pageInteractionHandlers) return;
-  
-  document.removeEventListener('scroll', pageInteractionHandlers.scroll);
-  document.removeEventListener('touchstart', pageInteractionHandlers.touchstart);
-  document.removeEventListener('touchend', pageInteractionHandlers.touchend);
-  document.removeEventListener('mousedown', pageInteractionHandlers.mousedown);
-  document.removeEventListener('keydown', pageInteractionHandlers.keydown);
-  
-  pageInteractionHandlersAdded = false;
-  pageInteractionHandlers = null;
-  console.log('📱 Page interaction handlers removed');
-}
-
-/**
- * Adds global page interaction handlers to hide enhanced tooltip
- */
-function addPageInteractionHandlers() {
-  if (pageInteractionHandlersAdded) return;
-  
-  const hideOnInteraction = (e) => {
-    // Don't hide if the interaction is on the tooltip itself
-    if (currentEnhancedTooltip && currentEnhancedTooltip.contains(e.target)) {
-      return;
-    }
-    hideEnhancedChartModeTooltip();
-  };
-  
-  const hideOnTouchInteraction = (e) => {
-    // Don't hide if the interaction is on the tooltip itself
-    // Check both the target and any touch points
-    if (currentEnhancedTooltip) {
-      if (currentEnhancedTooltip.contains(e.target)) {
-        return;
-      }
-      
-      // For touch events, also check touch points
-      if (e.touches && e.touches.length > 0) {
-        for (let i = 0; i < e.touches.length; i++) {
-          const touch = e.touches[i];
-          const elementUnderTouch = document.elementFromPoint(touch.clientX, touch.clientY);
-          if (elementUnderTouch && currentEnhancedTooltip.contains(elementUnderTouch)) {
-            return;
-          }
-        }
-      }
-    }
-    hideEnhancedChartModeTooltip();
-  };
-  
-  // Store handler references for cleanup
-  pageInteractionHandlers = {
-    scroll: hideEnhancedChartModeTooltip,
-    touchstart: hideOnTouchInteraction,
-    touchend: hideOnTouchInteraction,
-    mousedown: hideOnInteraction,
-    keydown: hideEnhancedChartModeTooltip
-  };
-  
-  // Add event listeners for various user interactions
-  document.addEventListener('scroll', pageInteractionHandlers.scroll, { passive: true });
-  document.addEventListener('touchstart', pageInteractionHandlers.touchstart, { passive: false });
-  document.addEventListener('touchend', pageInteractionHandlers.touchend, { passive: false });
-  document.addEventListener('mousedown', pageInteractionHandlers.mousedown);
-  document.addEventListener('keydown', pageInteractionHandlers.keydown);
-  
-  pageInteractionHandlersAdded = true;
-  console.log('📱 Page interaction handlers added for enhanced tooltip management');
-}
-
-/**
- * Hides the enhanced chart mode tooltip if it's currently visible
- */
-export function hideEnhancedChartModeTooltip() {
-  if (currentEnhancedTooltip) {
-    // Clear any pending auto-hide timer first
-    if (enhancedTooltipTimer) {
-      clearTimeout(enhancedTooltipTimer);
-      enhancedTooltipTimer = null;
-    }
-    
-    const tooltipToHide = currentEnhancedTooltip;
-    currentEnhancedTooltip = null; // Clear reference immediately to prevent double-hiding
-    
-    tooltipToHide.style.opacity = '0';
-    tooltipToHide.style.transform = 'translate(-50%, -50%) scale(0.9)';
-    setTimeout(() => {
-      if (tooltipToHide && tooltipToHide.parentNode) {
-        tooltipToHide.parentNode.removeChild(tooltipToHide);
-      }
-    }, 400);
-    
-    console.log('📊 Enhanced chart mode tooltip hidden');
-  }
-}
-
-/**
- * Shows an enhanced tooltip with mode name and swipe direction hints
- * @param {string} mode - The current chart mode
- */
-export function showEnhancedChartModeTooltip(mode) {
-  // Hide any existing enhanced tooltips first
-  hideEnhancedChartModeTooltip();
-  
-  const tooltip = document.createElement('div');
-  tooltip.className = 'enhanced-chart-mode-tooltip';
-  tooltip.style.cssText = `
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(135deg, var(--primary-color), #1d2b36);
-    color: #fff;
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    z-index: 2000;
-    font-size: 0.9rem;
-    line-height: 1.4;
-    text-align: center;
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
-    transition: all 0.4s ease;
-    pointer-events: auto;
-    max-width: 280px;
-    cursor: pointer;
-  `;
-  
-  // Mode names and descriptions
-  const modeInfo = {
-    [CHART_MODES.PRECIPITATION]: { 
-      name: 'Precipitazioni', 
-      icon: '🌧️',
-      desc: 'Probabilità e intensità di pioggia'
-    },
-    [CHART_MODES.TEMPERATURE]: { 
-      name: 'Temperature', 
-      icon: '🌡️',
-      desc: 'Temperature reali e percepite'
-    },
-    [CHART_MODES.WIND]: { 
-      name: 'Vento', 
-      icon: '💨',
-      desc: 'Velocità e direzione del vento'
-    },
-    [CHART_MODES.PRESSURE]: { 
-      name: 'Pressione', 
-      icon: '🔘',
-      desc: 'Pressione atmosferica'
-    },
-    [CHART_MODES.AIR_QUALITY]: { 
-      name: 'Qualità dell\'aria', 
-      icon: '🍃',
-      desc: 'Indice qualità dell\'aria europea'
-    }
-  };
-  
-  const info = modeInfo[mode] || { name: mode, icon: '📊', desc: 'Modalità grafici' };
-  
-  tooltip.innerHTML = `
-    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${info.icon}</div>
-    <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.3rem;">
-      ${info.name}
-    </div>
-    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-bottom: 0.8rem;">
-      ${info.desc}
-    </div>
-    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">
-      ← Scorri per cambiare modalità →
-    </div>
-  `;
-  
-  document.body.appendChild(tooltip);
-  currentEnhancedTooltip = tooltip;
-  
-  // Add click handler to hide tooltip when clicked
-  tooltip.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    hideEnhancedChartModeTooltip();
-  });
-  
-  // Add touch handler to hide tooltip when touched
-  tooltip.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    hideEnhancedChartModeTooltip();
-  }, { passive: false });
-  
-  // Show tooltip with animation
-  setTimeout(() => {
-    tooltip.style.opacity = '1';
-    tooltip.style.transform = 'translate(-50%, -50%) scale(1)';
-  }, 10);
-  
-  // Auto-hide after 3 seconds - use a more robust timeout mechanism
-  enhancedTooltipTimer = setTimeout(() => {
-    // Double-check that the tooltip is still the current one before hiding
-    if (currentEnhancedTooltip === tooltip) {
-      console.log('📊 Auto-hiding tooltip after timeout');
-      hideEnhancedChartModeTooltip();
-    }
-  }, 3000);
-  
-  console.log(`📊 Enhanced chart mode tooltip shown: ${info.name}`);
-}
 
 // Chart modes in order for cycling
 const MODE_ORDER = [
@@ -283,21 +66,8 @@ function hideAllChartTooltips() {
 function switchToModeViaSwiping(targetMode, weatherData) {
   // Hide any visible tooltips immediately before switching modes
   hideAllChartTooltips();
-  
-  // Also hide any existing enhanced tooltips immediately
-  hideEnhancedChartModeTooltip();
-  
-  // Add mode switching animation to all forecast cards
-  const forecastCards = document.querySelectorAll('.forecast-card');
-  forecastCards.forEach(card => card.classList.add('mode-switching'));
-  
-  // Remove animation class after animation completes
-  setTimeout(() => {
-    forecastCards.forEach(card => card.classList.remove('mode-switching'));
-  }, 600);
-  
   // Import and use the existing switchToMode function from navigation-dots
-  import('./navigation-dots.js').then(({ updateNavigationDots }) => {
+  import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
     // Import chart building functions directly
     import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice }) => {
       if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
@@ -373,11 +143,8 @@ function switchToModeViaSwiping(targetMode, weatherData) {
       // Update navigation dots to reflect the change
       updateNavigationDots(actualMode);
       
-      // Show enhanced tooltip to indicate the active mode immediately
-      // Simple timing: just wait for DOM updates to complete
-      setTimeout(() => {
-        showEnhancedChartModeTooltip(actualMode);
-      }, 50);
+      // Show tooltip to indicate the active mode
+      showChartModeTooltip(actualMode);
       
       console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
     });
@@ -407,16 +174,6 @@ function createSwipeHandler(element, weatherData) {
     touchStartY = touch.clientY;
     touchStartTime = Date.now();
     touchMoved = false;
-    
-    // Add visual feedback class for touch start
-    element.classList.add('swiping');
-    
-    // If there's a tooltip showing and this touch is outside the forecast cards area,
-    // don't prevent the tooltip from being hidden by document-level handlers
-    if (currentEnhancedTooltip && !element.contains(e.target)) {
-      // Let the document-level touch handlers deal with tooltip hiding
-      return;
-    }
   };
 
   const handleTouchMove = (e) => {
@@ -430,26 +187,14 @@ function createSwipeHandler(element, weatherData) {
     const deltaX = Math.abs(touch.clientX - touchStartX);
     const deltaY = Math.abs(touch.clientY - touchStartY);
     
-    // Only prevent default if we're confident this is a horizontal swipe gesture
-    // Use stricter thresholds to preserve pull-to-refresh functionality
-    // Require significant horizontal movement AND horizontal dominance
-    if (deltaX >= SWIPE_CONFIG.PREVENT_DEFAULT_THRESHOLD && 
-        deltaX > deltaY * 1.5 && 
-        deltaY < SWIPE_CONFIG.MAX_VERTICAL) {
+    // If horizontal movement is dominant, prevent scrolling
+    if (deltaX > deltaY && deltaX > 20) {
       e.preventDefault();
-      
-      // Add stronger visual feedback during confirmed swipe
-      if (!element.classList.contains('swipe-active')) {
-        element.classList.add('swipe-active');
-      }
     }
   };
 
   const handleTouchEnd = (e) => {
     if (touchStartX === null || touchStartY === null || touchStartTime === null) return;
-    
-    // Remove visual feedback classes
-    element.classList.remove('swiping', 'swipe-active');
     
     const touch = e.changedTouches[0];
     const endX = touch.clientX;
@@ -490,12 +235,6 @@ function createSwipeHandler(element, weatherData) {
         e.preventDefault();
         e.stopPropagation();
         
-        // Add successful swipe feedback
-        element.classList.add('swipe-success');
-        setTimeout(() => {
-          element.classList.remove('swipe-success');
-        }, 300);
-        
         // Switch to new mode
         switchToModeViaSwiping(nextMode, weatherData);
       }
@@ -525,9 +264,6 @@ function createSwipeHandler(element, weatherData) {
 export function setupSwipeGestures(weatherData) {
   const handlers = [];
   const forecastCards = document.querySelectorAll('.forecast-card');
-  
-  // Add global page interaction handlers for tooltip management
-  addPageInteractionHandlers();
   
   forecastCards.forEach(card => {
     const handler = createSwipeHandler(card, weatherData);
