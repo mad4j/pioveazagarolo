@@ -2,6 +2,87 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.8.4] - 2025-09-12
+
+### Features
+- Improve cloud coverage icons positioning and visibility on temperature charts (34d10f35)
+- Add cloud coverage icons to temperature charts (5f9448e8)
+- Initial assessment and plan for cloud coverage feature (8dcbd129)
+
+### Fix
+- Fix icon alignment in Wind and Pressure chart modes (cdff3e96)
+- Fix weather data retrieval and update data.json (4d5938e2)
+- Fix pressure chart weather icon positioning to match temperature chart reference (186e6d84)
+- Fix navigation dots size update on mobile swipe gestures (83d219e2)
+- Fix tooltip timing issues during mode switches (1eb95bf1)
+- Fix tooltip persistence and navigation dot size after swipe gestures (79fc1528)
+- Final validation: Touch screen tooltip fix complete (1bbc5a72)
+- Fix mode tooltip touch screen interaction issues (60e85047)
+- Fix enhanced mode tooltip persistence - hide on all chart tooltips and page interactions (e4d16f68)
+
+### Refactor
+- Refactor chart mode tooltip handling and update data (8b81a399)
+
+### Performance
+- Complete cloud coverage feature - icons display perfectly on temperature charts (b6d08ae8)
+
+### Other
+- chore(release): prepare 1.8.4 (6d99bff9)
+- chore: aggiornamento dati meteo (rolling) (ac3a206a)
+- Initial plan (5427bbcf)
+- Update cloud cover property to 'cloud_cover' (d401c2e5)
+- chore: aggiornamento dati meteo (rolling) (f3455a2a)
+- Revert "chore: aggiornamento dati meteo (rolling)" (187f5312)
+- chore: aggiornamento dati meteo (rolling) (3349c1af)
+- chore: aggiornamento dati meteo (rolling) (9a4d4bdf)
+- Initial analysis - position pressure chart weather icons higher (e0d907ff)
+- Initial plan (6806a91d)
+- chore: aggiornamento dati meteo (rolling) (b9659166)
+- chore: aggiornamento dati meteo (rolling) (410cf780)
+- Implement consistent color and simplified tooltip for cloud coverage icons (c2f3164d)
+- Initial plan (057a9eb4)
+- chore: aggiornamento dati meteo (rolling) (8c96fdd2)
+- Initial analysis: identify navigation dots size update issue (599363f9)
+- Initial plan (21518466)
+- chore: aggiornamento dati meteo (rolling) (ba955b21)
+- chore: aggiornamento dati meteo (rolling) (0a27a5aa)
+- chore: aggiornamento dati meteo (rolling) (85b7c981)
+- chore: aggiornamento dati meteo (rolling) (f30e8c0b)
+- chore: aggiornamento dati meteo (rolling) (c787fc72)
+- Initial plan (9df92af8)
+- Make enhanced chart mode tooltip clickable and hide when other tooltips appear (07ae39fc)
+- chore: aggiornamento dati meteo (rolling) (a202a0d2)
+- Unify tooltip system using enhanced tooltips and remove swipe arrows (9030acd6)
+- Enhance horizontal swipe visual feedback with animations and tooltips (5c43996e)
+- Initial exploration - understand swipe visual feedback issue (18e00f0c)
+- Initial plan (c6714037)
+- chore: auto-update CHANGELOG for 1.8.3 (8f51c8c2)
+
+## [1.8.3] - 2025-09-12
+
+### Features
+- Add swipe gesture support for mode switching (8124ebc6)
+- Add weather code icon tooltips with Italian descriptions (27315f1f)
+
+### Fix
+- Fix pull-to-refresh interference by adjusting swipe gesture thresholds (3f01bd07)
+- Fix tooltip hiding during swipe gesture mode switching (cd3b1209)
+- Fix weather icon tooltips to match air quality tooltip format and behavior (dfea42d9)
+
+### Other
+- chore(release): prepare 1.8.3 (2f76a0cc)
+- chore: aggiornamento dati meteo (rolling) (c397b4ba)
+- Initial plan (545e0b28)
+- Initial plan (7a59e85e)
+- chore: aggiornamento dati meteo (rolling) (03ce3c83)
+- chore: aggiornamento dati meteo (rolling) (5a6fe8bc)
+- Update humidity bar colors to darker, varied scheme per feedback (7e66d99a)
+- Update humidity bar colors to lighter scheme in temperature charts (7cdf518b)
+- Update humidity bar colors to lighter scheme for better temperature line visibility (dcc525a3)
+- Initial analysis of humidity bar colors in temperature charts (378f2604)
+- Initial plan (a30c590c)
+- chore: aggiornamento dati meteo (rolling) (8d44d363)
+
 ## [1.8.2] - 2025-09-10
 
 ### Features
