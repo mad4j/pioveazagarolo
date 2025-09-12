@@ -429,16 +429,20 @@ function createSwipeHandler(element, weatherData) {
     const touch = e.touches[0];
     const deltaX = Math.abs(touch.clientX - touchStartX);
     const deltaY = Math.abs(touch.clientY - touchStartY);
+    const rawDeltaY = touch.clientY - touchStartY; // Preserve direction for pull-to-refresh detection
+    
+    // Check if page is at top and gesture is primarily vertical downward (potential pull-to-refresh)
+    const isPageAtTop = window.scrollY === 0 || window.pageYOffset === 0;
+    const isVerticalDownward = rawDeltaY > 0 && deltaY > deltaX; // Downward and more vertical than horizontal
+    const isPotentialPullToRefresh = isPageAtTop && isVerticalDownward;
     
     // Only prevent default if we're confident this is a horizontal swipe gesture
-    // Use stricter thresholds to preserve pull-to-refresh functionality
-    // Require significant horizontal movement AND horizontal dominance AND not near top of screen
-    const isNearTop = touch.clientY < 100; // Don't interfere with pull-to-refresh in top 100px
-    
+    // Use stricter thresholds to preserve pull-to-refresh functionality throughout the page
+    // Require significant horizontal movement AND horizontal dominance AND not a potential pull-to-refresh
     if (deltaX >= SWIPE_CONFIG.PREVENT_DEFAULT_THRESHOLD && 
         deltaX > deltaY * 1.5 && 
         deltaY < SWIPE_CONFIG.MAX_VERTICAL &&
-        !isNearTop) { // Additional check to preserve pull-to-refresh
+        !isPotentialPullToRefresh) { // Preserve pull-to-refresh anywhere on the page
       e.preventDefault();
       
       // Add stronger visual feedback during confirmed swipe
