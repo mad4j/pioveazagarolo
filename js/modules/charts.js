@@ -605,8 +605,9 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
                 rows.push({ k: 'humidity', t: `Umidità: ${humidity}%` }); 
               }
               // Add cloud coverage info if available
-              if (cloudCoverageData && cloudCoverageData[idx] != null) {
-                const cloudCoverage = Math.round(cloudCoverageData[idx]);
+              const cloudCoveragePlugin = chart.options.plugins.cloudCoverageIcons;
+              if (cloudCoveragePlugin && cloudCoveragePlugin.cloudCoverageData && cloudCoveragePlugin.cloudCoverageData[idx] != null) {
+                const cloudCoverage = Math.round(cloudCoveragePlugin.cloudCoverageData[idx]);
                 const cloudDesc = getCloudCoverDescription(cloudCoverage);
                 rows.push({ k: 'cloud', t: `Copertura: ${cloudCoverage}% (${cloudDesc})` });
               } 
