@@ -18,6 +18,24 @@ const SWIPE_CONFIG = {
 let currentEnhancedTooltip = null;
 let enhancedTooltipTimer = null;
 let pageInteractionHandlersAdded = false;
+let pageInteractionHandlers = null;
+
+/**
+ * Removes global page interaction handlers for tooltip management
+ */
+function removePageInteractionHandlers() {
+  if (!pageInteractionHandlersAdded || !pageInteractionHandlers) return;
+  
+  document.removeEventListener('scroll', pageInteractionHandlers.scroll);
+  document.removeEventListener('touchstart', pageInteractionHandlers.touchstart);
+  document.removeEventListener('touchend', pageInteractionHandlers.touchend);
+  document.removeEventListener('mousedown', pageInteractionHandlers.mousedown);
+  document.removeEventListener('keydown', pageInteractionHandlers.keydown);
+  
+  pageInteractionHandlersAdded = false;
+  pageInteractionHandlers = null;
+  console.log('📱 Page interaction handlers removed');
+}
 
 /**
  * Adds global page interaction handlers to hide enhanced tooltip
@@ -33,11 +51,43 @@ function addPageInteractionHandlers() {
     hideEnhancedChartModeTooltip();
   };
   
+  const hideOnTouchInteraction = (e) => {
+    // Don't hide if the interaction is on the tooltip itself
+    // Check both the target and any touch points
+    if (currentEnhancedTooltip) {
+      if (currentEnhancedTooltip.contains(e.target)) {
+        return;
+      }
+      
+      // For touch events, also check touch points
+      if (e.touches && e.touches.length > 0) {
+        for (let i = 0; i < e.touches.length; i++) {
+          const touch = e.touches[i];
+          const elementUnderTouch = document.elementFromPoint(touch.clientX, touch.clientY);
+          if (elementUnderTouch && currentEnhancedTooltip.contains(elementUnderTouch)) {
+            return;
+          }
+        }
+      }
+    }
+    hideEnhancedChartModeTooltip();
+  };
+  
+  // Store handler references for cleanup
+  pageInteractionHandlers = {
+    scroll: hideEnhancedChartModeTooltip,
+    touchstart: hideOnTouchInteraction,
+    touchend: hideOnTouchInteraction,
+    mousedown: hideOnInteraction,
+    keydown: hideEnhancedChartModeTooltip
+  };
+  
   // Add event listeners for various user interactions
-  document.addEventListener('scroll', hideEnhancedChartModeTooltip, { passive: true });
-  document.addEventListener('touchstart', hideOnInteraction, { passive: true });
-  document.addEventListener('mousedown', hideOnInteraction);
-  document.addEventListener('keydown', hideEnhancedChartModeTooltip);
+  document.addEventListener('scroll', pageInteractionHandlers.scroll, { passive: true });
+  document.addEventListener('touchstart', pageInteractionHandlers.touchstart, { passive: false });
+  document.addEventListener('touchend', pageInteractionHandlers.touchend, { passive: false });
+  document.addEventListener('mousedown', pageInteractionHandlers.mousedown);
+  document.addEventListener('keydown', pageInteractionHandlers.keydown);
   
   pageInteractionHandlersAdded = true;
   console.log('📱 Page interaction handlers added for enhanced tooltip management');
@@ -48,20 +98,22 @@ function addPageInteractionHandlers() {
  */
 export function hideEnhancedChartModeTooltip() {
   if (currentEnhancedTooltip) {
-    currentEnhancedTooltip.style.opacity = '0';
-    currentEnhancedTooltip.style.transform = 'translate(-50%, -50%) scale(0.9)';
-    setTimeout(() => {
-      if (currentEnhancedTooltip && currentEnhancedTooltip.parentNode) {
-        currentEnhancedTooltip.parentNode.removeChild(currentEnhancedTooltip);
-      }
-      currentEnhancedTooltip = null;
-    }, 400);
-    
-    // Clear any pending auto-hide timer
+    // Clear any pending auto-hide timer first
     if (enhancedTooltipTimer) {
       clearTimeout(enhancedTooltipTimer);
       enhancedTooltipTimer = null;
     }
+    
+    const tooltipToHide = currentEnhancedTooltip;
+    currentEnhancedTooltip = null; // Clear reference immediately to prevent double-hiding
+    
+    tooltipToHide.style.opacity = '0';
+    tooltipToHide.style.transform = 'translate(-50%, -50%) scale(0.9)';
+    setTimeout(() => {
+      if (tooltipToHide && tooltipToHide.parentNode) {
+        tooltipToHide.parentNode.removeChild(tooltipToHide);
+      }
+    }, 400);
     
     console.log('📊 Enhanced chart mode tooltip hidden');
   }
@@ -153,15 +205,26 @@ export function showEnhancedChartModeTooltip(mode) {
     hideEnhancedChartModeTooltip();
   });
   
+  // Add touch handler to hide tooltip when touched
+  tooltip.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    hideEnhancedChartModeTooltip();
+  }, { passive: false });
+  
   // Show tooltip with animation
   setTimeout(() => {
     tooltip.style.opacity = '1';
     tooltip.style.transform = 'translate(-50%, -50%) scale(1)';
   }, 10);
   
-  // Auto-hide after 3 seconds
+  // Auto-hide after 3 seconds - use a more robust timeout mechanism
   enhancedTooltipTimer = setTimeout(() => {
-    hideEnhancedChartModeTooltip();
+    // Double-check that the tooltip is still the current one before hiding
+    if (currentEnhancedTooltip === tooltip) {
+      console.log('📊 Auto-hiding tooltip after timeout');
+      hideEnhancedChartModeTooltip();
+    }
   }, 3000);
   
   console.log(`📊 Enhanced chart mode tooltip shown: ${info.name}`);
@@ -220,6 +283,9 @@ function hideAllChartTooltips() {
 function switchToModeViaSwiping(targetMode, weatherData) {
   // Hide any visible tooltips immediately before switching modes
   hideAllChartTooltips();
+  
+  // Also hide any existing enhanced tooltips immediately
+  hideEnhancedChartModeTooltip();
   
   // Add mode switching animation to all forecast cards
   const forecastCards = document.querySelectorAll('.forecast-card');
@@ -307,8 +373,11 @@ function switchToModeViaSwiping(targetMode, weatherData) {
       // Update navigation dots to reflect the change
       updateNavigationDots(actualMode);
       
-      // Show enhanced tooltip to indicate the active mode
-      showEnhancedChartModeTooltip(actualMode);
+      // Show enhanced tooltip to indicate the active mode immediately
+      // Simple timing: just wait for DOM updates to complete
+      setTimeout(() => {
+        showEnhancedChartModeTooltip(actualMode);
+      }, 50);
       
       console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
     });
@@ -341,6 +410,13 @@ function createSwipeHandler(element, weatherData) {
     
     // Add visual feedback class for touch start
     element.classList.add('swiping');
+    
+    // If there's a tooltip showing and this touch is outside the forecast cards area,
+    // don't prevent the tooltip from being hidden by document-level handlers
+    if (currentEnhancedTooltip && !element.contains(e.target)) {
+      // Let the document-level touch handlers deal with tooltip hiding
+      return;
+    }
   };
 
   const handleTouchMove = (e) => {
