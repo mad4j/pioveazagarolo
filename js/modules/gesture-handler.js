@@ -261,10 +261,7 @@ function createSwipeHandler(element, weatherData) {
       
       // Only switch if the mode would actually change
       if (nextMode !== currentMode) {
-        // Prevent any other touch events from firing
-        e.preventDefault();
-        e.stopPropagation();
-        
+        // Do not block native gestures; simply trigger mode switch
         // Switch to new mode
         switchToModeViaSwiping(nextMode, weatherData);
       }

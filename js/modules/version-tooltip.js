@@ -67,8 +67,10 @@ function clearPressTimer() {
  * Handles start of press/touch on title
  */
 function handlePressStart(event) {
-  // Prevent default to avoid text selection
-  event.preventDefault();
+  // On mouse, prevent text selection; on touch, let native gestures work
+  if (event.type === 'mousedown') {
+    event.preventDefault();
+  }
   
   // Clear any existing timers
   clearPressTimer();
@@ -116,7 +118,7 @@ export function setupVersionTooltip() {
   pageTitle.addEventListener('mouseleave', handlePressEnd);
   
   // Touch events for mobile
-  pageTitle.addEventListener('touchstart', handlePressStart, { passive: false });
+  pageTitle.addEventListener('touchstart', handlePressStart, { passive: true });
   pageTitle.addEventListener('touchend', handlePressEnd);
   pageTitle.addEventListener('touchcancel', handlePressEnd);
   
@@ -124,7 +126,7 @@ export function setupVersionTooltip() {
   document.addEventListener('click', handlePageInteraction);
   document.addEventListener('scroll', handlePageInteraction);
   document.addEventListener('keydown', handlePageInteraction);
-  document.addEventListener('touchstart', handlePageInteraction);
+  document.addEventListener('touchstart', handlePageInteraction, { passive: true });
   
   // Prevent context menu on title to avoid interference
   pageTitle.addEventListener('contextmenu', (e) => e.preventDefault());

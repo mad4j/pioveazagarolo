@@ -231,7 +231,7 @@ export function setupChartToggleListeners(weatherData) {
       
       if (tapCount === 2) {
         // Double-tap detected
-        e.preventDefault();
+        // Avoid blocking native gestures earlier; only stop propagation on confirmed double-tap
         e.stopPropagation();
         toggleChartMode(chartId, weatherData);
         // Reset for next double-tap sequence
@@ -239,8 +239,9 @@ export function setupChartToggleListeners(weatherData) {
         lastTouchTime = 0;
       }
     };
-    
-    forecastCard.addEventListener('touchend', forecastCard._doubleTapHandler, { passive: false });
+
+    // Use passive to not block scroll; handler only stops propagation on confirmed double-tap
+    forecastCard.addEventListener('touchend', forecastCard._doubleTapHandler, { passive: true });
   });
 }
 
