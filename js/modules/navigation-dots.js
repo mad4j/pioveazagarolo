@@ -9,7 +9,7 @@ let chartModeTooltipCleanups = [];
  * Shows a tooltip indicating the current chart mode
  * @param {string} mode - The current chart mode
  */
-export function showChartModeTooltip(mode) {
+export function showChartModeTooltip(mode, opts = {}) {
   // Hide any existing tooltip first
   hideChartModeTooltip();
   
@@ -55,10 +55,11 @@ export function showChartModeTooltip(mode) {
     tooltip.classList.add('show');
   }, 10);
   
-  // Auto-hide after 2 seconds
+  // Auto-hide after configured duration (default 2000ms)
+  const duration = typeof opts.duration === 'number' ? opts.duration : 2000;
   chartModeTooltipTimer = setTimeout(() => {
     hideChartModeTooltip();
-  }, 2000);
+  }, duration);
 
   // Also hide on any user interaction to avoid lingering tooltips
   const dismiss = () => hideChartModeTooltip();
@@ -80,7 +81,8 @@ export function showChartModeTooltip(mode) {
 /**
  * Hides the chart mode tooltip
  */
-function hideChartModeTooltip() {
+export function hideChartModeTooltip() {
+  add('pointerup', { passive: true, once: true });
   const tooltip = document.getElementById('chart-mode-tooltip');
   if (tooltip) {
     tooltip.classList.remove('show');
@@ -206,10 +208,12 @@ function hideAllTooltips() {
   });
 
   // Hide chart mode tooltip if present
-  const modeTooltip = document.getElementById('chart-mode-tooltip');
-  if (modeTooltip) {
-    modeTooltip.classList.remove('show');
-    setTimeout(() => modeTooltip.remove(), 200);
+  try { hideChartModeTooltip(); } catch {
+    const modeTooltip = document.getElementById('chart-mode-tooltip');
+    if (modeTooltip) {
+      modeTooltip.classList.remove('show');
+      setTimeout(() => modeTooltip.remove(), 200);
+    }
   }
 }
 

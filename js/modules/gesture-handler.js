@@ -1,4 +1,5 @@
 import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
+import { hideChartModeTooltip } from './navigation-dots.js';
 
 /**
  * Gesture detection module for swipe-based mode switching
@@ -162,11 +163,9 @@ function switchToModeViaSwiping(targetMode, weatherData) {
       // Save the new mode
       saveChartMode(actualMode);
       
-      // Update navigation dots to reflect the change
-      updateNavigationDots(actualMode);
-      
-      // Show tooltip to indicate the active mode
-      showChartModeTooltip(actualMode);
+  // Update navigation dots and show a short-lived tooltip on swipe
+  updateNavigationDots(actualMode);
+  showChartModeTooltip(actualMode, { duration: 800 });
       
       console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
     });
@@ -192,10 +191,7 @@ function createSwipeHandler(element, weatherData) {
     if (e.touches.length !== 1) return;
 
     // Ensure any chart-mode tooltip is dismissed immediately when a swipe starts
-    const modeTooltip = document.getElementById('chart-mode-tooltip');
-    if (modeTooltip && modeTooltip.parentNode) {
-      modeTooltip.parentNode.removeChild(modeTooltip);
-    }
+    try { hideChartModeTooltip(); } catch {}
     
     const touch = e.touches[0];
     touchStartX = touch.clientX;
