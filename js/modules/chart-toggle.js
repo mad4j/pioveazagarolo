@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // Chart tooltip functionality removed - now handled by navigation-dots.js
 
 /**
- * Removes all visible chart tooltips immediately
+ * Removes all visible tooltips immediately (Chart.js tooltips, apparent temperature tooltips, weather icon tooltips)
  */
-function hideAllChartTooltips() {
-  // Hide all chart tooltips by finding tooltip DOM elements
+function hideAllTooltips() {
+  // Hide all Chart.js tooltips by finding tooltip DOM elements
   const chartIds = ['today-chart', 'tomorrow-chart', 'dayaftertomorrow-chart'];
   chartIds.forEach(chartId => {
     const tooltip = document.getElementById(`chartjs-tooltip-${chartId}`);
@@ -29,6 +29,27 @@ function hideAllChartTooltips() {
       tooltip.style.opacity = '0';
     }
   });
+  
+  // Hide apparent temperature tooltips
+  document.querySelectorAll('.apparent-temp-tooltip').forEach(tooltip => {
+    tooltip.style.opacity = '0';
+    tooltip.style.transform = 'translateY(-10px)';
+    setTimeout(() => tooltip.remove(), 300);
+  });
+  
+  // Hide weather icon tooltips
+  document.querySelectorAll('.weather-icon-tooltip').forEach(tooltip => {
+    tooltip.style.opacity = '0';
+    tooltip.style.transform = 'translateY(-10px)';
+    setTimeout(() => tooltip.remove(), 300);
+  });
+}
+
+/**
+ * Removes all visible chart tooltips immediately (legacy function for compatibility)
+ */
+function hideAllChartTooltips() {
+  hideAllTooltips();
 }
 
 /**
