@@ -186,6 +186,7 @@ function createSwipeHandler(element, weatherData) {
   let touchStartY = null;
   let touchStartTime = null;
   let touchMoved = false;
+  let isAtTopOfPage = false;
 
   const handleTouchStart = (e) => {
     // Only handle single finger touches
@@ -196,6 +197,9 @@ function createSwipeHandler(element, weatherData) {
     touchStartY = touch.clientY;
     touchStartTime = Date.now();
     touchMoved = false;
+    
+    // Check if we're at the top of the page to allow pull-to-refresh
+    isAtTopOfPage = window.scrollY === 0 || document.documentElement.scrollTop === 0;
   };
 
   const handleTouchMove = (e) => {
@@ -204,12 +208,19 @@ function createSwipeHandler(element, weatherData) {
     
     touchMoved = true;
     
-    // Allow vertical scrolling by not preventing default for primarily vertical movements
     const touch = e.touches[0];
     const deltaX = Math.abs(touch.clientX - touchStartX);
     const deltaY = Math.abs(touch.clientY - touchStartY);
+    const deltaYRaw = touch.clientY - touchStartY;
     
-    // If horizontal movement is dominant, prevent scrolling
+    // If we're at the top of the page and the user is pulling down, 
+    // don't interfere with pull-to-refresh
+    if (isAtTopOfPage && deltaYRaw > 0 && deltaY > deltaX) {
+      return; // Let pull-to-refresh work naturally
+    }
+    
+    // Only prevent default if horizontal movement is dominant AND 
+    // we have sufficient movement to be confident it's a swipe gesture
     if (deltaX > deltaY && deltaX > 20) {
       e.preventDefault();
     }
@@ -264,7 +275,8 @@ function createSwipeHandler(element, weatherData) {
   };
 
   // Add event listeners
-  element.addEventListener('touchstart', handleTouchStart, { passive: false });
+  // Use passive for touchstart since we don't need to prevent default there
+  element.addEventListener('touchstart', handleTouchStart, { passive: true });
   element.addEventListener('touchmove', handleTouchMove, { passive: false });
   element.addEventListener('touchend', handleTouchEnd, { passive: false });
 
