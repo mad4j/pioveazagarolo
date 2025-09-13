@@ -32,7 +32,8 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
   } else if (currentMode === CHART_MODES.AIR_QUALITY && weatherData.air_quality && weatherData.air_quality.hourly && weatherData.air_quality.hourly.european_aqi) {
     const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
-    buildAirQualityChart(chartId, eaqiSlice, sunriseTime, sunsetTime);
+    const uvSlice = weatherData.hourly.uv_index ? getDaySlice(weatherData.hourly.uv_index, dayIndex) : null;
+    buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime);
   } else {
     // Default to precipitation chart and ensure all charts are in precipitation mode
     chartModes[chartId] = CHART_MODES.PRECIPITATION;

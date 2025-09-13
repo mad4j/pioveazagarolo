@@ -315,8 +315,9 @@ function switchToMode(targetMode, weatherData) {
         buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
       } else if (actualMode === CHART_MODES.AIR_QUALITY) {
         // Switch to air quality chart
-        const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
-        buildAirQualityChart(chartId, eaqiSlice, sunriseTime, sunsetTime);
+  const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
+  const uvSlice = weatherData.hourly.uv_index ? getDaySlice(weatherData.hourly.uv_index, dayIndex) : null;
+  buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime);
       } else {
         // Switch to precipitation chart
         const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
