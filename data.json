@@ -1,7 +1,7 @@
 {
   "latitude": 41.8125,
   "longitude": 12.8125,
-  "generationtime_ms": 0.32269954681396484,
+  "generationtime_ms": 0.4775524139404297,
   "utc_offset_seconds": 7200,
   "timezone": "Europe/Rome",
   "timezone_abbreviation": "GMT+2",
@@ -1065,11 +1065,11 @@
       0
     ]
   },
-  "last_update": "2025-09-13 18:20",
+  "last_update": "2025-09-13 18:24",
   "air_quality": {
     "latitude": 41.8,
     "longitude": 12.799999,
-    "generationtime_ms": 0.25010108947753906,
+    "generationtime_ms": 0.2313852310180664,
     "utc_offset_seconds": 7200,
     "timezone": "Europe/Rome",
     "timezone_abbreviation": "GMT+2",
