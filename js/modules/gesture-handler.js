@@ -271,16 +271,9 @@ function createSwipeHandler(element, weatherData) {
   };
 
   // Add event listeners
-  // Use passive listeners so browsers can continue to handle native
-  // vertical gestures (pull-to-refresh). We also set `touch-action`
-  // on the element to `pan-y` when enabling swipe so horizontal
-  // gestures remain available to our handlers without blocking the
-  // native vertical scroll/pull-to-refresh behavior.
-  element.style.touchAction = element.style.touchAction || 'pan-y';
-  element.style.msTouchAction = element.style.msTouchAction || 'pan-y';
-
+  // Use passive listeners except for touchmove where we may conditionally preventDefault for horizontal swipes
   element.addEventListener('touchstart', handleTouchStart, { passive: true });
-  element.addEventListener('touchmove', handleTouchMove, { passive: true });
+  element.addEventListener('touchmove', handleTouchMove, { passive: false });
   element.addEventListener('touchend', handleTouchEnd, { passive: true });
 
   // Return cleanup function
