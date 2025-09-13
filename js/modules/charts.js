@@ -478,7 +478,6 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
   const maxTemp = Math.max(...temperatureData, ...apparentTemperatureData) + 2;
   const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
-  if (hasUV) plugins.push(uvAlertLinePlugin);
   if (cloudCoverageData) plugins.push(cloudCoverageIconsPlugin);
   
   // Build datasets array - always include temperature lines
