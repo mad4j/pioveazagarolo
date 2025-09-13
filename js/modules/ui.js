@@ -197,7 +197,7 @@ export function addWeatherIconTooltip(iconElement, weatherCode) {
     },
     
     touchstart: (e) => {
-      e.preventDefault(); // Prevent mouse events on touch
+      // Do not prevent default to keep native gestures intact
       showWeatherIconTooltip(iconElement, description);
     }
   };
@@ -208,7 +208,7 @@ export function addWeatherIconTooltip(iconElement, weatherCode) {
   // Add event listeners
   iconElement.addEventListener('mouseenter', handlers.mouseenter);
   iconElement.addEventListener('mouseleave', handlers.mouseleave);
-  iconElement.addEventListener('touchstart', handlers.touchstart);
+  iconElement.addEventListener('touchstart', handlers.touchstart, { passive: true });
   
   // Add cursor pointer to indicate interactivity
   iconElement.style.cursor = 'pointer';

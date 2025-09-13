@@ -3,12 +3,13 @@ import { toggleChartMode } from './chart-toggle.js';
 
 // Chart mode tooltip state
 let chartModeTooltipTimer = null;
+let chartModeTooltipCleanups = [];
 
 /**
  * Shows a tooltip indicating the current chart mode
  * @param {string} mode - The current chart mode
  */
-export function showChartModeTooltip(mode) {
+export function showChartModeTooltip(mode, opts = {}) {
   // Hide any existing tooltip first
   hideChartModeTooltip();
   
@@ -54,10 +55,26 @@ export function showChartModeTooltip(mode) {
     tooltip.classList.add('show');
   }, 10);
   
-  // Auto-hide after 2 seconds
+  // Auto-hide after configured duration (default 2000ms)
+  const duration = typeof opts.duration === 'number' ? opts.duration : 2000;
   chartModeTooltipTimer = setTimeout(() => {
     hideChartModeTooltip();
-  }, 2000);
+  }, duration);
+
+  // Also hide on user interaction (avoid scroll/wheel to prevent premature dismissal)
+  const dismiss = () => hideChartModeTooltip();
+  const add = (type, opts) => {
+    const handler = () => dismiss();
+    document.addEventListener(type, handler, opts);
+    chartModeTooltipCleanups.push(() => document.removeEventListener(type, handler, opts));
+  };
+  // Defer binding to next tick to avoid catching the same initiating event
+  setTimeout(() => {
+    add('touchstart', { passive: true, once: true });
+    add('pointerdown', { passive: true, once: true });
+    add('mousedown', { passive: true, once: true });
+    add('keydown', { once: true });
+  }, 50);
   
   console.log(`📊 Chart mode tooltip shown: ${modeNames[mode]}`);
 }
@@ -65,7 +82,7 @@ export function showChartModeTooltip(mode) {
 /**
  * Hides the chart mode tooltip
  */
-function hideChartModeTooltip() {
+export function hideChartModeTooltip() {
   const tooltip = document.getElementById('chart-mode-tooltip');
   if (tooltip) {
     tooltip.classList.remove('show');
@@ -80,6 +97,12 @@ function hideChartModeTooltip() {
   if (chartModeTooltipTimer) {
     clearTimeout(chartModeTooltipTimer);
     chartModeTooltipTimer = null;
+  }
+
+  // Remove any interaction listeners set for dismiss
+  if (chartModeTooltipCleanups.length) {
+    chartModeTooltipCleanups.forEach(fn => { try { fn(); } catch {} });
+    chartModeTooltipCleanups = [];
   }
 }
 
@@ -183,6 +206,15 @@ function hideAllTooltips() {
     tooltip.style.transform = 'translateY(-10px)';
     setTimeout(() => tooltip.remove(), 300);
   });
+
+  // Hide chart mode tooltip if present
+  try { hideChartModeTooltip(); } catch {
+    const modeTooltip = document.getElementById('chart-mode-tooltip');
+    if (modeTooltip) {
+      modeTooltip.classList.remove('show');
+      setTimeout(() => modeTooltip.remove(), 200);
+    }
+  }
 }
 
 /**
