@@ -1191,7 +1191,8 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
   // Calcola range UV se disponibile
   const hasUV = Array.isArray(uvData) && uvData.length === eaqiData.length;
   const maxUV = hasUV ? Math.max(...uvData, 0) : 0;
-  const uvAxisMax = hasUV ? Math.max(10, Math.ceil(maxUV * 1.2)) : 10;
+  // Assicura che la linea di warning UV a 8 sia sempre visibile con margine
+  const uvAxisMax = hasUV ? Math.max(10, Math.ceil(maxUV * 1.2), 9) : 10;
   
   // Assicura un range minimo per leggibilità
   let scaleMax = Math.max(maxEAQI + 5, 50); // Almeno 50 per vedere i livelli base
