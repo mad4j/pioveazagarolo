@@ -192,6 +192,8 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  /* Crea il minimo spazio di scroll per abilitare il pull-to-refresh senza introdurre scroll visibile */
+  body { padding-bottom: 1px; }
   .chart-mode-navigation {
     gap: 0.2rem;
   }
@@ -688,28 +690,29 @@ footer .chart-mode-navigation {
   /* Layout mobile ottimizzato per occupare l'intera altezza evitando lo scroll verticale */
   html,
   body {
-    height: 100svh !important;
-    max-height: 100svh !important;
-    overflow: hidden !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
+    /* Consenti lo scroll verticale e il pull-to-refresh nativo */
+    height: auto;
+    min-height: 100svh;
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
     align-items: stretch;
   }
 
   .dashboard-container {
-    max-height: 100svh !important;
-    height: 100svh !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
+    /* Lascia che il contenuto determini l'altezza complessiva per abilitare lo scroll della pagina */
+    display: flex;
+    flex-direction: column;
     padding: 0.45rem 0.5rem 0.35rem;
     gap: 0.25rem;
     min-height: 100svh;
     max-width: 100dvw;
     box-shadow: none;
     border-radius: 0;
-    box-sizing: border-box !important;
+    box-sizing: border-box;
   }
 
   .row {

@@ -1,4 +1,5 @@
 import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
+import { hideChartModeTooltip } from './navigation-dots.js';
 
 /**
  * Gesture detection module for swipe-based mode switching
@@ -162,11 +163,9 @@ function switchToModeViaSwiping(targetMode, weatherData) {
       // Save the new mode
       saveChartMode(actualMode);
       
-      // Update navigation dots to reflect the change
-      updateNavigationDots(actualMode);
-      
-      // Show tooltip to indicate the active mode
-      showChartModeTooltip(actualMode);
+  // Update navigation dots and show a short-lived tooltip on swipe
+  updateNavigationDots(actualMode);
+  showChartModeTooltip(actualMode, { duration: 800 });
       
       console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
     });
@@ -190,6 +189,9 @@ function createSwipeHandler(element, weatherData) {
   const handleTouchStart = (e) => {
     // Only handle single finger touches
     if (e.touches.length !== 1) return;
+
+    // Ensure any chart-mode tooltip is dismissed immediately when a swipe starts
+    try { hideChartModeTooltip(); } catch {}
     
     const touch = e.touches[0];
     touchStartX = touch.clientX;
@@ -210,9 +212,17 @@ function createSwipeHandler(element, weatherData) {
     const deltaY = Math.abs(touch.clientY - touchStartY);
     
     // If horizontal movement is dominant, prevent scrolling
-    if (deltaX > deltaY && deltaX > 20) {
-      e.preventDefault();
-    }
+    // If horizontal movement is clearly dominant we want to prevent the
+    // page from panning. However, to preserve native pull-to-refresh we
+    // avoid calling preventDefault from this handler (listener will be
+    // passive). Instead we rely on setting `touch-action: pan-y` on the
+    // element so the browser will allow vertical gestures while we
+    // implement horizontal swipe logic. Keep the logic here to detect
+    // horizontal swipes but do not call preventDefault.
+    // (No-op: actual prevention is handled by CSS `touch-action`.)
+    // if (deltaX > deltaY && deltaX > 20) {
+    //   e.preventDefault();
+    // }
   };
 
   const handleTouchEnd = (e) => {
@@ -253,10 +263,7 @@ function createSwipeHandler(element, weatherData) {
       
       // Only switch if the mode would actually change
       if (nextMode !== currentMode) {
-        // Prevent any other touch events from firing
-        e.preventDefault();
-        e.stopPropagation();
-        
+        // Do not block native gestures; simply trigger mode switch
         // Switch to new mode
         switchToModeViaSwiping(nextMode, weatherData);
       }
@@ -264,16 +271,20 @@ function createSwipeHandler(element, weatherData) {
   };
 
   // Add event listeners
-  element.addEventListener('touchstart', handleTouchStart, { passive: false });
+  // Use passive listeners except for touchmove where we may conditionally preventDefault for horizontal swipes
+  element.addEventListener('touchstart', handleTouchStart, { passive: true });
   element.addEventListener('touchmove', handleTouchMove, { passive: false });
-  element.addEventListener('touchend', handleTouchEnd, { passive: false });
+  element.addEventListener('touchend', handleTouchEnd, { passive: true });
 
   // Return cleanup function
   return {
     destroy() {
-      element.removeEventListener('touchstart', handleTouchStart);
-      element.removeEventListener('touchmove', handleTouchMove);
-      element.removeEventListener('touchend', handleTouchEnd);
+      element.removeEventListener('touchstart', handleTouchStart, { passive: true });
+      element.removeEventListener('touchmove', handleTouchMove, { passive: true });
+      element.removeEventListener('touchend', handleTouchEnd, { passive: true });
+      // Remove added touch-action styles if we set them
+      if (element.style.touchAction === 'pan-y') element.style.touchAction = '';
+      if (element.style.msTouchAction === 'pan-y') element.style.msTouchAction = '';
     }
   };
 }
