@@ -36,10 +36,10 @@ function getNextMode(currentMode, direction) {
   let nextIndex;
   if (direction > 0) {
     // Right swipe - next mode
-    nextIndex = (currentIndex + 1) % MODE_ORDER.length;
+    nextIndex = (currentIndex - 1 + MODE_ORDER.length) % MODE_ORDER.length;
   } else {
     // Left swipe - previous mode  
-    nextIndex = (currentIndex - 1 + MODE_ORDER.length) % MODE_ORDER.length;
+    nextIndex = (currentIndex + 1) % MODE_ORDER.length;
   }
   
   return MODE_ORDER[nextIndex];
