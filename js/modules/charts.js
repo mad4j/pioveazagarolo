@@ -103,6 +103,52 @@ export const pressure1013LinePlugin = {
   }
 };
 
+// Plugin per linea soglia UV (es. 8+ allerta)
+export const uvAlertLinePlugin = {
+  id: 'uvAlertLine',
+  afterDraw(chart, args, opts) {
+    if (!opts) return;
+    const yScale = chart.scales.y2; // UV usa l'asse destro
+    if (!yScale) return;
+    const value = typeof opts.value === 'number' ? opts.value : 8;
+    const y = yScale.getPixelForValue(value);
+    const { left, right, top, bottom } = chart.chartArea || {};
+    if (y == null || y < top || y > bottom) return;
+    const ctx = chart.ctx; ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = opts.color || '#f39c12';
+    ctx.lineWidth = opts.lineWidth || 3;
+    ctx.setLineDash(opts.lineDash || [6, 4]);
+    ctx.beginPath();
+    const yPix = Math.round(y) + 0.5; // crisp line
+    ctx.moveTo(left, yPix);
+    ctx.lineTo(right, yPix);
+    ctx.stroke();
+    // Etichetta opzionale
+    if (opts.label !== false) {
+      const label = typeof opts.label === 'string' ? opts.label : 'UV 8+';
+      const color = opts.color || '#f39c12';
+      ctx.font = '11px Helvetica, Arial';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+      // Background for readability
+      const paddingX = 4, paddingY = 2;
+      const textWidth = ctx.measureText(label).width;
+      const boxRight = right - 4, boxTop = yPix - 2 - 12;
+      const boxLeft = boxRight - textWidth - paddingX * 2;
+      const boxHeight = 14;
+      ctx.fillStyle = 'rgba(44,62,80,0.9)';
+      ctx.beginPath();
+      ctx.rect(boxLeft, boxTop, textWidth + paddingX * 2, boxHeight);
+      ctx.fill();
+      // Text
+      ctx.fillStyle = color;
+      ctx.fillText(label, boxRight - paddingX, yPix - 2);
+    }
+    ctx.restore();
+  }
+};
+
 // Plugin per icone meteo in modalità pressione (ogni 3 ore)
 export const pressureWeatherIconsPlugin = {
   id: 'pressureWeatherIcons',
@@ -430,8 +476,9 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
   const tempColors = temperatureData.map(getTemperatureLineColor);
   const minTemp = Math.min(...temperatureData, ...apparentTemperatureData) - 2;
   const maxTemp = Math.max(...temperatureData, ...apparentTemperatureData) + 2;
-  const plugins = [sunriseSunsetPlugin]; 
+  const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
+  if (hasUV) plugins.push(uvAlertLinePlugin);
   if (cloudCoverageData) plugins.push(cloudCoverageIconsPlugin);
   
   // Build datasets array - always include temperature lines
@@ -1144,7 +1191,7 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
   // Calcola range UV se disponibile
   const hasUV = Array.isArray(uvData) && uvData.length === eaqiData.length;
   const maxUV = hasUV ? Math.max(...uvData, 0) : 0;
-  const uvAxisMax = hasUV ? Math.max(12, Math.ceil(maxUV * 1.2)) : 12;
+  const uvAxisMax = hasUV ? Math.max(10, Math.ceil(maxUV * 1.2)) : 10;
   
   // Assicura un range minimo per leggibilità
   let scaleMax = Math.max(maxEAQI + 5, 50); // Almeno 50 per vedere i livelli base
@@ -1171,16 +1218,16 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
         ...(hasUV ? [{
           label: 'UV Index',
           type: 'line',
-          fill: false,
+          fill: true,
           tension: 0.35,
-          backgroundColor: 'rgb(255, 193, 7)',
-          borderColor: 'rgb(255, 193, 7)',
+          backgroundColor: 'rgba(106, 27, 154, 0.20)',
+          borderColor: '#6a1b9a',
           borderWidth: 2,
           data: uvData,
           pointRadius: 0,
           pointHoverRadius: 3,
           yAxisID: 'y2',
-          order: 0
+          order: 10
         }] : [])
       ]
     },
@@ -1237,6 +1284,13 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
           sunrise: sunriseTime,
           sunset: sunsetTime
         },
+        uvAlertLine: hasUV ? {
+          value: 8,
+          color: '#f39c12',
+          lineWidth: 2,
+          lineDash: [],
+          label: 'UV 8+'
+        } : undefined,
         legend: { display: false },
         tooltip: {
           enabled: false,
@@ -1312,7 +1366,7 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
             rows.forEach(r => {
               let icon = '';
               if (r.k === 'eaqi') icon = '<i class="wi wi-smog" style="margin-right:4px; color:#50ccaa;"></i>';
-              else if (r.k === 'uv') icon = '<i class="wi wi-day-sunny" style="margin-right:4px; color:#ffc107;"></i>';
+              else if (r.k === 'uv') icon = '<i class="wi wi-day-sunny" style="margin-right:4px; color:#bb86fc;"></i>';
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
               html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`;
