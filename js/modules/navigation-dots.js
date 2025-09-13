@@ -158,11 +158,42 @@ export function setupNavigationDots(weatherData) {
 }
 
 /**
+ * Removes all visible tooltips immediately (Chart.js tooltips, apparent temperature tooltips, weather icon tooltips)
+ */
+function hideAllTooltips() {
+  // Hide all Chart.js tooltips by finding tooltip DOM elements
+  const chartIds = ['today-chart', 'tomorrow-chart', 'dayaftertomorrow-chart'];
+  chartIds.forEach(chartId => {
+    const tooltip = document.getElementById(`chartjs-tooltip-${chartId}`);
+    if (tooltip) {
+      tooltip.style.opacity = '0';
+    }
+  });
+  
+  // Hide apparent temperature tooltips
+  document.querySelectorAll('.apparent-temp-tooltip').forEach(tooltip => {
+    tooltip.style.opacity = '0';
+    tooltip.style.transform = 'translateY(-10px)';
+    setTimeout(() => tooltip.remove(), 300);
+  });
+  
+  // Hide weather icon tooltips
+  document.querySelectorAll('.weather-icon-tooltip').forEach(tooltip => {
+    tooltip.style.opacity = '0';
+    tooltip.style.transform = 'translateY(-10px)';
+    setTimeout(() => tooltip.remove(), 300);
+  });
+}
+
+/**
  * Switches charts to a specific mode by directly updating charts
  * @param {string} targetMode - The mode to switch to
  * @param {Object} weatherData - Weather data object
  */
 function switchToMode(targetMode, weatherData) {
+  // Hide any visible tooltips immediately before switching modes
+  hideAllTooltips();
+  
   // Import chart building functions
   import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice }) => {
     if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
