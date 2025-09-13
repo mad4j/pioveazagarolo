@@ -210,9 +210,17 @@ function createSwipeHandler(element, weatherData) {
     const deltaY = Math.abs(touch.clientY - touchStartY);
     
     // If horizontal movement is dominant, prevent scrolling
-    if (deltaX > deltaY && deltaX > 20) {
-      e.preventDefault();
-    }
+    // If horizontal movement is clearly dominant we want to prevent the
+    // page from panning. However, to preserve native pull-to-refresh we
+    // avoid calling preventDefault from this handler (listener will be
+    // passive). Instead we rely on setting `touch-action: pan-y` on the
+    // element so the browser will allow vertical gestures while we
+    // implement horizontal swipe logic. Keep the logic here to detect
+    // horizontal swipes but do not call preventDefault.
+    // (No-op: actual prevention is handled by CSS `touch-action`.)
+    // if (deltaX > deltaY && deltaX > 20) {
+    //   e.preventDefault();
+    // }
   };
 
   const handleTouchEnd = (e) => {
@@ -264,16 +272,27 @@ function createSwipeHandler(element, weatherData) {
   };
 
   // Add event listeners
-  element.addEventListener('touchstart', handleTouchStart, { passive: false });
-  element.addEventListener('touchmove', handleTouchMove, { passive: false });
-  element.addEventListener('touchend', handleTouchEnd, { passive: false });
+  // Use passive listeners so browsers can continue to handle native
+  // vertical gestures (pull-to-refresh). We also set `touch-action`
+  // on the element to `pan-y` when enabling swipe so horizontal
+  // gestures remain available to our handlers without blocking the
+  // native vertical scroll/pull-to-refresh behavior.
+  element.style.touchAction = element.style.touchAction || 'pan-y';
+  element.style.msTouchAction = element.style.msTouchAction || 'pan-y';
+
+  element.addEventListener('touchstart', handleTouchStart, { passive: true });
+  element.addEventListener('touchmove', handleTouchMove, { passive: true });
+  element.addEventListener('touchend', handleTouchEnd, { passive: true });
 
   // Return cleanup function
   return {
     destroy() {
-      element.removeEventListener('touchstart', handleTouchStart);
-      element.removeEventListener('touchmove', handleTouchMove);
-      element.removeEventListener('touchend', handleTouchEnd);
+      element.removeEventListener('touchstart', handleTouchStart, { passive: true });
+      element.removeEventListener('touchmove', handleTouchMove, { passive: true });
+      element.removeEventListener('touchend', handleTouchEnd, { passive: true });
+      // Remove added touch-action styles if we set them
+      if (element.style.touchAction === 'pan-y') element.style.touchAction = '';
+      if (element.style.msTouchAction === 'pan-y') element.style.msTouchAction = '';
     }
   };
 }
