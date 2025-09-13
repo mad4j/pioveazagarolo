@@ -190,6 +190,12 @@ function createSwipeHandler(element, weatherData) {
   const handleTouchStart = (e) => {
     // Only handle single finger touches
     if (e.touches.length !== 1) return;
+
+    // Ensure any chart-mode tooltip is dismissed immediately when a swipe starts
+    const modeTooltip = document.getElementById('chart-mode-tooltip');
+    if (modeTooltip && modeTooltip.parentNode) {
+      modeTooltip.parentNode.removeChild(modeTooltip);
+    }
     
     const touch = e.touches[0];
     touchStartX = touch.clientX;

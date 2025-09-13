@@ -3,6 +3,7 @@ import { toggleChartMode } from './chart-toggle.js';
 
 // Chart mode tooltip state
 let chartModeTooltipTimer = null;
+let chartModeTooltipCleanups = [];
 
 /**
  * Shows a tooltip indicating the current chart mode
@@ -58,6 +59,20 @@ export function showChartModeTooltip(mode) {
   chartModeTooltipTimer = setTimeout(() => {
     hideChartModeTooltip();
   }, 2000);
+
+  // Also hide on any user interaction to avoid lingering tooltips
+  const dismiss = () => hideChartModeTooltip();
+  const add = (type, opts) => {
+    const handler = () => dismiss();
+    document.addEventListener(type, handler, opts);
+    chartModeTooltipCleanups.push(() => document.removeEventListener(type, handler, opts));
+  };
+  add('touchstart', { passive: true, once: true });
+  add('pointerdown', { passive: true, once: true });
+  add('mousedown', { passive: true, once: true });
+  add('wheel', { passive: true, once: true });
+  add('scroll', { passive: true, once: true });
+  add('keydown', { once: true });
   
   console.log(`📊 Chart mode tooltip shown: ${modeNames[mode]}`);
 }
@@ -80,6 +95,12 @@ function hideChartModeTooltip() {
   if (chartModeTooltipTimer) {
     clearTimeout(chartModeTooltipTimer);
     chartModeTooltipTimer = null;
+  }
+
+  // Remove any interaction listeners set for dismiss
+  if (chartModeTooltipCleanups.length) {
+    chartModeTooltipCleanups.forEach(fn => { try { fn(); } catch {} });
+    chartModeTooltipCleanups = [];
   }
 }
 
@@ -183,6 +204,13 @@ function hideAllTooltips() {
     tooltip.style.transform = 'translateY(-10px)';
     setTimeout(() => tooltip.remove(), 300);
   });
+
+  // Hide chart mode tooltip if present
+  const modeTooltip = document.getElementById('chart-mode-tooltip');
+  if (modeTooltip) {
+    modeTooltip.classList.remove('show');
+    setTimeout(() => modeTooltip.remove(), 200);
+  }
 }
 
 /**
