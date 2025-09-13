@@ -30,8 +30,14 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
     const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
     buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
-  } else if (currentMode === CHART_MODES.AIR_QUALITY && weatherData.air_quality && weatherData.air_quality.hourly && weatherData.air_quality.hourly.european_aqi) {
-    const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
+  } else if (currentMode === CHART_MODES.AIR_QUALITY && (
+    (weatherData.air_quality && weatherData.air_quality.hourly && weatherData.air_quality.hourly.european_aqi) ||
+    (weatherData.hourly.uv_index)
+  )) {
+    // Use EAQI data if available, otherwise create minimal dummy data for UV-only chart
+    const eaqiSlice = weatherData.air_quality && weatherData.air_quality.hourly && weatherData.air_quality.hourly.european_aqi
+      ? getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex)
+      : new Array(24).fill(10); // Minimal EAQI values to allow UV chart rendering
     const uvSlice = weatherData.hourly.uv_index ? getDaySlice(weatherData.hourly.uv_index, dayIndex) : null;
     buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime);
   } else {

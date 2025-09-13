@@ -1181,8 +1181,14 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
   if (!el) return;
   if (chartInstances[target]) chartInstances[target].destroy();
 
-  // Mappa i colori EAQI per ogni valore
-  const eaqiColors = eaqiData.map(getEAQIBarColor);
+  // Detect if using dummy EAQI data (all values are the same)
+  const isDummyEAQI = eaqiData.every(val => val === eaqiData[0]);
+  
+  // Mappa i colori EAQI per ogni valore - make subtle if dummy data
+  const eaqiColors = eaqiData.map(val => {
+    const color = getEAQIBarColor(val);
+    return isDummyEAQI ? 'rgba(189, 195, 199, 0.3)' : color; // Subtle gray for dummy data
+  });
   
   // Calcola il range per le scale
   const maxEAQI = Math.max(...eaqiData);
@@ -1207,11 +1213,11 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
       labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
       datasets: [
         {
-          label: 'Qualità dell\'aria (EAQI)',
+          label: isDummyEAQI ? 'Qualità dell\'aria (non disponibile)' : 'Qualità dell\'aria (EAQI)',
           type: 'bar',
           backgroundColor: eaqiColors,
           borderColor: eaqiColors.map(color => color),
-          borderWidth: 1,
+          borderWidth: isDummyEAQI ? 0 : 1, // No border for dummy data
           data: eaqiData,
           maxBarThickness: 30,
           yAxisID: 'y'
