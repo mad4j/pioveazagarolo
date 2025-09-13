@@ -61,19 +61,20 @@ export function showChartModeTooltip(mode, opts = {}) {
     hideChartModeTooltip();
   }, duration);
 
-  // Also hide on any user interaction to avoid lingering tooltips
+  // Also hide on user interaction (avoid scroll/wheel to prevent premature dismissal)
   const dismiss = () => hideChartModeTooltip();
   const add = (type, opts) => {
     const handler = () => dismiss();
     document.addEventListener(type, handler, opts);
     chartModeTooltipCleanups.push(() => document.removeEventListener(type, handler, opts));
   };
-  add('touchstart', { passive: true, once: true });
-  add('pointerdown', { passive: true, once: true });
-  add('mousedown', { passive: true, once: true });
-  add('wheel', { passive: true, once: true });
-  add('scroll', { passive: true, once: true });
-  add('keydown', { once: true });
+  // Defer binding to next tick to avoid catching the same initiating event
+  setTimeout(() => {
+    add('touchstart', { passive: true, once: true });
+    add('pointerdown', { passive: true, once: true });
+    add('mousedown', { passive: true, once: true });
+    add('keydown', { once: true });
+  }, 50);
   
   console.log(`📊 Chart mode tooltip shown: ${modeNames[mode]}`);
 }
@@ -82,7 +83,6 @@ export function showChartModeTooltip(mode, opts = {}) {
  * Hides the chart mode tooltip
  */
 export function hideChartModeTooltip() {
-  add('pointerup', { passive: true, once: true });
   const tooltip = document.getElementById('chart-mode-tooltip');
   if (tooltip) {
     tooltip.classList.remove('show');
