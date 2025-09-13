@@ -2,6 +2,34 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.8.5] - 2025-09-13
+
+### Features
+- Improve tooltip handling for gestures and chart mode (c3a3f3a6)
+- Improve chart mode tooltip dismissal on user interaction (db3ffa17)
+
+### Fix
+- Fix swipe direction logic in getNextMode (bd19af89)
+- Fix tooltip persistence issue when switching visualization modes (a991d95e)
+
+### Refactor
+- Refactor chart mode toggling and tooltip handling (d2e1f59d)
+
+### Other
+- chore(release): prepare 1.8.5 (2f9ff543)
+- Update gesture-handler.js (7310e81c)
+- update (b04e665f)
+- update (b892000d)
+- chore: aggiornamento dati meteo (rolling) (b029485d)
+- update (ece4b102)
+- Update gesture-handler.js (3c8a20f0)
+- chore: aggiornamento dati meteo (rolling) (cdb0938d)
+- chore: aggiornamento dati meteo (rolling) (fcd462c0)
+- chore: aggiornamento dati meteo (rolling) (0087b2eb)
+- Initial analysis: understand tooltip issue with swipe gesture mode switching (f4c71af1)
+- Initial plan (2fc7c7f2)
+- chore: aggiornamento dati meteo (rolling) (bd0104d8)
+
 ## [1.8.4] - 2025-09-12
 
 ### Features
