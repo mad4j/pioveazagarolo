@@ -103,52 +103,6 @@ export const pressure1013LinePlugin = {
   }
 };
 
-// Plugin per linea soglia UV (es. 8+ allerta)
-export const uvAlertLinePlugin = {
-  id: 'uvAlertLine',
-  afterDraw(chart, args, opts) {
-    if (!opts) return;
-    const yScale = chart.scales.y2; // UV usa l'asse destro
-    if (!yScale) return;
-    const value = typeof opts.value === 'number' ? opts.value : 8;
-    const y = yScale.getPixelForValue(value);
-    const { left, right, top, bottom } = chart.chartArea || {};
-    if (y == null || y < top || y > bottom) return;
-    const ctx = chart.ctx; ctx.save();
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.strokeStyle = opts.color || '#f39c12';
-    ctx.lineWidth = opts.lineWidth || 3;
-    ctx.setLineDash(opts.lineDash || [6, 4]);
-    ctx.beginPath();
-    const yPix = Math.round(y) + 0.5; // crisp line
-    ctx.moveTo(left, yPix);
-    ctx.lineTo(right, yPix);
-    ctx.stroke();
-    // Etichetta opzionale
-    if (opts.label !== false) {
-      const label = typeof opts.label === 'string' ? opts.label : 'UV 8+';
-      const color = opts.color || '#f39c12';
-      ctx.font = '11px Helvetica, Arial';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      // Background for readability
-      const paddingX = 4, paddingY = 2;
-      const textWidth = ctx.measureText(label).width;
-      const boxRight = right - 4, boxTop = yPix - 2 - 12;
-      const boxLeft = boxRight - textWidth - paddingX * 2;
-      const boxHeight = 14;
-      ctx.fillStyle = 'rgba(44,62,80,0.9)';
-      ctx.beginPath();
-      ctx.rect(boxLeft, boxTop, textWidth + paddingX * 2, boxHeight);
-      ctx.fill();
-      // Text
-      ctx.fillStyle = color;
-      ctx.fillText(label, boxRight - paddingX, yPix - 2);
-    }
-    ctx.restore();
-  }
-};
-
 // Plugin per icone meteo in modalità pressione (ogni 3 ore)
 export const pressureWeatherIconsPlugin = {
   id: 'pressureWeatherIcons',
