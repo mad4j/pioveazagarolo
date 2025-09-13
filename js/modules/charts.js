@@ -1129,7 +1129,7 @@ function getItalianWindName(compassDirection) {
  * @param {string} sunriseTime - Orario alba (opzionale)
  * @param {string} sunsetTime - Orario tramonto (opzionale) 
  */
-export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunsetTime = null) {
+export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTime = null, sunsetTime = null) {
   const el = document.getElementById(target);
   if (!el) return;
   if (chartInstances[target]) chartInstances[target].destroy();
@@ -1140,6 +1140,11 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
   // Calcola il range per le scale
   const maxEAQI = Math.max(...eaqiData);
   const minEAQI = Math.min(...eaqiData);
+
+  // Calcola range UV se disponibile
+  const hasUV = Array.isArray(uvData) && uvData.length === eaqiData.length;
+  const maxUV = hasUV ? Math.max(...uvData, 0) : 0;
+  const uvAxisMax = hasUV ? Math.max(12, Math.ceil(maxUV * 1.2)) : 12;
   
   // Assicura un range minimo per leggibilità
   let scaleMax = Math.max(maxEAQI + 5, 50); // Almeno 50 per vedere i livelli base
@@ -1157,11 +1162,26 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
           label: 'Qualità dell\'aria (EAQI)',
           type: 'bar',
           backgroundColor: eaqiColors,
-          borderColor: eaqiColors.map(color => color), // Same color for border
+          borderColor: eaqiColors.map(color => color),
           borderWidth: 1,
           data: eaqiData,
-          maxBarThickness: 30
-        }
+          maxBarThickness: 30,
+          yAxisID: 'y'
+        },
+        ...(hasUV ? [{
+          label: 'UV Index',
+          type: 'line',
+          fill: false,
+          tension: 0.35,
+          backgroundColor: 'rgb(255, 193, 7)',
+          borderColor: 'rgb(255, 193, 7)',
+          borderWidth: 2,
+          data: uvData,
+          pointRadius: 0,
+          pointHoverRadius: 3,
+          yAxisID: 'y2',
+          order: 0
+        }] : [])
       ]
     },
     options: {
@@ -1188,6 +1208,15 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
           },
           ticks: { display: false }
         },
+        ...(hasUV ? {
+          y2: {
+            min: 0,
+            max: uvAxisMax,
+            position: 'right',
+            grid: { drawOnChartArea: false, drawTicks: false },
+            ticks: { display: false }
+          }
+        } : {}),
         x: {
           grid: { display: false },
           ticks: {
@@ -1232,8 +1261,10 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
 
             const rows = [];
             if (tooltip.dataPoints?.length) {
-              const dp = tooltip.dataPoints[0];
-              const eaqiValue = Math.round(dp.parsed.y);
+              // Trova il punto EAQI (dataset bar)
+              const dpEAQI = tooltip.dataPoints.find(dp => dp.datasetIndex === 0) || tooltip.dataPoints[0];
+              const idx = dpEAQI.dataIndex;
+              const eaqiValue = Math.round(dpEAQI.parsed.y);
               
               // Determina il livello di qualità dell'aria
               let eaqiLevel = 'Buona';
@@ -1245,8 +1276,22 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
               
               rows.push({ k: 'eaqi', t: `EAQI: ${eaqiValue} (${eaqiLevel})` });
 
+              // Aggiungi UV se disponibile
+              if (hasUV && chart.data.datasets[1] && chart.data.datasets[1].label === 'UV Index') {
+                const uvValRaw = chart.data.datasets[1].data[idx];
+                if (uvValRaw != null) {
+                  const uvVal = Math.round(uvValRaw * 10) / 10;
+                  let uvLevel = 'Basso';
+                  if (uvVal >= 11) uvLevel = 'Estremo';
+                  else if (uvVal >= 8) uvLevel = 'Molto alto';
+                  else if (uvVal >= 6) uvLevel = 'Alto';
+                  else if (uvVal >= 3) uvLevel = 'Moderato';
+                  rows.push({ k: 'uv', t: `UV: ${uvVal} (${uvLevel})` });
+                }
+              }
+
               if (sunriseTime && sunsetTime) {
-                const hour = parseFloat(dp.label.split(':')[0]);
+                const hour = parseFloat(dpEAQI.label.split(':')[0]);
                 const sr = timeStringToHours(sunriseTime);
                 const ss = timeStringToHours(sunsetTime);
                 if (sr && ss) {
@@ -1267,6 +1312,7 @@ export function buildAirQualityChart(target, eaqiData, sunriseTime = null, sunse
             rows.forEach(r => {
               let icon = '';
               if (r.k === 'eaqi') icon = '<i class="wi wi-smog" style="margin-right:4px; color:#50ccaa;"></i>';
+              else if (r.k === 'uv') icon = '<i class="wi wi-day-sunny" style="margin-right:4px; color:#ffc107;"></i>';
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
               html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`;
