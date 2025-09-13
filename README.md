@@ -64,6 +64,12 @@ Visita: **[https://mad4j.github.io/pioveazagarolo/](https://mad4j.github.io/piov
 3. Segui le istruzioni del browser per installare l'app
 4. L'app sarà disponibile come applicazione nativa
 
+## 🖐️ Interazioni
+
+- Cambio modalità grafici: scorri orizzontalmente sulle card oppure tocca i puntini in basso.
+- Tooltip: tocca le icone meteo o la temperatura per dettagli (ad es. percepita, descrizione meteo).
+- Offline: dopo il primo avvio, l'app funziona anche senza connessione.
+
 ## File Dati Principali
 
 - `data.json`: Previsioni e condizioni attuali (aggiornato ogni 30 min via GitHub Actions)

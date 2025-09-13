@@ -3,7 +3,7 @@ import { getRainIconClass, getWeatherDescription } from './icons.js';
 import { buildChart, getDaySlice } from './charts.js';
 import { precipitationManager } from './precipitation.js';
 import { updateAirQualityDisplay } from './air-quality.js';
-import { setupChartToggleListeners, buildAppropriateChart } from './chart-toggle.js';
+import { buildAppropriateChart } from './chart-toggle.js';
 import { setupNavigationDots, syncNavigationDotsWithChartMode } from './navigation-dots.js';
 import { setupVersionTooltip } from './version-tooltip.js';
 import { setupSwipeGestures } from './gesture-handler.js';
@@ -368,9 +368,6 @@ export function displayData(data){
     
     buildAppropriateChart(cfg.chartId, data, i);
   });
-  
-  // Setup chart toggle listeners once after all charts are built
-  setupChartToggleListeners(data);
   
   // Setup navigation dots
   setupNavigationDots(data);

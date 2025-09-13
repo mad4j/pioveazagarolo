@@ -1,5 +1,4 @@
 import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
-import { toggleChartMode } from './chart-toggle.js';
 
 // Chart mode tooltip state
 let chartModeTooltipTimer = null;
@@ -304,7 +303,7 @@ function switchToMode(targetMode, weatherData) {
 }
 
 /**
- * Updates navigation dots when chart mode changes from other sources (like double-click)
+ * Updates navigation dots when chart mode changes from other sources
  * This function should be called whenever the chart mode changes
  */
 export function syncNavigationDotsWithChartMode() {
