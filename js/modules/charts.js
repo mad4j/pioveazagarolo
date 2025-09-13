@@ -5,6 +5,38 @@ export const chartInstances = {};
 
 export function getDaySlice(array, dayIndex) { const start = dayIndex * 24; return array.slice(start, start + 24); }
 
+// Convert 24-hour format to wi-time icon class names
+export function getTimeIcon(hour) {
+  if (hour === 0) return 'wi-time-12';  // Midnight = 12:00
+  if (hour <= 12) return `wi-time-${hour}`;  // 1:00 AM - 12:00 PM
+  return `wi-time-${hour - 12}`;  // 1:00 PM - 11:00 PM
+}
+
+// Custom tick callback to render time icons instead of text labels
+export function timeIconTickCallback(value, index, values) {
+  // For Chart.js, we need to return the Unicode character for the icon
+  const hour = parseInt(value);
+  const iconClass = getTimeIcon(hour);
+  
+  // Map wi-time icons to their Unicode characters from the weather-icons font
+  const iconMap = {
+    'wi-time-1': '\uf08a',
+    'wi-time-2': '\uf08b', 
+    'wi-time-3': '\uf08c',
+    'wi-time-4': '\uf08d',
+    'wi-time-5': '\uf08e',
+    'wi-time-6': '\uf08f',
+    'wi-time-7': '\uf090',
+    'wi-time-8': '\uf091',
+    'wi-time-9': '\uf092',
+    'wi-time-10': '\uf093',
+    'wi-time-11': '\uf094',
+    'wi-time-12': '\uf089'
+  };
+  
+  return iconMap[iconClass] || value;
+}
+
 // Plugin linea ora corrente
 export const currentHourLinePlugin = {
   id: 'currentHourLine', afterDraw(chart, args, opts) {
@@ -415,7 +447,7 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
   const el = document.getElementById(target); if (!el) return; if (chartInstances[target]) chartInstances[target].destroy();
   const precipColors = precipitationData.map(getPrecipitationBarColor); const m = Math.max(...precipitationData, 1); const maxPrecip = m < 2 ? 2 : Math.ceil(m);
   const plugins = [sunriseSunsetPlugin]; if (target === 'today-chart') plugins.push(currentHourLinePlugin);
-  chartInstances[target] = new Chart(el, { plugins, data: { labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')), datasets: [{ label: 'Probabilità (%)', type: 'line', fill: true, tension: 0.4, backgroundColor: 'rgba(52,152,219,0.30)', borderColor: 'rgb(41,128,185)', borderWidth: 2, data: probabilityData, pointBackgroundColor: 'rgb(41,128,185)', pointRadius: 0, pointHoverRadius: 4, yAxisID: 'y' }, { label: 'Precipitazione (mm/h)', type: 'bar', backgroundColor: precipColors, borderColor: precipColors, borderWidth: 1, data: precipitationData, yAxisID: 'y1', order: 2 }] }, options: { responsive: true, maintainAspectRatio: false, layout: { padding: 2 }, onHover: (e, a, chart) => { if (isTouchDevice() && a.length) { if (chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout); chart._tooltipTimeout = setTimeout(() => { chart.tooltip.setActiveElements([], { x: 0, y: 0 }); chart.setActiveElements([]); chart.update('none'); }, 3000); } }, scales: { y: { min: 0, max: 100, position: 'left', grid: { drawOnChartArea: true, color: 'rgba(200,200,200,0.2)', drawTicks: false }, ticks: { display: false } }, y1: { min: 0, max: maxPrecip, position: 'right', grid: { drawOnChartArea: false, drawTicks: false }, ticks: { display: false } }, x: { grid: { display: false }, ticks: { maxRotation: 0, minRotation: 0, autoSkip: true, maxTicksLimit: 6, color: '#7f8c8d' } } }, plugins: { currentHourLine: { color: '#27ae60', overlayColor: 'rgba(128,128,128,0.18)' }, sunriseSunset: { sunrise: sunriseTime, sunset: sunsetTime }, legend: { display: false }, tooltip: { enabled: false, external: ({ chart, tooltip }) => { let tip = document.getElementById('chartjs-tooltip-' + target); if (!tip) { tip = document.createElement('div'); tip.id = 'chartjs-tooltip-' + target; Object.assign(tip.style, { position: 'absolute', pointerEvents: 'none', transition: 'all .08s ease', zIndex: 30 }); document.body.appendChild(tip); } if (!tooltip || tooltip.opacity === 0) { tip.style.opacity = 0; return; } const rows = []; if (tooltip.dataPoints?.length) { const dp = tooltip.dataPoints[0]; const idx = dp.dataIndex; const prob = Math.round(dp.parsed.y); const ds2 = chart.data.datasets[1]; let mm = 0; if (ds2 && ds2.data && ds2.data[idx] != null) mm = ds2.data[idx]; const precipStr = mm < 1 && mm > 0 ? mm.toFixed(1) : Math.round(mm); rows.push({ k: 'rain', t: `Pioggia: ${precipStr}mm (${prob}%)` }); if (sunriseTime && sunsetTime) { const hour = parseFloat(dp.label.split(':')[0]); const sr = timeStringToHours(sunriseTime); const ss = timeStringToHours(sunsetTime); if (sr && ss) { const daylight = ss - sr; if (Math.abs(hour - sr) < 1) rows.push({ k: 'sunrise', t: `Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)` }); else if (Math.abs(hour - ss) < 1) rows.push({ k: 'sunset', t: `Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)` }); } } } const title = tooltip.title?.[0] ? `Ore ${tooltip.title[0]}` : ''; let html = `<div style=\"font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;\">`; if (title) html += `<div style=\\"font-weight:600; margin-bottom:4px;\\">${title}</div>`; html += '<div style=\"display:flex; flex-direction:column; gap:2px;\">'; rows.forEach(r => { let icon = ''; if (r.k === 'rain') icon = '<i class=\"wi wi-umbrella\" style=\"margin-right:4px; color:#3498db;\"></i>'; else if (r.k === 'sunrise') icon = '<i class=\"wi wi-sunrise\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if (r.k === 'sunset') icon = '<i class=\"wi wi-sunset\" style=\"margin-right:4px; color:#ff3b30;\"></i>'; html += `<div style=\\"display:flex; align-items:center; font-size:12px; line-height:1.2;\\">${icon}<span>${r.t}</span></div>`; }); html += '</div></div>'; tip.innerHTML = html; const rect = chart.canvas.getBoundingClientRect(); const bodyRect = document.body.getBoundingClientRect(); const left = rect.left + window.pageXOffset + tooltip.caretX + 10; const top = rect.top + window.pageYOffset + tooltip.caretY - 10; tip.style.left = Math.min(left, bodyRect.width - 260) + 'px'; tip.style.top = top + 'px'; tip.style.opacity = 1; } } }, interaction: { mode: 'index', intersect: false } } });
+  chartInstances[target] = new Chart(el, { plugins, data: { labels: [...Array(24).keys()], datasets: [{ label: 'Probabilità (%)', type: 'line', fill: true, tension: 0.4, backgroundColor: 'rgba(52,152,219,0.30)', borderColor: 'rgb(41,128,185)', borderWidth: 2, data: probabilityData, pointBackgroundColor: 'rgb(41,128,185)', pointRadius: 0, pointHoverRadius: 4, yAxisID: 'y' }, { label: 'Precipitazione (mm/h)', type: 'bar', backgroundColor: precipColors, borderColor: precipColors, borderWidth: 1, data: precipitationData, yAxisID: 'y1', order: 2 }] }, options: { responsive: true, maintainAspectRatio: false, layout: { padding: 2 }, onHover: (e, a, chart) => { if (isTouchDevice() && a.length) { if (chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout); chart._tooltipTimeout = setTimeout(() => { chart.tooltip.setActiveElements([], { x: 0, y: 0 }); chart.setActiveElements([]); chart.update('none'); }, 3000); } }, scales: { y: { min: 0, max: 100, position: 'left', grid: { drawOnChartArea: true, color: 'rgba(200,200,200,0.2)', drawTicks: false }, ticks: { display: false } }, y1: { min: 0, max: maxPrecip, position: 'right', grid: { drawOnChartArea: false, drawTicks: false }, ticks: { display: false } }, x: { grid: { display: false }, ticks: { maxRotation: 0, minRotation: 0, autoSkip: true, maxTicksLimit: 6, color: '#7f8c8d', font: { family: 'weathericons', size: 16 }, callback: timeIconTickCallback } } }, plugins: { currentHourLine: { color: '#27ae60', overlayColor: 'rgba(128,128,128,0.18)' }, sunriseSunset: { sunrise: sunriseTime, sunset: sunsetTime }, legend: { display: false }, tooltip: { enabled: false, external: ({ chart, tooltip }) => { let tip = document.getElementById('chartjs-tooltip-' + target); if (!tip) { tip = document.createElement('div'); tip.id = 'chartjs-tooltip-' + target; Object.assign(tip.style, { position: 'absolute', pointerEvents: 'none', transition: 'all .08s ease', zIndex: 30 }); document.body.appendChild(tip); } if (!tooltip || tooltip.opacity === 0) { tip.style.opacity = 0; return; } const rows = []; if (tooltip.dataPoints?.length) { const dp = tooltip.dataPoints[0]; const idx = dp.dataIndex; const prob = Math.round(dp.parsed.y); const ds2 = chart.data.datasets[1]; let mm = 0; if (ds2 && ds2.data && ds2.data[idx] != null) mm = ds2.data[idx]; const precipStr = mm < 1 && mm > 0 ? mm.toFixed(1) : Math.round(mm); rows.push({ k: 'rain', t: `Pioggia: ${precipStr}mm (${prob}%)` }); if (sunriseTime && sunsetTime) { const hour = parseFloat(dp.label.split(':')[0]); const sr = timeStringToHours(sunriseTime); const ss = timeStringToHours(sunsetTime); if (sr && ss) { const daylight = ss - sr; if (Math.abs(hour - sr) < 1) rows.push({ k: 'sunrise', t: `Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)` }); else if (Math.abs(hour - ss) < 1) rows.push({ k: 'sunset', t: `Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)` }); } } } const title = tooltip.title?.[0] ? `Ore ${tooltip.title[0]}` : ''; let html = `<div style=\"font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;\">`; if (title) html += `<div style=\\"font-weight:600; margin-bottom:4px;\\">${title}</div>`; html += '<div style=\"display:flex; flex-direction:column; gap:2px;\">'; rows.forEach(r => { let icon = ''; if (r.k === 'rain') icon = '<i class=\"wi wi-umbrella\" style=\"margin-right:4px; color:#3498db;\"></i>'; else if (r.k === 'sunrise') icon = '<i class=\"wi wi-sunrise\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if (r.k === 'sunset') icon = '<i class=\"wi wi-sunset\" style=\"margin-right:4px; color:#ff3b30;\"></i>'; html += `<div style=\\"display:flex; align-items:center; font-size:12px; line-height:1.2;\\">${icon}<span>${r.t}</span></div>`; }); html += '</div></div>'; tip.innerHTML = html; const rect = chart.canvas.getBoundingClientRect(); const bodyRect = document.body.getBoundingClientRect(); const left = rect.left + window.pageXOffset + tooltip.caretX + 10; const top = rect.top + window.pageYOffset + tooltip.caretY - 10; tip.style.left = Math.min(left, bodyRect.width - 260) + 'px'; tip.style.top = top + 'px'; tip.style.opacity = 1; } } }, interaction: { mode: 'index', intersect: false } } });
   // Force redraw once fonts are ready (prevents seeing raw unicode if font loads late)
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => { try { chartInstances[target].update(); } catch { } });
@@ -487,7 +519,9 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
         minRotation: 0, 
         autoSkip: true, 
         maxTicksLimit: 6, 
-        color: '#7f8c8d' 
+        color: '#7f8c8d', 
+        font: { family: 'weathericons', size: 16 }, 
+        callback: timeIconTickCallback 
       } 
     } 
   };
@@ -532,7 +566,7 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
   chartInstances[target] = new Chart(el, { 
     plugins, 
     data: { 
-      labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')), 
+      labels: [...Array(24).keys()], 
       datasets 
     }, 
     options: { 
@@ -667,7 +701,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
   chartInstances[target] = new Chart(el, {
     plugins,
     data: {
-      labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
+      labels: [...Array(24).keys()],
       datasets: [{
         label: 'Velocità vento (km/h)',
         type: 'bar',
@@ -711,7 +745,9 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
             minRotation: 0,
             autoSkip: true,
             maxTicksLimit: 6,
-            color: '#7f8c8d'
+            color: '#7f8c8d',
+            font: { family: 'weathericons', size: 16 },
+            callback: timeIconTickCallback
           }
         }
       },
@@ -890,7 +926,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   chartInstances[target] = new Chart(el, {
     plugins,
     data: {
-      labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
+      labels: [...Array(24).keys()],
       datasets: [
         {
           label: 'Pressione (hPa)',
@@ -968,7 +1004,9 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
             minRotation: 0,
             autoSkip: true,
             maxTicksLimit: 6,
-            color: '#7f8c8d'
+            color: '#7f8c8d',
+            font: { family: 'weathericons', size: 16 },
+            callback: timeIconTickCallback
           }
         }
       },
@@ -1156,7 +1194,7 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
   chartInstances[target] = new Chart(el, {
     plugins,
     data: {
-      labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
+      labels: [...Array(24).keys()],
       datasets: [
         {
           label: 'Qualità dell\'aria (EAQI)',
@@ -1224,7 +1262,9 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
             minRotation: 0,
             autoSkip: true,
             maxTicksLimit: 6,
-            color: '#7f8c8d'
+            color: '#7f8c8d',
+            font: { family: 'weathericons', size: 16 },
+            callback: timeIconTickCallback
           }
         }
       },
