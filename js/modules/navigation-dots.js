@@ -3,6 +3,9 @@ import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
 // Chart mode tooltip state
 let chartModeTooltipTimer = null;
 let chartModeTooltipCleanups = [];
+let chartModeTooltipShowTimer = null; // delayed add('show') timer
+let chartModeTooltipBindTimer = null; // delayed event binding timer
+let chartModeTooltipGeneration = 0;   // token to invalidate stale timers
 
 /**
  * Shows a tooltip indicating the current chart mode
@@ -11,6 +14,13 @@ let chartModeTooltipCleanups = [];
 export function showChartModeTooltip(mode, opts = {}) {
   // Hide any existing tooltip first
   hideChartModeTooltip();
+  // Advance generation to invalidate any stale timers
+  const myGen = ++chartModeTooltipGeneration;
+  // Force-remove any existing tooltip element immediately to avoid duplicate IDs during rapid swipes
+  const existing = document.getElementById('chart-mode-tooltip');
+  if (existing && existing.parentNode) {
+    try { existing.parentNode.removeChild(existing); } catch {}
+  }
   
   // Create tooltip element
   const tooltip = document.createElement('div');
@@ -50,8 +60,13 @@ export function showChartModeTooltip(mode, opts = {}) {
   }
   
   // Show tooltip with animation
-  setTimeout(() => {
-    tooltip.classList.add('show');
+  chartModeTooltipShowTimer = setTimeout(() => {
+    if (myGen !== chartModeTooltipGeneration) return;
+    // Only add 'show' if tooltip is still in the DOM
+    if (document.body.contains(tooltip)) {
+      tooltip.classList.add('show');
+    }
+    chartModeTooltipShowTimer = null;
   }, 10);
   
   // Auto-hide after configured duration (default 2000ms)
@@ -63,16 +78,18 @@ export function showChartModeTooltip(mode, opts = {}) {
   // Also hide on user interaction (avoid scroll/wheel to prevent premature dismissal)
   const dismiss = () => hideChartModeTooltip();
   const add = (type, opts) => {
-    const handler = () => dismiss();
+    const handler = () => { if (myGen !== chartModeTooltipGeneration) return; dismiss(); };
     document.addEventListener(type, handler, opts);
     chartModeTooltipCleanups.push(() => document.removeEventListener(type, handler, opts));
   };
   // Defer binding to next tick to avoid catching the same initiating event
-  setTimeout(() => {
+  chartModeTooltipBindTimer = setTimeout(() => {
+    if (myGen !== chartModeTooltipGeneration) return;
     add('touchstart', { passive: true, once: true });
     add('pointerdown', { passive: true, once: true });
     add('mousedown', { passive: true, once: true });
     add('keydown', { once: true });
+    chartModeTooltipBindTimer = null;
   }, 50);
   
   console.log(`📊 Chart mode tooltip shown: ${modeNames[mode]}`);
@@ -98,11 +115,24 @@ export function hideChartModeTooltip() {
     chartModeTooltipTimer = null;
   }
 
+  // Clear any deferred timers created during show
+  if (chartModeTooltipShowTimer) {
+    clearTimeout(chartModeTooltipShowTimer);
+    chartModeTooltipShowTimer = null;
+  }
+  if (chartModeTooltipBindTimer) {
+    clearTimeout(chartModeTooltipBindTimer);
+    chartModeTooltipBindTimer = null;
+  }
+
   // Remove any interaction listeners set for dismiss
   if (chartModeTooltipCleanups.length) {
     chartModeTooltipCleanups.forEach(fn => { try { fn(); } catch {} });
     chartModeTooltipCleanups = [];
   }
+
+  // Invalidate any pending timeouts bound to previous generation
+  chartModeTooltipGeneration++;
 }
 
 /**

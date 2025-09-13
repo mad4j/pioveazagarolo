@@ -190,8 +190,9 @@ function createSwipeHandler(element, weatherData) {
     // Only handle single finger touches
     if (e.touches.length !== 1) return;
 
-    // Ensure any chart-mode tooltip is dismissed immediately when a swipe starts
+    // Ensure any tooltip is dismissed immediately when a swipe starts (robust on fast swipes)
     try { hideChartModeTooltip(); } catch {}
+    try { hideAllTooltips(); } catch {}
     
     const touch = e.touches[0];
     touchStartX = touch.clientX;
@@ -280,7 +281,7 @@ function createSwipeHandler(element, weatherData) {
   return {
     destroy() {
       element.removeEventListener('touchstart', handleTouchStart, { passive: true });
-      element.removeEventListener('touchmove', handleTouchMove, { passive: true });
+      element.removeEventListener('touchmove', handleTouchMove, { passive: false });
       element.removeEventListener('touchend', handleTouchEnd, { passive: true });
       // Remove added touch-action styles if we set them
       if (element.style.touchAction === 'pan-y') element.style.touchAction = '';
