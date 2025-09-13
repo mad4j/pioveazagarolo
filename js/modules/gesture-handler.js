@@ -46,8 +46,64 @@ function getNextMode(currentMode, direction) {
 }
 
 /**
- * Removes all visible tooltips immediately (Chart.js tooltips, apparent temperature tooltips, weather icon tooltips)
+ * Shows visual feedback for swipe direction
+ * @param {string} direction - 'left' or 'right'
+ * @param {HTMLElement} element - The element being swiped
  */
+function showSwipeIndicator(direction, element) {
+  // Remove any existing indicators
+  document.querySelectorAll('.swipe-indicator').forEach(indicator => {
+    indicator.remove();
+  });
+  
+  // Create the direction indicator
+  const indicator = document.createElement('div');
+  indicator.className = `swipe-indicator ${direction}`;
+  
+  // Add the appropriate directional icon
+  const icon = document.createElement('i');
+  if (direction === 'left') {
+    icon.className = 'wi wi-direction-left';
+  } else {
+    icon.className = 'wi wi-direction-right';
+  }
+  
+  indicator.appendChild(icon);
+  document.body.appendChild(indicator);
+  
+  // Show the indicator
+  requestAnimationFrame(() => {
+    indicator.classList.add('show');
+  });
+  
+  // Add active highlight to the swiped element
+  element.classList.add('swipe-active');
+  
+  // Auto-hide after 500ms
+  setTimeout(() => {
+    hideSwipeIndicator();
+  }, 500);
+}
+
+/**
+ * Hides swipe direction indicators and removes active states
+ */
+function hideSwipeIndicator() {
+  // Remove indicators with fade out
+  document.querySelectorAll('.swipe-indicator').forEach(indicator => {
+    indicator.classList.remove('show');
+    setTimeout(() => {
+      if (indicator.parentNode) {
+        indicator.parentNode.removeChild(indicator);
+      }
+    }, 200);
+  });
+  
+  // Remove active states from cards
+  document.querySelectorAll('.forecast-card.swipe-active').forEach(card => {
+    card.classList.remove('swipe-active');
+  });
+}
 function hideAllTooltips() {
   // Hide all Chart.js tooltips by finding tooltip DOM elements
   const chartIds = ['today-chart', 'tomorrow-chart', 'dayaftertomorrow-chart'];
@@ -208,23 +264,21 @@ function createSwipeHandler(element, weatherData) {
     
     touchMoved = true;
     
-    // Allow vertical scrolling by not preventing default for primarily vertical movements
     const touch = e.touches[0];
     const deltaX = Math.abs(touch.clientX - touchStartX);
     const deltaY = Math.abs(touch.clientY - touchStartY);
+    const rawDeltaX = touch.clientX - touchStartX;
     
-    // If horizontal movement is dominant, prevent scrolling
-    // If horizontal movement is clearly dominant we want to prevent the
-    // page from panning. However, to preserve native pull-to-refresh we
-    // avoid calling preventDefault from this handler (listener will be
-    // passive). Instead we rely on setting `touch-action: pan-y` on the
-    // element so the browser will allow vertical gestures while we
-    // implement horizontal swipe logic. Keep the logic here to detect
-    // horizontal swipes but do not call preventDefault.
-    // (No-op: actual prevention is handled by CSS `touch-action`.)
-    // if (deltaX > deltaY && deltaX > 20) {
-    //   e.preventDefault();
-    // }
+    // Show swipe indicator if horizontal movement is dominant and above threshold
+    if (deltaX > deltaY && deltaX > 30) {
+      const direction = rawDeltaX > 0 ? 'right' : 'left';
+      
+      // Show visual feedback only once per gesture
+      if (!element._currentSwipeDirection) {
+        showSwipeIndicator(direction, element);
+        element._currentSwipeDirection = direction;
+      }
+    }
   };
 
   const handleTouchEnd = (e) => {
@@ -241,6 +295,10 @@ function createSwipeHandler(element, weatherData) {
     const distance = Math.abs(deltaX);
     const verticalDistance = Math.abs(deltaY);
     const velocity = distance / deltaTime;
+    
+    // Clean up visual feedback
+    element._currentSwipeDirection = null;
+    setTimeout(() => hideSwipeIndicator(), 100);
     
     // Reset tracking
     touchStartX = null;
@@ -287,6 +345,9 @@ function createSwipeHandler(element, weatherData) {
       // Remove added touch-action styles if we set them
       if (element.style.touchAction === 'pan-y') element.style.touchAction = '';
       if (element.style.msTouchAction === 'pan-y') element.style.msTouchAction = '';
+      // Clean up visual feedback state
+      element._currentSwipeDirection = null;
+      hideSwipeIndicator();
     }
   };
 }
@@ -315,7 +376,12 @@ export function setupSwipeGestures(weatherData) {
     destroy() {
       handlers.forEach(handler => handler.destroy());
       // Remove visual feedback classes
-      forecastCards.forEach(card => card.classList.remove('swipe-enabled'));
+      forecastCards.forEach(card => {
+        card.classList.remove('swipe-enabled');
+        card._currentSwipeDirection = null;
+      });
+      // Clean up any remaining visual indicators
+      hideSwipeIndicator();
     }
   };
 }
