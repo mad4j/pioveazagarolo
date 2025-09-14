@@ -94,7 +94,7 @@ function createSwipeIndicator(element) {
         
         // Trigger haptic feedback if available
         if (navigator.vibrate) {
-          navigator.vibrate(50);
+          navigator.vibrate(25);
         }
         
         // Add bounce effect to card
