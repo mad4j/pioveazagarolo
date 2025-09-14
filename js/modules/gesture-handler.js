@@ -46,6 +46,92 @@ function getNextMode(currentMode, direction) {
 }
 
 /**
+ * Creates and manages a swipe visual indicator for a card element
+ * @param {HTMLElement} element - The card element
+ * @returns {Object} Object with methods to control the indicator
+ */
+function createSwipeIndicator(element) {
+  const leftIndicator = document.createElement('div');
+  leftIndicator.className = 'swipe-indicator left';
+  leftIndicator.innerHTML = '<i class="wi wi-direction-left"></i>';
+  
+  const rightIndicator = document.createElement('div');
+  rightIndicator.className = 'swipe-indicator right';
+  rightIndicator.innerHTML = '<i class="wi wi-direction-right"></i>';
+  
+  element.appendChild(leftIndicator);
+  element.appendChild(rightIndicator);
+  
+  let activeIndicator = null;
+  
+  return {
+    show(direction, progress = 0) {
+      // Hide the other indicator
+      if (direction > 0) {
+        // Right swipe - show left indicator
+        leftIndicator.classList.add('active');
+        rightIndicator.classList.remove('active');
+        activeIndicator = leftIndicator;
+      } else {
+        // Left swipe - show right indicator  
+        rightIndicator.classList.add('active');
+        leftIndicator.classList.remove('active');
+        activeIndicator = rightIndicator;
+      }
+      
+      // Adjust indicator position based on swipe progress (0-1)
+      const translateX = Math.min(progress * 20, 20);
+      if (activeIndicator === leftIndicator) {
+        activeIndicator.style.transform = `translateY(-50%) scale(1) translateX(${translateX}px)`;
+      } else {
+        activeIndicator.style.transform = `translateY(-50%) scale(1) translateX(-${translateX}px)`;
+      }
+    },
+    
+    complete() {
+      if (activeIndicator) {
+        activeIndicator.classList.add('completing');
+        
+        // Trigger haptic feedback if available
+        if (navigator.vibrate) {
+          navigator.vibrate(50);
+        }
+        
+        // Add bounce effect to card
+        element.classList.add('swipe-completing');
+        
+        setTimeout(() => {
+          element.classList.remove('swipe-completing');
+          element.classList.add('swipe-completed');
+          
+          setTimeout(() => {
+            element.classList.remove('swipe-completed');
+          }, 300);
+        }, 200);
+        
+        // Reset indicator after animation
+        setTimeout(() => {
+          this.hide();
+        }, 500);
+      }
+    },
+    
+    hide() {
+      leftIndicator.classList.remove('active', 'completing');
+      rightIndicator.classList.remove('active', 'completing');
+      leftIndicator.style.transform = '';
+      rightIndicator.style.transform = '';
+      activeIndicator = null;
+    },
+    
+    destroy() {
+      leftIndicator.remove();
+      rightIndicator.remove();
+    }
+  };
+}
+
+/**
  * Removes all visible tooltips immediately (Chart.js tooltips, apparent temperature tooltips, weather icon tooltips)
  */
 function hideAllTooltips() {
@@ -186,6 +272,9 @@ function createSwipeHandler(element, weatherData) {
   let touchStartY = null;
   let touchStartTime = null;
   let touchMoved = false;
+  
+  // Create visual indicator for this card
+  const indicator = createSwipeIndicator(element);
 
   const handleTouchStart = (e) => {
     // Only handle single finger touches
@@ -208,23 +297,23 @@ function createSwipeHandler(element, weatherData) {
     
     touchMoved = true;
     
-    // Allow vertical scrolling by not preventing default for primarily vertical movements
     const touch = e.touches[0];
-    const deltaX = Math.abs(touch.clientX - touchStartX);
+    const deltaX = touch.clientX - touchStartX;
     const deltaY = Math.abs(touch.clientY - touchStartY);
+    const absDeltaX = Math.abs(deltaX);
     
-    // If horizontal movement is dominant, prevent scrolling
-    // If horizontal movement is clearly dominant we want to prevent the
-    // page from panning. However, to preserve native pull-to-refresh we
-    // avoid calling preventDefault from this handler (listener will be
-    // passive). Instead we rely on setting `touch-action: pan-y` on the
-    // element so the browser will allow vertical gestures while we
-    // implement horizontal swipe logic. Keep the logic here to detect
-    // horizontal swipes but do not call preventDefault.
-    // (No-op: actual prevention is handled by CSS `touch-action`.)
-    // if (deltaX > deltaY && deltaX > 20) {
-    //   e.preventDefault();
-    // }
+    // Check if this is a horizontal swipe gesture
+    if (absDeltaX > 10 && absDeltaX > deltaY * 1.5) {
+      // Calculate progress (0-1) based on minimum swipe distance
+      const progress = Math.min(absDeltaX / SWIPE_CONFIG.MIN_DISTANCE, 1);
+      
+      // Show indicator with progress
+      const direction = deltaX > 0 ? 1 : -1;
+      indicator.show(direction, progress);
+    } else {
+      // Hide indicator if not a clear horizontal swipe
+      indicator.hide();
+    }
   };
 
   const handleTouchEnd = (e) => {
@@ -265,10 +354,20 @@ function createSwipeHandler(element, weatherData) {
       
       // Only switch if the mode would actually change
       if (nextMode !== currentMode) {
-        // Do not block native gestures; simply trigger mode switch
-        // Switch to new mode
-        switchToModeViaSwiping(nextMode, weatherData);
+        // Show completion animation
+        indicator.complete();
+        
+        // Switch to new mode after a short delay for visual effect
+        setTimeout(() => {
+          switchToModeViaSwiping(nextMode, weatherData);
+        }, 100);
+      } else {
+        // Just hide the indicator if no mode change
+        indicator.hide();
       }
+    } else {
+      // Hide indicator if swipe wasn't completed
+      indicator.hide();
     }
   };
 
@@ -284,6 +383,8 @@ function createSwipeHandler(element, weatherData) {
       element.removeEventListener('touchstart', handleTouchStart, { passive: true });
       element.removeEventListener('touchmove', handleTouchMove, { passive: false });
       element.removeEventListener('touchend', handleTouchEnd, { passive: true });
+      // Clean up visual indicator
+      indicator.destroy();
       // Remove added touch-action styles if we set them
       if (element.style.touchAction === 'pan-y') element.style.touchAction = '';
       if (element.style.msTouchAction === 'pan-y') element.style.msTouchAction = '';

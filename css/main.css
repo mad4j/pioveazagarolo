@@ -419,6 +419,7 @@ body {
 .forecast-card.swipe-enabled {
   position: relative;
   touch-action: pan-y; /* Allow vertical scrolling but prevent horizontal panning */
+  overflow: hidden;
 }
 
 .forecast-card.swipe-enabled::after {
@@ -441,6 +442,57 @@ body {
 
 .forecast-card.swipe-enabled:active::after {
   opacity: 1;
+}
+
+/* Enhanced swipe visual indicator */
+.swipe-indicator {
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  background: rgba(52, 152, 219, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  opacity: 0;
+  transform: translateY(-50%) scale(0.8);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.swipe-indicator.left {
+  left: -60px;
+}
+
+.swipe-indicator.right {
+  right: -60px;
+}
+
+.swipe-indicator.active {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+.swipe-indicator.completing {
+  transform: translateY(-50%) scale(1.1);
+  background: rgba(26, 188, 156, 0.9);
+  box-shadow: 0 6px 20px rgba(26, 188, 156, 0.4);
+}
+
+/* Card bounce animation on swipe completion */
+.forecast-card.swipe-completing {
+  transform: scale(1.02);
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.forecast-card.swipe-completed {
+  transform: scale(1);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .day-title {
