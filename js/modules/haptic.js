@@ -23,8 +23,8 @@ export function vibrateModeSwitch() {
   
   try {
     // Short, subtle vibration pattern for mode switching
-    // 25ms pulse - enough to be felt but not intrusive
-    navigator.vibrate(25);
+    // 35ms pulse - enough to be felt but not intrusive
+    navigator.vibrate(35);
     console.log('🔄 Haptic feedback: mode switch vibration');
   } catch (error) {
     // Silently fail if vibration API throws an error
