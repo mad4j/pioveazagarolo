@@ -1,4 +1,5 @@
 import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
+import { vibrateModeSwitch } from './haptic.js';
 
 // Chart mode tooltip state
 let chartModeTooltipTimer = null;
@@ -177,6 +178,9 @@ export function setupNavigationDots(weatherData) {
       
       // Only switch if clicking a different mode
       if (mode !== currentMode) {
+        // Provide haptic feedback for successful mode switch
+        vibrateModeSwitch();
+        
         // Update chart modes directly to the clicked mode
         Object.keys(chartModes).forEach(chartId => {
           chartModes[chartId] = mode;
