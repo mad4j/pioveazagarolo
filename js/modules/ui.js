@@ -91,11 +91,28 @@ export function showApparentTemperatureTooltip(tempElement, apparentTemp) {
  * @param {string} description - Weather description text
  */
 function showWeatherIconTooltip(iconElement, description) {
-  // Remove existing weather icon tooltips
-  document.querySelectorAll('.weather-icon-tooltip').forEach(t => t.remove());
+  // Remove existing weather icon tooltips, but respect minimum display time
+  document.querySelectorAll('.weather-icon-tooltip').forEach(t => {
+    const timeShown = Date.now() - (t._createdAt || 0);
+    const minDisplayTime = 2000; // 2 seconds minimum display
+    
+    if (timeShown >= minDisplayTime) {
+      // Tooltip has been shown for at least 2 seconds, safe to remove
+      t.remove();
+    } else {
+      // Tooltip is newer than 2 seconds, hide it gracefully and remove after animation
+      t.style.opacity = '0';
+      t.style.transform = 'translateY(-10px)';
+      setTimeout(() => t.remove(), 300);
+    }
+  });
   
   const tooltip = document.createElement('div');
   tooltip.className = 'weather-icon-tooltip';
+  
+  // Add timestamp to track when tooltip was created (for preventing premature dismissal)
+  tooltip._createdAt = Date.now();
+  
   tooltip.style.cssText = `
     position: absolute;
     z-index: 1000;

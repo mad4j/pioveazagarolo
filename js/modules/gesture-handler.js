@@ -66,11 +66,18 @@ function hideAllTooltips() {
     setTimeout(() => tooltip.remove(), 300);
   });
   
-  // Hide weather icon tooltips
+  // Hide weather icon tooltips (but respect minimum display time of 2 seconds)
   document.querySelectorAll('.weather-icon-tooltip').forEach(tooltip => {
-    tooltip.style.opacity = '0';
-    tooltip.style.transform = 'translateY(-10px)';
-    setTimeout(() => tooltip.remove(), 300);
+    const timeShown = Date.now() - (tooltip._createdAt || 0);
+    const minDisplayTime = 2000; // 2 seconds minimum display
+    
+    if (timeShown >= minDisplayTime) {
+      // Tooltip has been shown for at least 2 seconds, safe to hide
+      tooltip.style.opacity = '0';
+      tooltip.style.transform = 'translateY(-10px)';
+      setTimeout(() => tooltip.remove(), 300);
+    }
+    // If tooltip is newer than 2 seconds, leave it visible to complete its natural timeout
   });
 }
 
