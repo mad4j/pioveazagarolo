@@ -13,13 +13,14 @@ This is a **static web application** with minimal Node.js tooling. No complex bu
 - Start local development server: `python3 -m http.server 8080` or any static file server
 - Access application: `http://localhost:8080`
 
-### Core Scripts (All complete in < 1 second)
-- `npm run generate-changelog` -- generates CHANGELOG.md from git commit history and tags (~0.2s)
-- `npm run build-info` -- generates build-info.json with build timestamp and commit info (~0.2s)
+### Core Scripts (All complete in < 0.2 seconds)
+- `npm run generate-changelog` -- generates CHANGELOG.md from git commit history and tags (0.18s)
+- `npm run build-info` -- generates build-info.json with build timestamp and commit info (0.18s)
+- `npm run update-precipitation` -- updates data-precipitations.json with actual precipitation data (0.19s)
 
 **Timing Expectations:**
-- `npm install` -- completes in ~0.3 seconds
-- All npm scripts complete in under 0.5 seconds
+- `npm install` -- completes in ~0.31 seconds (validated)
+- All npm scripts complete in under 0.2 seconds (validated)
 - **NEVER set timeouts > 30 seconds for any command** - all operations complete in under 1 second.
 
 ## Validation
@@ -32,6 +33,7 @@ Always test these scenarios after making changes:
    - Open `http://localhost:8080`
    - Verify weather cards display for Today/Tomorrow/Day After Tomorrow
    - Confirm weather icons, temperatures, and precipitation data appear
+   - Check console shows "Service Worker registrato con successo" and "🔍 DEBUG MOBILE - Script caricato"
 
 2. **PWA Functionality**:
    - Verify Service Worker registers (check browser console)
@@ -39,45 +41,85 @@ Always test these scenarios after making changes:
    - Confirm charts load correctly with Chart.js
    - Verify responsive design on mobile viewport
 
-3. **Data Integrity**:
+3. **Interactive Features** (VALIDATED):
+   - Click weather icons to see tooltips with weather descriptions
+   - Click temperature values to see "apparent temperature" tooltips
+   - Test chart mode switching: Click "Temperature", "Vento", "Pressione", "Qualità dell'aria" buttons
+   - Verify haptic feedback on mobile (console shows "🔄 Haptic feedback: mode switch vibration")
+   - Test swipe gestures on mobile devices (console shows "📱 Swipe gestures enabled on 3 forecast cards")
+
+4. **Data Integrity**:
    - Check `data.json` contains valid weather data structure
+   - Verify `data-precipitations.json` exists and is valid JSON
+   - Verify `build-info.json` contains recent build timestamp
    - Verify last_update timestamp is recent
    - Test `getRainIconClass()` function with different weather codes
    - Confirm weather icons display correctly for codes: 0,1 (sunny), 61,63,65 (rain), 95,96,99 (thunderstorm)
 
-4. **Mobile Responsiveness**:
+5. **Mobile Responsiveness** (VALIDATED):
    - Test on mobile viewport (375x667px) - layout should adapt correctly
    - Verify touch interactions work on mobile devices
    - Confirm all elements are readable and accessible on small screens
+   - Check cards stack vertically instead of horizontally on mobile
+   - Test swipe gestures work on forecast cards
+
+6. **Advanced Features** (NEW):
+   - Verify air quality data displays when available
+   - Test navigation dots show at bottom of cards
+   - Check version tooltip functionality (console shows "📱 Version tooltip functionality initialized")
+   - Test chart navigation and mode persistence
+   - Verify precipitation data loading (console shows "Loaded actual precipitation data")
 
 ### Pre-commit Validation
 Always run before committing changes:
 - Test application loads without JavaScript errors
-- Verify Service Worker registration succeeds
+- Verify Service Worker registration succeeds (console: "Service Worker registrato con successo")
 - Confirm PWA manifest is valid
 - Check that data.json parses correctly
+- Validate data-precipitations.json and build-info.json exist and are valid
+- Test at least one interactive feature (chart mode switching or weather icon tooltip)
+- Verify mobile responsive design works (test 375x667px viewport)
 
 **No linting or automated tests exist** - manual validation is required.
 
 ## Architecture & Key Files
 
 ### Critical Files
-- `index.html` -- Main application page (6.9KB)
-- `js/main.js` -- Core application logic (33KB, 802 lines)
-- `service-worker.js` -- PWA service worker (2.5KB, 85 lines)
-- `js/pwa-install.js` -- PWA installation handler (1.4KB, 44 lines)
+- `index.html` -- Main application page (8.8KB)
+- `js/main.js` -- Core application logic (3.9KB) - now modular entry point
+- `js/modules/` -- 13 JavaScript modules for different features (charts, UI, cache, etc.)
+- `service-worker.js` -- PWA service worker (2.8KB) - caches all modules
+- `js/pwa-install.js` -- PWA installation handler
 - `data.json` -- Weather data (updated every 30 minutes by GitHub Actions)
-- `manifest.json` -- PWA manifest file
+- `data-precipitations.json` -- Actual precipitation data (updated incrementally)
+- `build-info.json` -- Build timestamp and commit info (generated by scripts)
+- `manifest.json` -- PWA manifest file (424 bytes)
 
 ### Project Structure
 ```
 /
 ├── index.html              # Main application
 ├── js/
-│   ├── main.js             # Core JavaScript logic
+│   ├── main.js             # Modular entry point (3.9KB)
+│   ├── modules/            # 13 JavaScript modules:
+│   │   ├── ui.js           # UI components and display logic
+│   │   ├── charts.js       # Chart.js configuration and rendering
+│   │   ├── cache.js        # Data caching with localStorage
+│   │   ├── icons.js        # Weather icon mapping
+│   │   ├── constants.js    # Application constants
+│   │   ├── precipitation.js # Precipitation data management
+│   │   ├── air-quality.js  # Air quality display
+│   │   ├── chart-toggle.js # Chart mode switching
+│   │   ├── navigation-dots.js # Chart navigation
+│   │   ├── gesture-handler.js # Touch/swipe gestures
+│   │   ├── haptic.js       # Haptic feedback
+│   │   ├── version-tooltip.js # Version information
+│   │   └── debug-mobile.js # Mobile debugging
 │   └── pwa-install.js      # PWA install handler
-├── service-worker.js       # PWA service worker
+├── service-worker.js       # PWA service worker (caches all modules)
 ├── data.json               # Weather data (auto-updated)
+├── data-precipitations.json # Actual precipitation data
+├── build-info.json         # Build timestamp and commit info
 ├── manifest.json           # PWA manifest
 ├── package.json            # Node.js scripts only
 ├── css/                    # Stylesheets
@@ -89,7 +131,8 @@ Always run before committing changes:
 ├── _scripts/               # Node.js utility scripts
 │   ├── generate-changelog.js
 │   ├── write-build-info.js
-│   └── create-release-notes.js
+│   ├── create-release-notes.js
+│   └── update-precipitation.js
 └── .github/workflows/      # CI/CD automation
     ├── build.yml          # Weather data updates
     ├── changelog.yml      # Changelog generation
@@ -106,7 +149,17 @@ Always run before committing changes:
 
 ## Key Functions & Code Patterns
 
-### Weather Icon Mapping (`js/main.js`)
+### Modular Architecture
+The application uses ES6 modules with clear separation of concerns:
+- `js/main.js`: Entry point, data loading, and initialization
+- `js/modules/ui.js`: UI components and display logic  
+- `js/modules/charts.js`: Chart.js configuration and rendering
+- `js/modules/cache.js`: localStorage caching with TTL
+- `js/modules/icons.js`: Weather icon mapping functions
+- `js/modules/precipitation.js`: Precipitation data management
+- `js/modules/air-quality.js`: Air quality indicators and EAQI display
+
+### Weather Icon Mapping (`js/modules/icons.js`)
 ```javascript
 function getRainIconClass(weatherCode) {
     // Maps WMO weather codes to Weather Icons CSS classes
@@ -114,19 +167,27 @@ function getRainIconClass(weatherCode) {
 }
 ```
 
-### Data Caching
+### Data Caching (`js/modules/cache.js`)
 - Uses localStorage for weather data caching (3-hour TTL)
 - Service Worker implements cache-first strategy for static assets
 - Stale-while-revalidate for data.json
 
-### Chart Configuration
+### Chart Configuration (`js/modules/charts.js`)
 - Three charts: Today (with current hour line), Tomorrow, Day After Tomorrow  
 - Custom Chart.js plugin for current hour overlay
 - Responsive design with precipitation probability and intensity
 - Charts render automatically when data loads (confirmed working)
+- Multiple chart modes: Precipitation, Temperature, Wind, Pressure, Air Quality
+
+### Interactive Features
+- **Chart Mode Switching** (`js/modules/chart-toggle.js`): Button-based mode selection
+- **Gesture Handling** (`js/modules/gesture-handler.js`): Touch/swipe support for mobile
+- **Haptic Feedback** (`js/modules/haptic.js`): Vibration feedback on interactions
+- **Navigation Dots** (`js/modules/navigation-dots.js`): Chart navigation indicators
+- **Tooltips**: Weather icons and temperature values show detailed information
 
 ### Mobile Debug Features
-- Built-in mobile debugging panel available in `js/main.js`
+- Built-in mobile debugging panel available in `js/modules/debug-mobile.js`
 - Console logs show "🔍 DEBUG MOBILE - Script caricato" when loaded
 - Debug functions: `window.exportDebugData()` and `window.emailDebugData()`
 
@@ -208,16 +269,19 @@ function getRainIconClass(weatherCode) {
 ### Validation Commands
 Always run these commands to verify the application state:
 ```bash
-# Verify all dependencies
+# Verify all dependencies (0.31s)
 npm install
 
-# Test all npm scripts work
-npm run build-info
-npm run generate-changelog
+# Test all npm scripts work (each <0.2s)
+npm run build-info            # Generates build-info.json (0.18s)
+npm run generate-changelog    # Generates CHANGELOG.md (0.18s) 
+npm run update-precipitation  # Updates data-precipitations.json (0.19s)
 
 # Validate JSON files
-python3 -c "import json; json.load(open('data.json')); print('data.json valid')"
-python3 -c "import json; json.load(open('manifest.json')); print('manifest.json valid')"
+python3 -c "import json; json.load(open('data.json')); print('✓ data.json valid')"
+python3 -c "import json; json.load(open('manifest.json')); print('✓ manifest.json valid')"
+python3 -c "import json; json.load(open('data-precipitations.json')); print('✓ data-precipitations.json valid')"
+python3 -c "import json; json.load(open('build-info.json')); print('✓ build-info.json valid')"
 
 # Start local server for testing
 python3 -m http.server 8080
@@ -279,38 +343,50 @@ Run this complete checklist to verify everything works:
 ```bash
 # 1. Setup and Dependencies
 cd /path/to/pioveazagarolo
-npm install                    # Should complete in ~0.3s
+npm install                    # Should complete in ~0.31s
 
 # 2. Test all scripts
-npm run build-info            # Should complete in ~0.2s
-npm run generate-changelog    # Should complete in ~0.2s
+npm run build-info            # Should complete in ~0.18s
+npm run generate-changelog    # Should complete in ~0.18s  
+npm run update-precipitation  # Should complete in ~0.19s
 
 # 3. Validate JSON files
-python3 -c "import json; json.load(open('data.json')); print('data.json valid')"
-python3 -c "import json; json.load(open('manifest.json')); print('manifest.json valid')"
+python3 -c "import json; json.load(open('data.json')); print('✓ data.json valid')"
+python3 -c "import json; json.load(open('manifest.json')); print('✓ manifest.json valid')"
+python3 -c "import json; json.load(open('data-precipitations.json')); print('✓ data-precipitations.json valid')"
+python3 -c "import json; json.load(open('build-info.json')); print('✓ build-info.json valid')"
 
 # 4. Start development server
 python3 -m http.server 8080
 
 # 5. Open http://localhost:8080 and verify:
 #    - Weather cards display (Today/Tomorrow/Day After Tomorrow)
-#    - Charts render in each card
+#    - Charts render in each card with precipitation data
 #    - Current conditions show (temperature, humidity, pressure)
 #    - Weather icons display correctly
-#    - PWA install button appears
+#    - Console shows "Service Worker registrato con successo"
+#    - Console shows "🔍 DEBUG MOBILE - Script caricato"
 
-# 6. Test mobile responsive (browser dev tools):
+# 6. Test interactive features:
+#    - Click weather icons for tooltips
+#    - Click temperature for "apparent temperature" tooltip
+#    - Click chart mode buttons (Temperature, Vento, Pressione, Qualità dell'aria)
+#    - Console should show "🔄 Haptic feedback: mode switch vibration"
+
+# 7. Test mobile responsive (browser dev tools):
 #    - Switch to mobile viewport (375x667px)
-#    - Verify layout adapts correctly
+#    - Verify layout adapts correctly (cards stack vertically)
+#    - Console should show "📱 Swipe gestures enabled on 3 forecast cards"
 
-# 7. Test offline functionality:
+# 8. Test offline functionality:
 #    - Stop server (Ctrl+C)
 #    - Refresh browser page
-#    - App should still load completely from Service Worker cache
+#    - App should still load core functionality from Service Worker cache
 
-# 8. Test Service Worker:
+# 9. Test Service Worker:
 #    - Check browser console for "Service Worker registrato con successo"
 #    - No JavaScript errors should appear
+#    - All 13 JavaScript modules should load successfully
 ```
 
 **Everything should work flawlessly if you follow these instructions exactly.**
