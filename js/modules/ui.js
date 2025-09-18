@@ -148,7 +148,7 @@ function showWeatherIconTooltip(iconElement, description) {
     tooltip.style.transform = 'translateY(0)';
   });
   
-  // Remove tooltip after 2 seconds or on document click
+  // Remove tooltip after 4 seconds or on document click
   const removeTooltip = () => {
     tooltip.style.opacity = '0';
     tooltip.style.transform = 'translateY(-10px)';
@@ -156,7 +156,7 @@ function showWeatherIconTooltip(iconElement, description) {
     document.removeEventListener('click', removeTooltip);
   };
   
-  setTimeout(removeTooltip, 2000);
+  setTimeout(removeTooltip, 4000);
   document.addEventListener('click', removeTooltip);
 }
 
