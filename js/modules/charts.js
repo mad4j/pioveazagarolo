@@ -422,7 +422,7 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
   }
 }
 
-export function buildTemperatureChart(target, temperatureData, apparentTemperatureData, humidityData = null, sunriseTime = null, sunsetTime = null, cloudCoverageData = null) {
+export function buildTemperatureChart(target, temperatureData, apparentTemperatureData, humidityData = null, sunriseTime = null, sunsetTime = null) {
   const el = document.getElementById(target); 
   if (!el) return; 
   if (chartInstances[target]) chartInstances[target].destroy();
@@ -432,7 +432,6 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
   const maxTemp = Math.max(...temperatureData, ...apparentTemperatureData) + 2;
   const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
-  if (cloudCoverageData) plugins.push(cloudCoverageIconsPlugin);
   
   // Build datasets array - always include temperature lines
   const datasets = [
@@ -558,10 +557,7 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
         sunriseSunset: { 
           sunrise: sunriseTime, 
           sunset: sunsetTime 
-        },
-        cloudCoverageIcons: cloudCoverageData ? {
-          cloudCoverageData: cloudCoverageData
-        } : undefined, 
+        }, 
         legend: { display: false }, 
         tooltip: { 
           enabled: false, 
@@ -597,13 +593,6 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
               if (ds3 && ds3.data && ds3.data[idx] != null) { 
                 const humidity = Math.round(ds3.data[idx]); 
                 rows.push({ k: 'humidity', t: `Umidità: ${humidity}%` }); 
-              }
-              // Add cloud coverage info if available
-              const cloudCoveragePlugin = chart.options.plugins.cloudCoverageIcons;
-              if (cloudCoveragePlugin && cloudCoveragePlugin.cloudCoverageData && cloudCoveragePlugin.cloudCoverageData[idx] != null) {
-                const cloudCoverage = Math.round(cloudCoveragePlugin.cloudCoverageData[idx]);
-                const cloudDesc = getCloudCoverDescription(cloudCoverage);
-                rows.push({ k: 'cloud', t: `Copertura: ${cloudDesc}` });
               } 
               if (sunriseTime && sunsetTime) { 
                 const hour = parseFloat(dp.label.split(':')[0]); 
@@ -625,7 +614,6 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
               if (r.k === 'temp') icon = '<i class="wi wi-thermometer" style="margin-right:4px; color:#e74c3c;"></i>'; 
               else if (r.k === 'apparent') icon = '<i class="wi wi-thermometer-exterior" style="margin-right:4px; color:#e91e63;"></i>'; 
               else if (r.k === 'humidity') icon = '<i class="wi wi-humidity" style="margin-right:4px; color:#3498db;"></i>';
-              else if (r.k === 'cloud') icon = '<i class="wi wi-cloud" style="margin-right:4px; color:#95a5a6;"></i>'; 
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>'; 
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>'; 
               html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`; 
@@ -1129,7 +1117,7 @@ function getItalianWindName(compassDirection) {
  * @param {string} sunriseTime - Orario alba (opzionale)
  * @param {string} sunsetTime - Orario tramonto (opzionale) 
  */
-export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTime = null, sunsetTime = null) {
+export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTime = null, sunsetTime = null, cloudCoverageData = null) {
   const el = document.getElementById(target);
   if (!el) return;
   if (chartInstances[target]) chartInstances[target].destroy();
@@ -1152,6 +1140,7 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
 
   const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
+  if (cloudCoverageData) plugins.push(cloudCoverageIconsPlugin);
 
   chartInstances[target] = new Chart(el, {
     plugins,
@@ -1237,6 +1226,9 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
           sunrise: sunriseTime,
           sunset: sunsetTime
         },
+        cloudCoverageIcons: cloudCoverageData ? {
+          cloudCoverageData: cloudCoverageData
+        } : undefined,
         uvAlertLine: hasUV ? {
           value: 8,
           color: '#f39c12',
@@ -1297,6 +1289,14 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
                 }
               }
 
+              // Add cloud coverage info if available
+              const cloudCoveragePlugin = chart.options.plugins.cloudCoverageIcons;
+              if (cloudCoveragePlugin && cloudCoveragePlugin.cloudCoverageData && cloudCoveragePlugin.cloudCoverageData[idx] != null) {
+                const cloudCoverage = Math.round(cloudCoveragePlugin.cloudCoverageData[idx]);
+                const cloudDesc = getCloudCoverDescription(cloudCoverage);
+                rows.push({ k: 'cloud', t: `Copertura: ${cloudDesc}` });
+              }
+
               if (sunriseTime && sunsetTime) {
                 const hour = parseFloat(dpEAQI.label.split(':')[0]);
                 const sr = timeStringToHours(sunriseTime);
@@ -1320,6 +1320,7 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
               let icon = '';
               if (r.k === 'eaqi') icon = '<i class="wi wi-smog" style="margin-right:4px; color:#50ccaa;"></i>';
               else if (r.k === 'uv') icon = '<i class="wi wi-day-sunny" style="margin-right:4px; color:#bb86fc;"></i>';
+              else if (r.k === 'cloud') icon = '<i class="wi wi-cloud" style="margin-right:4px; color:#95a5a6;"></i>';
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
               html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`;

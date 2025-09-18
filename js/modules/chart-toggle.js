@@ -19,8 +19,7 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
     const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
     const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
-    const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
-    buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, cloudCoverageSlice);
+    buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime);
   } else if (currentMode === CHART_MODES.WIND && weatherData.hourly.wind_speed_10m && weatherData.hourly.wind_direction_10m) {
     const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
     const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
@@ -33,7 +32,8 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
   } else if (currentMode === CHART_MODES.AIR_QUALITY && weatherData.air_quality && weatherData.air_quality.hourly && weatherData.air_quality.hourly.european_aqi) {
     const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
     const uvSlice = weatherData.hourly.uv_index ? getDaySlice(weatherData.hourly.uv_index, dayIndex) : null;
-    buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime);
+    const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
+    buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime, cloudCoverageSlice);
   } else {
     // Default to precipitation chart and ensure all charts are in precipitation mode
     chartModes[chartId] = CHART_MODES.PRECIPITATION;
