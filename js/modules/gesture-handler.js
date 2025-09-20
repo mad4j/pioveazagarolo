@@ -33,7 +33,7 @@ const MODE_ORDER = [
 function getNextMode(currentMode, direction) {
   const currentIndex = MODE_ORDER.indexOf(currentMode);
   if (currentIndex === -1) return MODE_ORDER[0]; // Default to first mode
-  
+
   let nextIndex;
   if (direction > 0) {
     // Right swipe - next mode
@@ -42,7 +42,7 @@ function getNextMode(currentMode, direction) {
     // Left swipe - previous mode  
     nextIndex = (currentIndex + 1) % MODE_ORDER.length;
   }
-  
+
   return MODE_ORDER[nextIndex];
 }
 
@@ -58,14 +58,14 @@ function hideAllTooltips() {
       tooltip.style.opacity = '0';
     }
   });
-  
+
   // Hide apparent temperature tooltips
   document.querySelectorAll('.apparent-temp-tooltip').forEach(tooltip => {
     tooltip.style.opacity = '0';
     tooltip.style.transform = 'translateY(-10px)';
     setTimeout(() => tooltip.remove(), 300);
   });
-  
+
   // Hide weather icon tooltips
   document.querySelectorAll('.weather-icon-tooltip').forEach(tooltip => {
     tooltip.style.opacity = '0';
@@ -94,14 +94,14 @@ function switchToModeViaSwiping(targetMode, weatherData) {
     // Import chart building functions directly
     import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice }) => {
       if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
-      
+
       // Chart IDs and their corresponding day indices
       const chartConfigs = [
         { chartId: 'today-chart', dayIndex: 0 },
         { chartId: 'tomorrow-chart', dayIndex: 1 },
         { chartId: 'dayaftertomorrow-chart', dayIndex: 2 }
       ];
-      
+
       // Check data availability before switching
       let actualMode = targetMode;
       if (targetMode === CHART_MODES.TEMPERATURE) {
@@ -121,16 +121,16 @@ function switchToModeViaSwiping(targetMode, weatherData) {
           actualMode = CHART_MODES.PRECIPITATION;
         }
       }
-      
+
       // Update all charts simultaneously
       chartConfigs.forEach(({ chartId, dayIndex }) => {
         // Update mode tracking for all charts
         chartModes[chartId] = actualMode;
-        
+
         // Get sunrise/sunset times for this day
         const sunriseTime = weatherData.daily.sunrise?.[dayIndex];
         const sunsetTime = weatherData.daily.sunset?.[dayIndex];
-        
+
         if (actualMode === CHART_MODES.TEMPERATURE) {
           // Switch to temperature chart
           const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
@@ -161,14 +161,14 @@ function switchToModeViaSwiping(targetMode, weatherData) {
           buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime);
         }
       });
-      
+
       // Save the new mode
       saveChartMode(actualMode);
-      
-  // Update navigation dots and show a short-lived tooltip on swipe
-  updateNavigationDots(actualMode);
-  showChartModeTooltip(actualMode, { duration: 800 });
-      
+
+      // Update navigation dots and show a short-lived tooltip on swipe
+      updateNavigationDots(actualMode);
+      showChartModeTooltip(actualMode, { duration: 800 });
+
       console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
     });
   }).catch(err => {
@@ -193,9 +193,9 @@ function createSwipeHandler(element, weatherData) {
     if (e.touches.length !== 1) return;
 
     // Ensure any tooltip is dismissed immediately when a swipe starts (robust on fast swipes)
-    try { hideChartModeTooltip(); } catch {}
-    try { hideAllTooltips(); } catch {}
-    
+    try { hideChartModeTooltip(); } catch { }
+    try { hideAllTooltips(); } catch { }
+
     const touch = e.touches[0];
     touchStartX = touch.clientX;
     touchStartY = touch.clientY;
@@ -206,14 +206,14 @@ function createSwipeHandler(element, weatherData) {
   const handleTouchMove = (e) => {
     if (touchStartX === null || touchStartY === null) return;
     if (e.touches.length !== 1) return;
-    
+
     touchMoved = true;
-    
+
     // Allow vertical scrolling by not preventing default for primarily vertical movements
     const touch = e.touches[0];
     const deltaX = Math.abs(touch.clientX - touchStartX);
     const deltaY = Math.abs(touch.clientY - touchStartY);
-    
+
     // If horizontal movement is dominant, prevent scrolling
     // If horizontal movement is clearly dominant we want to prevent the
     // page from panning. However, to preserve native pull-to-refresh we
@@ -230,45 +230,45 @@ function createSwipeHandler(element, weatherData) {
 
   const handleTouchEnd = (e) => {
     if (touchStartX === null || touchStartY === null || touchStartTime === null) return;
-    
+
     const touch = e.changedTouches[0];
     const endX = touch.clientX;
     const endY = touch.clientY;
     const endTime = Date.now();
-    
+
     const deltaX = endX - touchStartX;
     const deltaY = endY - touchStartY;
     const deltaTime = endTime - touchStartTime;
     const distance = Math.abs(deltaX);
     const verticalDistance = Math.abs(deltaY);
     const velocity = distance / deltaTime;
-    
+
     // Reset tracking
     touchStartX = null;
     touchStartY = null;
     touchStartTime = null;
-    
+
     // Check if this qualifies as a horizontal swipe
-    const isHorizontalSwipe = 
+    const isHorizontalSwipe =
       distance >= SWIPE_CONFIG.MIN_DISTANCE &&
       verticalDistance <= SWIPE_CONFIG.MAX_VERTICAL &&
       deltaTime <= SWIPE_CONFIG.MAX_DURATION &&
       velocity >= SWIPE_CONFIG.VELOCITY_THRESHOLD &&
       touchMoved;
-    
+
     if (isHorizontalSwipe) {
       // Determine swipe direction
       const direction = deltaX > 0 ? 1 : -1; // right = 1, left = -1
-      
+
       // Get current mode and calculate next mode
       const currentMode = chartModes['today-chart'];
       const nextMode = getNextMode(currentMode, direction);
-      
+
       // Only switch if the mode would actually change
       if (nextMode !== currentMode) {
         // Provide haptic feedback for successful mode switch
         vibrateModeSwitch();
-        
+
         // Do not block native gestures; simply trigger mode switch
         // Switch to new mode
         switchToModeViaSwiping(nextMode, weatherData);
@@ -303,17 +303,17 @@ function createSwipeHandler(element, weatherData) {
 export function setupSwipeGestures(weatherData) {
   const handlers = [];
   const forecastCards = document.querySelectorAll('.forecast-card');
-  
+
   forecastCards.forEach(card => {
     const handler = createSwipeHandler(card, weatherData);
     handlers.push(handler);
-    
+
     // Add visual feedback class for touch interactions
     card.classList.add('swipe-enabled');
   });
-  
+
   console.log(`📱 Swipe gestures enabled on ${forecastCards.length} forecast cards`);
-  
+
   // Return cleanup function for all handlers
   return {
     destroy() {

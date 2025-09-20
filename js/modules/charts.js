@@ -80,13 +80,13 @@ export const pressure1013LinePlugin = {
     if (!yScale) return;
     
     const { ctx, chartArea } = chart;
-    const { left, right } = chartArea;
+    const { left, right, top, bottom } = chartArea;
     
     // Get the y pixel position for 1013 hPa
     const y1013 = yScale.getPixelForValue(1013);
     
     // Only draw the line if 1013 is within the visible range
-    if (y1013 >= chartArea.top && y1013 <= chartArea.bottom) {
+    if (y1013 >= top && y1013 <= bottom) {
       ctx.save();
       ctx.strokeStyle = opts?.color || '#e74c3c';
       ctx.lineWidth = opts?.lineWidth || 2;
@@ -98,8 +98,56 @@ export const pressure1013LinePlugin = {
       ctx.lineTo(right, y1013);
       ctx.stroke();
       
+      // Etichetta a destra, sotto la linea
+      if (opts?.label) {
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        ctx.font = (opts.font && typeof opts.font === 'string') ? opts.font : '8px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        ctx.fillText(opts.label, right - 4, y1013 + 2);
+      }
+      
       ctx.restore();
     }
+  }
+};
+
+// Plugin per linea orizzontale di soglia UV (es. UV = 8)
+export const uvAlertLinePlugin = {
+  id: 'uvAlertLine',
+  afterDraw(chart, args, opts) {
+    if (!opts || typeof opts.value !== 'number') return;
+    const yScale = chart.scales.y2;
+    if (!yScale) return;
+    const { left, right, top, bottom } = chart.chartArea;
+    const y = yScale.getPixelForValue(opts.value);
+    if (y < top || y > bottom) return;
+    const ctx = chart.ctx; ctx.save();
+    // Usa il colore della linea UV se disponibile, altrimenti fallback
+    const uvDs = Array.isArray(chart.data?.datasets)
+      ? (chart.data.datasets.find(ds => ds?.yAxisID === 'y2' && (ds?.type === 'line' || ds?.type === undefined))
+        || chart.data.datasets.find(ds => (ds?.label || '').toLowerCase().includes('uv')))
+      : null;
+    const derivedColor = uvDs ? (Array.isArray(uvDs.borderColor) ? uvDs.borderColor[0] : uvDs.borderColor) : undefined;
+    const strokeColor = opts.color || derivedColor || '#6a1b9a';
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = opts.lineWidth || 2;
+    ctx.setLineDash(opts.lineDash || [6, 4]);
+    ctx.globalAlpha = opts.opacity ?? 0.9;
+    ctx.beginPath();
+    ctx.moveTo(left, y);
+    ctx.lineTo(right, y);
+    ctx.stroke();
+    if (opts.label) {
+      ctx.font = (opts.font && typeof opts.font === 'string') ? opts.font : '8px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      ctx.fillStyle = strokeColor;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top'; // posiziona SOTTO la linea
+      ctx.fillText(opts.label, right - 4, y + 2);
+    }
+    ctx.restore();
   }
 };
 
@@ -978,7 +1026,8 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
           color: '#27ae60',
           lineWidth: 2,
           lineDash: [8, 4],
-          opacity: 0.8
+          opacity: 0.8,
+          label: '1013 hPa'
         },
         currentHourLine: {
           color: '#27ae60',
@@ -1143,9 +1192,10 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
   const minEAQI = Math.min(...eaqiData);
 
   // Calcola range UV se disponibile
+  const UV_ALERT_THRESHOLD = 8;
   const hasUV = Array.isArray(uvData) && uvData.length === eaqiData.length;
   const maxUV = hasUV ? Math.max(...uvData, 0) : 0;
-  const uvAxisMax = hasUV ? Math.max(10, Math.ceil(maxUV * 1.2)) : 10;
+  const uvAxisMax = hasUV ? Math.max(10, 2*UV_ALERT_THRESHOLD) : 10;
   
   // Assicura un range minimo per leggibilità
   let scaleMax = Math.max(maxEAQI + 5, 50); // Almeno 50 per vedere i livelli base
@@ -1154,6 +1204,7 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
   const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
   if (cloudCoverageData) plugins.push(cloudCoverageIconsPlugin);
+  if (hasUV) plugins.push(uvAlertLinePlugin);
 
   chartInstances[target] = new Chart(el, {
     plugins,
@@ -1243,10 +1294,9 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
           cloudCoverageData: cloudCoverageData
         } : undefined,
         uvAlertLine: hasUV ? {
-          value: 8,
-          color: '#f39c12',
+          value: UV_ALERT_THRESHOLD,
           lineWidth: 2,
-          lineDash: [],
+          lineDash: [6, 4],
           label: 'UV 8+'
         } : undefined,
         legend: { display: false },
