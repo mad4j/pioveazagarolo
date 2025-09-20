@@ -348,7 +348,7 @@ function drawSunIcon(ctx, xScale, area, h, type) {
   ctx.textBaseline = 'middle';
   ctx.fillStyle = type === 'sunrise' ? '#dd8f11ff' : '#ff3b30';
   // Posizioniamo più in basso (sovrapposto alla linea dell'asse X)
-  const y = area.bottom + 2; //  +/- sposta leggermente
+  const y = area.bottom - 6; //  +/- sposta leggermente
   try { ctx.fillText(glyph, x, y); }
   catch { // Fallback: small triangle if font not ready
     ctx.beginPath();
