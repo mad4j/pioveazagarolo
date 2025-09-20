@@ -155,10 +155,6 @@
   position: relative;
 }
 
-.nav-dot:hover {
-  transform: scale(1.1);
-}
-
 .nav-dot:focus-visible {
   outline: 2px solid var(--secondary-color);
   outline-offset: 2px;
@@ -180,14 +176,18 @@
   transform: scale(1.2);
 }
 
-.nav-dot:hover .dot-icon {
-  background-color: var(--text-secondary);
-  transform: scale(1.2);
-}
-
-.nav-dot.active:hover .dot-icon {
-  background-color: var(--secondary-color);
-  box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
+@media (hover: hover) {
+  .nav-dot:hover {
+    transform: scale(1.1);
+  }
+  .nav-dot:hover .dot-icon {
+    background-color: var(--text-secondary);
+    transform: scale(1.2);
+  }
+  .nav-dot.active:hover .dot-icon {
+    background-color: var(--secondary-color);
+    box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
+  }
 }
 
 /* Responsive adjustments */
