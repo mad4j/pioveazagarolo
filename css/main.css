@@ -190,6 +190,16 @@
   box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
 }
 
+/* Reset transform for dots that are neither active nor hovered */
+.nav-dot:not(.active):not(:hover) .dot-icon {
+  transform: scale(1);
+}
+
+/* Force reset transform for inactive dots - higher specificity to override hover */
+.nav-dot:not(.active) .dot-icon {
+  transform: scale(1);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   /* Crea il minimo spazio di scroll per abilitare il pull-to-refresh senza introdurre scroll visibile */
