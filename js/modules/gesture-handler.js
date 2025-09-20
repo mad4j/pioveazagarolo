@@ -1,5 +1,6 @@
 import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
 import { hideChartModeTooltip } from './navigation-dots.js';
+import { vibrateModeSwitch } from './haptic.js';
 
 /**
  * Gesture detection module for swipe-based mode switching
@@ -265,6 +266,9 @@ function createSwipeHandler(element, weatherData) {
       
       // Only switch if the mode would actually change
       if (nextMode !== currentMode) {
+        // Provide haptic feedback for successful mode switch
+        vibrateModeSwitch();
+        
         // Do not block native gestures; simply trigger mode switch
         // Switch to new mode
         switchToModeViaSwiping(nextMode, weatherData);
