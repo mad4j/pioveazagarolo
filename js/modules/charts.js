@@ -645,6 +645,13 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
 export function buildWindChart(target, windSpeedData, windDirectionData, sunriseTime = null, sunsetTime = null) {
   const el = document.getElementById(target);
   if (!el) return;
+  
+  // Clean up existing tooltip before destroying chart to prevent parentNode errors
+  const existingTooltip = document.getElementById('chartjs-tooltip-' + target);
+  if (existingTooltip && existingTooltip.parentNode) {
+    existingTooltip.parentNode.removeChild(existingTooltip);
+  }
+  
   if (chartInstances[target]) chartInstances[target].destroy();
 
   const windColors = windSpeedData.map(getWindSpeedColor);
@@ -733,7 +740,10 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
             }
 
             if (!tooltip || tooltip.opacity === 0) {
-              tip.style.opacity = 0;
+              // Defensive check - ensure tip still exists and has a parent before manipulating it
+              if (tip && tip.parentNode) {
+                tip.style.opacity = 0;
+              }
               return;
             }
 
@@ -794,9 +804,12 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
             const left = rect.left + window.pageXOffset + tooltip.caretX + 10;
             const top = rect.top + window.pageYOffset + tooltip.caretY - 10;
 
-            tip.style.left = Math.min(left, bodyRect.width - 260) + 'px';
-            tip.style.top = top + 'px';
-            tip.style.opacity = 1;
+            // Defensive check - ensure tip still exists and has a parent before setting final styles
+            if (tip && tip.parentNode) {
+              tip.style.left = Math.min(left, bodyRect.width - 260) + 'px';
+              tip.style.top = top + 'px';
+              tip.style.opacity = 1;
+            }
           }
         }
       },
