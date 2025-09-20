@@ -86,6 +86,26 @@ export function showApparentTemperatureTooltip(tempElement, apparentTemp) {
 }
 
 /**
+ * Updates weather icons for all day cards
+ * @param {Object} weatherData - Weather data containing daily weather codes
+ */
+export function updateWeatherIcons(weatherData) {
+  if (!weatherData || !weatherData.daily || !weatherData.daily.weather_code) return;
+  
+  const { daily } = weatherData;
+  DAY_CONFIGS.forEach(cfg => {
+    const i = cfg.index;
+    const iconEl = $(cfg.iconId);
+    if (iconEl && daily.weather_code[i] !== undefined){ 
+      iconEl.className = getRainIconClass(daily.weather_code[i]); 
+      iconEl.setAttribute('aria-label',`Meteo ${ARIA_LABEL_DAY[i]} codice ${daily.weather_code[i]}`);
+      // Add weather code tooltip
+      addWeatherIconTooltip(iconEl, daily.weather_code[i]);
+    }
+  });
+}
+
+/**
  * Show weather icon tooltip with weather description (matches air quality tooltip format)
  * @param {HTMLElement} iconElement - Weather icon element
  * @param {string} description - Weather description text
@@ -291,15 +311,12 @@ export function displayData(data){
     }
   } catch {}
   const { daily, hourly } = data;
+  
+  // Update weather icons for all day cards
+  updateWeatherIcons(data);
+  
   DAY_CONFIGS.forEach(cfg => {
     const i = cfg.index;
-    const iconEl = $(cfg.iconId);
-    if (iconEl){ 
-      iconEl.className = getRainIconClass(daily.weather_code[i]); 
-      iconEl.setAttribute('aria-label',`Meteo ${ARIA_LABEL_DAY[i]} codice ${daily.weather_code[i]}`);
-      // Add weather code tooltip
-      addWeatherIconTooltip(iconEl, daily.weather_code[i]);
-    }
     const maxEl = $(`${cfg.key}-temp-max`); if (maxEl) maxEl.textContent = `${Math.round(daily.temperature_2m_max[i])}°`;
     const minEl = $(`${cfg.key}-temp-min`); if (minEl) minEl.textContent = `${Math.round(daily.temperature_2m_min[i])}°`;
     const percEl = $(`${cfg.key}-percentage`);
