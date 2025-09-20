@@ -195,11 +195,6 @@
   transform: scale(1);
 }
 
-/* Force reset transform for inactive dots - higher specificity to override hover */
-.nav-dot:not(.active) .dot-icon {
-  transform: scale(1);
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   /* Crea il minimo spazio di scroll per abilitare il pull-to-refresh senza introdurre scroll visibile */
