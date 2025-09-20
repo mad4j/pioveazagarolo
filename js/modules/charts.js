@@ -26,21 +26,41 @@ export const currentHourLinePlugin = {
 // Plugin etichette ancorate sull'asse X (00:00, 12:00, 24:00)
 export const xAxisAnchorLabelsPlugin = {
   id: 'xAxisAnchorLabels',
+  beforeLayout(chart, args, opts) {
+    try {
+      const extra = Number.isFinite(opts?.paddingBottom) ? opts.paddingBottom : 8;
+      const layout = chart.options.layout ?? {};
+      const pad = layout.padding ?? 2;
+      if (typeof pad === 'number') {
+        chart.options.layout.padding = { top: pad, right: pad, bottom: Math.max(pad, extra), left: pad };
+      } else if (typeof pad === 'object' && pad) {
+        pad.bottom = Math.max(pad.bottom ?? 0, extra);
+        chart.options.layout.padding = pad;
+      } else {
+        chart.options.layout.padding = { top: 2, right: 2, bottom: extra, left: 2 };
+      }
+    } catch { /* noop */ }
+  },
   afterDraw(chart, args, opts) {
     try {
       if (chart.config?.data?.labels?.length !== 24) return;
       const xScale = chart.scales?.x; if (!xScale) return;
       const { left, right, bottom } = chart.chartArea;
       const ctx = chart.ctx; ctx.save();
+      // Reset clipping to full canvas to allow drawing outside chartArea
+      try {
+        ctx.beginPath();
+        ctx.rect(0, 0, chart.width, chart.height);
+        ctx.clip();
+      } catch { }
       const font = (opts && typeof opts.font === 'string') ? opts.font : "10px system-ui, -apple-system, Segoe UI, Roboto, Arial";
       ctx.font = font;
       ctx.fillStyle = opts?.color || (isDarkMode() ? '#c0c7cf' : '#7f8c8d');
-      ctx.textBaseline = 'bottom';
-      const y = bottom - (Number.isFinite(opts?.offsetY) ? opts.offsetY : 2);
-      // Sinistra (00:00) ancorata al primo valore
-      const x0 = xScale.getPixelForValue(0);
-      ctx.textAlign = 'left';
-      ctx.fillText('00:00', Math.max(left + 2, x0), y);
+  ctx.textBaseline = 'top';
+      const y = bottom + (Number.isFinite(opts?.offsetY) ? opts.offsetY : 4);
+  // Sinistra (00:00) esattamente all'origine dell'asse X
+  ctx.textAlign = 'left';
+  ctx.fillText('00:00', left, y);
       // Centro (12:00) esattamente sul valore delle 12
       const x12 = xScale.getPixelForValue(12);
       if (x12 >= left && x12 <= right) {
