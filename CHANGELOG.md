@@ -2,6 +2,53 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.8.6] - 2025-09-20
+
+### Features
+- feat: Implement haptic feedback for chart mode switching (a57bc7a7)
+- Initial plan: Add haptic feedback for chart mode switching (464a74b4)
+- Remove UV alert line plugin from charts module (74cf7c59)
+- Added support for UV index visualization (408544c8)
+- Added hourly UV index (04615e89)
+
+### Fix
+- Fix wind chart console error with defensive tooltip cleanup (22885f11)
+- Fix cloud coverage icons in air quality mode navigation (15754a79)
+
+### Docs
+- docs: Update build info after haptic feedback implementation (595f6ee5)
+
+### Other
+- chore(release): prepare 1.8.6 (c58cd491)
+- Update service-worker.js (b5ad8552)
+- chore: aggiornamento dati meteo (rolling) (4c6f17c1)
+- Initial plan (20999034)
+- Scope nav-dot hover styles to hover-capable devices (4cbbea4a)
+- chore: aggiornamento dati meteo (rolling) (fb41434c)
+- chore: aggiornamento dati meteo (rolling) (7c671511)
+- Create Screenshot 2025-09-20 090221.png (78683c3b)
+- chore: aggiornamento dati meteo (rolling) (a30d8c86)
+- Reduce haptic vibration duration for mode switch (23377075)
+- Initial plan (44fe1fe9)
+- chore: aggiornamento dati meteo (rolling) (08e37d16)
+- chore: aggiornamento dati meteo (rolling) (1053ecf3)
+- Move cloud cover icons from temperature chart to air quality chart (aa062c7c)
+- Initial plan (a460a77b)
+- chore: aggiornamento dati meteo (rolling) (d1eb7218)
+- Increase vibration duration from 25ms to 35ms (730e1a34)
+- chore: aggiornamento dati meteo (rolling) (c2e40adb)
+- Reduce vibration duration for mode switching (c764673d)
+- Initial plan (972cfaec)
+- chore: aggiornamento dati meteo (rolling) (d7117df9)
+- Update charts.js (f301daf0)
+- chore: aggiornamento dati meteo (rolling) (1f98a107)
+- chore: aggiornamento dati meteo (rolling) (7db18c27)
+- Update charts.js (93f543fe)
+- chore: aggiornamento dati meteo (rolling) (33033821)
+- chore: aggiornamento dati meteo (rolling) (f3115745)
+- chore: aggiornamento dati meteo (rolling) (fd677054)
+- chore: auto-update CHANGELOG for 1.8.5 (5ff618bf)
+
 ## [1.8.5] - 2025-09-13
 
 ### Features
