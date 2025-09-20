@@ -1,5 +1,6 @@
 import { CHART_MODES, chartModes, saveChartMode } from './constants.js';
 import { vibrateModeSwitch } from './haptic.js';
+import { updateWeatherIcons } from './ui.js';
 
 // Chart mode tooltip state
 let chartModeTooltipTimer = null;
@@ -333,9 +334,7 @@ function switchToMode(targetMode, weatherData) {
     
     // Update weather icons after chart mode switch to ensure they remain visible
     // This fixes the issue where weather icons disappear in Air Quality view
-    import('./ui.js').then(({ updateWeatherIcons }) => {
-      updateWeatherIcons(weatherData);
-    });
+    updateWeatherIcons(weatherData);
     
     // Update navigation dots to reflect actual mode (in case target mode wasn't available)
     if (actualMode !== targetMode) {
