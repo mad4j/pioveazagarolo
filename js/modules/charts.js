@@ -67,6 +67,18 @@ export const xAxisAnchorLabelsPlugin = {
         ctx.textAlign = 'center';
         ctx.fillText('12:00', x12, y);
       }
+      // 06:00 centrata sul valore delle 6
+      const x6 = xScale.getPixelForValue(6);
+      if (x6 >= left && x6 <= right) {
+        ctx.textAlign = 'center';
+        ctx.fillText('06:00', x6, y);
+      }
+      // 18:00 centrata sul valore delle 18
+      const x18 = xScale.getPixelForValue(18);
+      if (x18 >= left && x18 <= right) {
+        ctx.textAlign = 'center';
+        ctx.fillText('18:00', x18, y);
+      }
       // Destra
       ctx.textAlign = 'right';
       ctx.fillText('24:00', right - 2, y);
