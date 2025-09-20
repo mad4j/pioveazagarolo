@@ -1,7 +1,7 @@
 {
   "latitude": 41.8125,
   "longitude": 12.8125,
-  "generationtime_ms": 0.19598007202148438,
+  "generationtime_ms": 0.20599365234375,
   "utc_offset_seconds": 7200,
   "timezone": "Europe/Rome",
   "timezone_abbreviation": "GMT+2",
@@ -21,18 +21,18 @@
     "wind_direction_10m": "°"
   },
   "current": {
-    "time": "2025-09-20T16:15",
+    "time": "2025-09-20T17:15",
     "interval": 900,
-    "temperature_2m": 28.4,
+    "temperature_2m": 27.3,
     "rain": 0.00,
-    "weather_code": 1,
-    "pressure_msl": 1021.5,
+    "weather_code": 0,
+    "pressure_msl": 1021.4,
     "precipitation": 0.00,
-    "relative_humidity_2m": 40,
+    "relative_humidity_2m": 39,
     "is_day": 1,
-    "apparent_temperature": 27.7,
-    "wind_speed_10m": 12.1,
-    "wind_direction_10m": 258
+    "apparent_temperature": 26.4,
+    "wind_speed_10m": 10.6,
+    "wind_direction_10m": 260
   },
   "hourly_units": {
     "time": "iso8601",
@@ -1065,11 +1065,11 @@
       18
     ]
   },
-  "last_update": "2025-09-20 16:18",
+  "last_update": "2025-09-20 17:20",
   "air_quality": {
     "latitude": 41.8,
     "longitude": 12.799999,
-    "generationtime_ms": 0.24437904357910156,
+    "generationtime_ms": 0.41484832763671875,
     "utc_offset_seconds": 7200,
     "timezone": "Europe/Rome",
     "timezone_abbreviation": "GMT+2",
@@ -1080,7 +1080,7 @@
       "european_aqi": "EAQI"
     },
     "current": {
-      "time": "2025-09-20T16:00",
+      "time": "2025-09-20T17:00",
       "interval": 3600,
       "european_aqi": 36
     },
