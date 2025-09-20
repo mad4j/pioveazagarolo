@@ -1297,7 +1297,7 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
           value: UV_ALERT_THRESHOLD,
           lineWidth: 2,
           lineDash: [6, 4],
-          label: 'UV 8+'
+          label: 'UV 8'
         } : undefined,
         legend: { display: false },
         tooltip: {
