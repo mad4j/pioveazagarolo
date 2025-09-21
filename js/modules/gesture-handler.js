@@ -306,11 +306,18 @@ export function setupSwipeGestures(weatherData) {
   const forecastCards = document.querySelectorAll('.forecast-card');
 
   forecastCards.forEach(card => {
+    // Prevent duplicate listeners if displayData() runs multiple times
+    if (card._swipeHandler) return;
+
     const handler = createSwipeHandler(card, weatherData);
+    card._swipeHandler = handler;
     handlers.push(handler);
 
-    // Add visual feedback class for touch interactions
+    // Add visual feedback class for touch interactions and optimize gestures
     card.classList.add('swipe-enabled');
+    // Hint browser to allow vertical panning while we handle horizontal swipes
+    if (!card.style.touchAction) card.style.touchAction = 'pan-y';
+    if (!card.style.msTouchAction) card.style.msTouchAction = 'pan-y';
   });
 
   console.log(`📱 Swipe gestures enabled on ${forecastCards.length} forecast cards`);

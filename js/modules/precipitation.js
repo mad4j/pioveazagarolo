@@ -2,6 +2,7 @@
 export class PrecipitationManager {
   constructor() {
     this.actualData = null;
+    this._lastFetchMinute = null;
   }
 
   /**
@@ -9,6 +10,10 @@ export class PrecipitationManager {
    */
   async loadActualData() {
     try {
+      const minuteKey = Math.floor(Date.now() / (60 * 1000));
+      if (this._lastFetchMinute === minuteKey && this.actualData) {
+        return true;
+      }
       const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
       const response = await fetch(`data-precipitations.json${randomQuery}`);
       if (!response.ok) {
@@ -16,6 +21,7 @@ export class PrecipitationManager {
         return false;
       }
       this.actualData = await response.json();
+      this._lastFetchMinute = minuteKey;
       console.log('Loaded actual precipitation data:', this.actualData);
       return true;
     } catch (error) {

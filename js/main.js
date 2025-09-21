@@ -4,8 +4,13 @@ import { loadCachedData, saveCachedData } from './modules/cache.js';
 import { precipitationManager } from './modules/precipitation.js';
 import './modules/debug-mobile.js';
 
+let _fetchInFlight = false;
+let _retryTimer = null;
+
 async function retrieveData() {
   try {
+    if (_fetchInFlight) return; // avoid concurrent fetches from timers/online events
+    _fetchInFlight = true;
     const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
     const response = await fetch(`data.json${randomQuery}`);
     if (!response.ok) throw new Error('Errore nel caricamento dei dati meteo');
@@ -16,17 +21,22 @@ async function retrieveData() {
     
     displayData(data);
     saveCachedData(data);
+    _fetchInFlight = false;
   } catch (e) {
     console.error('Errore:', e);
     const cached = loadCachedData();
     if (cached) {
       // Try to load precipitation data even from cache
-      await precipitationManager.loadActualData();
+      try { await precipitationManager.loadActualData(); } catch {}
       displayData(cached.data);
     } else {
       showToast('Errore rete. Ritento fra 60 secondi...', 'error');
     }
-    setTimeout(retrieveData, 60_000);
+    _fetchInFlight = false;
+    if (_retryTimer) { clearTimeout(_retryTimer); _retryTimer = null; }
+    // Add small jitter to avoid thundering herd and align with minute cache-buster
+    const jitter = Math.floor(Math.random() * 3000);
+    _retryTimer = setTimeout(() => { _retryTimer = null; retrieveData(); }, 60_000 + jitter);
   }
 }
 
@@ -44,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   retrieveData();
-  setInterval(retrieveData, 30 * 60 * 1000);
+  setInterval(() => { retrieveData(); }, 30 * 60 * 1000);
 
   // Fallback: prevent accidental text selection when clicking/tapping weather cards
   try {
