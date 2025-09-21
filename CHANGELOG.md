@@ -2,6 +2,33 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.8.7] - 2025-09-21
+
+### Features
+- Add 06:00 and 18:00 labels to x-axis anchor plugin (20e7624d)
+- Improve xAxisAnchorLabelsPlugin label rendering (dc902288)
+- Add x-axis anchor labels plugin to charts (a0b12084)
+- Add UV alert line plugin and improve chart annotations (36b44381)
+
+### Fix
+- Fix weather icons visibility issue in Air Quality mode by replacing async import with sync import (893f7ec1)
+- Fix weather icons not displaying in Air Quality view (564fb74c)
+
+### Other
+- chore(release): prepare 1.8.7 (b0a5da0b)
+- Pass cloud cover data to air quality chart builder (96443266)
+- chore: aggiornamento dati meteo (rolling) (1c9ea720)
+- chore: aggiornamento dati meteo (rolling) (fc841e40)
+- Initial plan (56d758a4)
+- chore: aggiornamento dati meteo (rolling) (7365a5bb)
+- Initial analysis of weather icons missing in Air Quality view (e2dc74c2)
+- Initial plan (b402e01a)
+- chore: aggiornamento dati meteo (rolling) (4f85d444)
+- Adjust sun icon vertical position in chart (90488522)
+- chore: aggiornamento dati meteo (rolling) (cc31a73a)
+- Update charts.js (348d9f76)
+- chore: aggiornamento dati meteo (rolling) (646df8d6)
+
 ## [1.8.6] - 2025-09-20
 
 ### Features
