@@ -1290,7 +1290,8 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
           borderWidth: 1,
           data: eaqiData,
           maxBarThickness: 30,
-          yAxisID: 'y'
+          yAxisID: 'y',
+          order: 10
         },
         ...(hasUV ? [{
           label: 'UV Index',
@@ -1304,7 +1305,7 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
           pointRadius: 0,
           pointHoverRadius: 3,
           yAxisID: 'y2',
-          order: 10
+          order: 5
         }] : [])
       ]
     },
