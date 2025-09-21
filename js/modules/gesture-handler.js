@@ -153,7 +153,8 @@ function switchToModeViaSwiping(targetMode, weatherData) {
           // Switch to air quality chart
           const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
           const uvSlice = weatherData.hourly.uv_index ? getDaySlice(weatherData.hourly.uv_index, dayIndex) : null;
-          buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime);
+          const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
+          buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime, cloudCoverageSlice);
         } else {
           // Switch to precipitation chart
           const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
