@@ -36,6 +36,25 @@ Use this as the single source of truth for AI agents working in this repo. Keep 
 - Adding assets/libs: copy under `vendor/` or `css/font/` and add to SW cache list.
 - Adding chart modes: extend `CHART_MODES` and update builder in `chart-toggle.js`/`charts.js`.
 
+### Requirements Doc (RFC)
+- Location: `docs/RFC-001-piove-a-zagarolo-requirements.md` (English). This is the canonical spec for features, UI, data schema, chart modes, plugins, caching and SW behavior.
+- Use RFC 2119 language (MUST/SHOULD/MAY). Keep “Status” and “Last-Updated” current.
+- Update WHEN you:
+  - Add/change chart modes, datasets, or custom plugin options.
+  - Change `data.json`/`data-precipitations.json` schema or semantics.
+  - Change caching params (`DATA_CACHE_TTL_MS`, keys) or SW strategies/`CACHE_NAME`.
+  - Adjust navigation dots/gestures or A11Y labels that affect behavior.
+- Update HOW:
+  - Keep module interface signatures in sync with exports in `js/modules/*.js`.
+  - Document plugin option objects exactly as accepted by builders/plugins.
+  - Ordered lists style: prefix with `1.` consistently; add blank lines around lists/headings (markdownlint MD029/MD032/MD022).
+  - Reflect chart datasets in “Appendix A” (precip/temp/wind/pressure/air-quality).
+- Pre-merge checklist:
+  - README “Documentazione” links to the RFC and still resolves.
+  - SW/cache values in RFC match `service-worker.js` and `constants.js`.
+  - Headings/lists render cleanly (no lint warnings about spacing).
+- Non-goals: don’t duplicate README usage/installation; don’t rename/renumber RFC-001 (add new RFCs as `RFC-00N-*` if needed and cross-link).
+
 ### Validation (manual)
 - Load app: cards for Today/Tomorrow/Day After Tomorrow, charts render, icons match codes (0/1 clear; 61/63/65 rain; 95/96/99 thunder).
 - PWA: SW registers, offline reload works; `#update-button` prompts update when `CACHE_NAME` changes.

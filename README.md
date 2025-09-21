@@ -114,7 +114,11 @@ Prima di committare, verifica che:
 - I grafici si visualizzino correttamente
 - La modalità offline funzioni (ferma il server e ricarica)
 
-## 🔄 Release e Contributi
+## � Documentazione
+
+- Requisiti e interfacce (RFC): [docs/RFC-001-piove-a-zagarolo-requirements.md](docs/RFC-001-piove-a-zagarolo-requirements.md)
+
+## �🔄 Release e Contributi
 
 ### Processo di Release Automatico
 Per pubblicare una nuova versione:
