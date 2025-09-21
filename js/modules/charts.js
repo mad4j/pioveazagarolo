@@ -1291,7 +1291,7 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
           data: eaqiData,
           maxBarThickness: 30,
           yAxisID: 'y',
-          order: 10
+          order: 2
         },
         ...(hasUV ? [{
           label: 'UV Index',
@@ -1302,10 +1302,17 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
           borderColor: '#6a1b9a',
           borderWidth: 2,
           data: uvData,
+          pointBackgroundColor: 'rgba(106, 27, 154, 0.20)',
+          pointBorderColor: '#6a1b9a',
+          pointBorderWidth: 0,
           pointRadius: 0,
-          pointHoverRadius: 3,
+          pointHitRadius: 4,
+          pointHoverRadius: 4,
+          pointHoverBackgroundColor: '#6a1b9a',
+          pointHoverBorderColor: '#ffffff',
+          pointHoverBorderWidth: 2,
           yAxisID: 'y2',
-          order: 5
+          order: 1
         }] : [])
       ]
     },
@@ -1313,6 +1320,10 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
       responsive: true,
       maintainAspectRatio: false,
       layout: { padding: 2 },
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
       onHover: (e, a, chart) => {
         if (isTouchDevice() && a.length) {
           if (chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout);
