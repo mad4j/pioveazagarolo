@@ -10,6 +10,9 @@ import { setupSwipeGestures } from './gesture-handler.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
 
+// Debounce state for weather icon tooltip
+let _lastWeatherTooltip = { target: null, ts: 0 };
+
 /**
  * Mostra tooltip temporaneo con temperatura percepita
  * @param {HTMLElement} tempElement - Elemento temperatura che ha scatenato il tooltip
@@ -111,6 +114,11 @@ export function updateWeatherIcons(weatherData) {
  * @param {string} description - Weather description text
  */
 function showWeatherIconTooltip(iconElement, description) {
+  const now = Date.now();
+  if (_lastWeatherTooltip.target === iconElement && now - _lastWeatherTooltip.ts < 300) {
+    return;
+  }
+  _lastWeatherTooltip = { target: iconElement, ts: now };
   // Remove existing weather icon tooltips
   document.querySelectorAll('.weather-icon-tooltip').forEach(t => t.remove());
   
@@ -168,16 +176,26 @@ function showWeatherIconTooltip(iconElement, description) {
     tooltip.style.transform = 'translateY(0)';
   });
   
-  // Remove tooltip after 4 seconds or on document click
-  const removeTooltip = () => {
+  // Remove tooltip after 4 seconds or on document interaction
+  const removeTooltip = (evt) => {
+    // Ignore the initiating click/tap on the same icon
+    if (evt && iconElement && iconElement.contains(evt.target)) return;
     tooltip.style.opacity = '0';
     tooltip.style.transform = 'translateY(-10px)';
     setTimeout(() => tooltip.remove(), 300);
-    document.removeEventListener('click', removeTooltip);
+    document.removeEventListener('click', removeTooltip, true);
+    document.removeEventListener('pointerdown', removeTooltip, true);
+    document.removeEventListener('keydown', removeTooltip, true);
   };
   
   setTimeout(removeTooltip, 4000);
-  document.addEventListener('click', removeTooltip);
+  // Defer binding so we don't capture the same initiating event
+  setTimeout(() => {
+    // Use capture + once to ensure reliable dismissal on the next interaction
+    document.addEventListener('click', removeTooltip, { capture: true, once: true });
+    document.addEventListener('pointerdown', removeTooltip, { capture: true, once: true });
+    document.addEventListener('keydown', removeTooltip, { capture: true, once: true });
+  }, 50);
 }
 
 /**
@@ -202,6 +220,9 @@ export function addWeatherIconTooltip(iconElement, weatherCode) {
   
   const handlers = {
     mouseenter: () => {
+      if (iconElement._weatherTooltipSuppressHoverUntil && Date.now() < iconElement._weatherTooltipSuppressHoverUntil) {
+        return;
+      }
       clearTimeout(tooltipTimer);
       showWeatherIconTooltip(iconElement, description);
     },
@@ -218,6 +239,7 @@ export function addWeatherIconTooltip(iconElement, weatherCode) {
     
     touchstart: (e) => {
       // Do not prevent default to keep native gestures intact
+      iconElement._weatherTooltipSuppressHoverUntil = Date.now() + 700;
       showWeatherIconTooltip(iconElement, description);
     }
   };
