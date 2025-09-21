@@ -89,6 +89,15 @@ Optional file `data-precipitations.json` (actuals):
 - [UI-004]: The App version from `package.json` MUST be shown; minor format MAY collapse `X.Y.0` to `X.Y`.
 - [UI-005]: When a new SW is installed, an update button MUST appear (`#update-button`) and trigger `SKIP_WAITING` on click.
 
+## Theme and Dark Mode
+
+- [THEME-001]: The App MUST support dark mode by defaulting to the user's system color scheme preference (`prefers-color-scheme`).
+- [THEME-002]: The App MUST provide an explicit theme toggle (light/dark/system) accessible via UI controls with clear labels.
+- [THEME-003]: The selected theme preference MUST persist across sessions and reloads.
+- [THEME-004]: Chart color palettes MUST adapt to the active theme to maintain readability of lines, bars, gridlines, and plugins.
+- [THEME-005]: Weather icons and other glyphs MUST retain sufficient contrast in both themes.
+- [THEME-006]: Focus indicators and interactive states MUST remain visible and meet contrast requirements in dark mode.
+
 ## Module Interfaces (Public)
 
 Files and functions named here describe their public interface; internal details MAY change without breaking the contract.
@@ -193,6 +202,7 @@ Custom Chart.js Plugins (options objects):
 - [CACHE-003]: Client fetches of `data.json` and `data-precipitations.json` MUST include `?nocache=<floor(now/60s)>`.
 - [RUN-001]: The App MUST auto‑refresh data every 30 minutes.
 - [RUN-002]: On fetch error, the App SHOULD retry after ~60 seconds with jitter.
+- [CACHE-004]: Theme preference (if not set to system) MUST be persisted locally (e.g., localStorage) with a stable key and applied early during startup to avoid a flash of incorrect theme.
 
 ## Error Handling and Resilience
 
@@ -210,6 +220,7 @@ Custom Chart.js Plugins (options objects):
 - [A11Y-001]: The UI MUST provide ARIA labels for day cards, weather icons, and control buttons.
 - [A11Y-002]: Numerics MUST use Italian locale formatting where applicable.
 - [A11Y-003]: Tooltips MUST be dismissible and not trap focus; announcements SHOULD use a polite live region.
+- [A11Y-004]: Color contrast in all themes MUST meet WCAG 2.1 AA (or better) for text and essential UI components.
 
 ## Security and Privacy Considerations
 
@@ -243,3 +254,4 @@ Custom Chart.js Plugins (options objects):
 
 - RFC 2119: Key words for use in RFCs to Indicate Requirement Levels.
 - Chart.js documentation (matching local UMD build).
+- Open-Meteo API documentation <https://open-meteo.com/en/docs>.
