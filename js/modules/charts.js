@@ -487,7 +487,7 @@ export function getPrecipitationBarColor(v) { if (v > 30) return '#6c3483'; if (
 
 export function getTemperatureLineColor(v) { if (v > 30) return '#e74c3c'; if (v > 25) return '#f39c12'; if (v > 20) return '#f1c40f'; if (v > 15) return '#27ae60'; if (v > 10) return '#3498db'; if (v > 5) return '#2980b9'; return '#34495e'; }
 
-export function getWindSpeedColor(v) { if (v > 50) return '#8e44ad'; if (v > 30) return '#e74c3c'; if (v > 20) return '#f39c12'; if (v > 10) return '#27ae60'; if (v > 5) return '#3498db'; return '#85c1e9'; }
+export function getWindSpeedColor(v) { if (v > 50) return '#8e44ad'; if (v > 30) return '#e74c3c'; if (v > 20) return '#f39c12'; if (v > 10) return '#2ecc71'; if (v > 5) return '#2980b9'; return '#5dade2'; }
 
 export function getPressureLineColor(v) { if (v > 1030) return '#e74c3c'; if (v > 1020) return '#f39c12'; if (v > 1010) return '#27ae60'; if (v > 1000) return '#3498db'; if (v > 990) return '#9b59b6'; return '#34495e'; }
 
