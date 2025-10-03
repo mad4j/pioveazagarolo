@@ -261,7 +261,7 @@ function switchToMode(targetMode, weatherData) {
   hideAllTooltips();
   
   // Import chart building functions
-  import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice }) => {
+  import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice, calculateUnifiedPressureScale }) => {
     if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
     
     // Chart IDs and their corresponding day indices
@@ -291,6 +291,12 @@ function switchToMode(targetMode, weatherData) {
       }
     }
     
+    // Calculate unified pressure scale if switching to pressure mode
+    let unifiedPressureScale = null;
+    if (actualMode === CHART_MODES.PRESSURE && weatherData.hourly.pressure_msl && weatherData.hourly.pressure_msl.length >= 72) {
+      unifiedPressureScale = calculateUnifiedPressureScale(weatherData.hourly.pressure_msl);
+    }
+    
     // Update all charts simultaneously
     chartConfigs.forEach(({ chartId, dayIndex }) => {
       // Update mode tracking for all charts
@@ -317,7 +323,7 @@ function switchToMode(targetMode, weatherData) {
         const pressureSlice = getDaySlice(weatherData.hourly.pressure_msl, dayIndex);
         const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
         const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
-        buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
+        buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice, unifiedPressureScale);
       } else if (actualMode === CHART_MODES.AIR_QUALITY) {
         // Switch to air quality chart
   const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
