@@ -1022,8 +1022,6 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   if (staleTip && staleTip.parentNode) { try { staleTip.parentNode.removeChild(staleTip); } catch {} }
   if (chartInstances[target]) chartInstances[target].destroy();
 
-  const pressureColors = pressureData.map(getPressureLineColor);
-  
   // Calculate pressure deltas (pressure - 1013)
   const pressureDeltas = pressureData.map(pressure => pressure - 1013);
   const deltasColors = pressureDeltas.map(getPressureDeltaBarColor);
@@ -1082,21 +1080,6 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
       labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
       datasets: [
         {
-          label: 'Pressione (hPa)',
-          type: 'line',
-          fill: false,
-          tension: 0.4,
-          backgroundColor: 'rgb(142, 68, 173)',
-          borderColor: 'rgb(142, 68, 173)',
-          borderWidth: 2,
-          data: pressureData,
-          pointBackgroundColor: pressureColors,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          yAxisID: 'y',
-          order: 1
-        },
-        {
           label: 'Delta Pressione (hPa)',
           type: 'bar',
           backgroundColor: deltasColors,
@@ -1104,13 +1087,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
           borderWidth: 0,
           data: pressureDeltas,
           yAxisID: 'y1',
-          order: 2,
-          // Hide from tooltips
-          tooltip: {
-            filter: function(tooltipItem) {
-              return false;
-            }
-          }
+          order: 1
         }
       ]
     },
@@ -1164,7 +1141,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
       },
       plugins: {
         pressure1013Line: {
-          color: '#27ae60',
+          color: 'rgb(142, 68, 173)',
           lineWidth: 2,
           lineDash: [8, 4],
           opacity: 0.8,
@@ -1185,10 +1162,6 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
         legend: { display: false },
         tooltip: {
           enabled: false,
-          filter: function(tooltipItem) {
-            // Hide delta bars from tooltip (dataset index 1)
-            return tooltipItem.datasetIndex !== 1;
-          },
           external: ({ chart, tooltip }) => {
             let tip = document.getElementById('chartjs-tooltip-' + target);
             if (!tip) {
@@ -1210,15 +1183,17 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
 
             const rows = [];
             if (tooltip.dataPoints?.length) {
-              // Only show pressure data (filter out deltas)
-              const pressureDataPoint = tooltip.dataPoints.find(dp => dp.datasetIndex === 0);
-              if (pressureDataPoint) {
-                const pressure = Math.round(pressureDataPoint.parsed.y);
+              // Bar dataset now at index 0 shows delta, calculate actual pressure
+              const deltaDataPoint = tooltip.dataPoints.find(dp => dp.datasetIndex === 0);
+              if (deltaDataPoint) {
+                // Delta is (pressure - 1013), so pressure = delta + 1013
+                const delta = deltaDataPoint.parsed.y;
+                const pressure = Math.round(delta + 1013);
                 rows.push({ k: 'pressure', t: `Pressione: ${pressure} hPa` });
 
                 // Add weather information if available
                 if (weatherCodes && isDayData) {
-                  const hourIndex = pressureDataPoint.dataIndex;
+                  const hourIndex = deltaDataPoint.dataIndex;
                   const weatherCode = weatherCodes[hourIndex];
                   const isDay = isDayData[hourIndex];
                   
@@ -1230,7 +1205,7 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
                 }
 
                 if (sunriseTime && sunsetTime) {
-                  const hour = parseFloat(pressureDataPoint.label.split(':')[0]);
+                  const hour = parseFloat(deltaDataPoint.label.split(':')[0]);
                   const sr = timeStringToHours(sunriseTime);
                   const ss = timeStringToHours(sunsetTime);
                   if (sr && ss) {
