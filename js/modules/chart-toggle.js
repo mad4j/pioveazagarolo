@@ -40,6 +40,8 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex, unifiedPre
     chartModes[chartId] = CHART_MODES.PRECIPITATION;
     const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
     const precipitationSlice = getDaySlice(weatherData.hourly.precipitation, dayIndex);
-    buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime);
+    const showersSlice = weatherData.hourly.showers ? getDaySlice(weatherData.hourly.showers, dayIndex) : null;
+    const snowfallSlice = weatherData.hourly.snowfall ? getDaySlice(weatherData.hourly.snowfall, dayIndex) : null;
+    buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime, showersSlice, snowfallSlice);
   }
 }

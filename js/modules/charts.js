@@ -601,13 +601,120 @@ export function getPressureDeltaBarColor(delta) {
   return '#0f1419';                     // Very dark blue for very low pressure
 }
 
+/**
+ * Get warning color for showers/snowfall based on severity
+ * @param {number} showersTotal - Total showers amount in mm (sum across interval)
+ * @param {number} snowfallTotal - Total snowfall amount in cm (sum across interval)
+ * @returns {string|null} Color code for warning icon or null if no warning
+ */
+export function getShowersSnowfallWarningColor(showersTotal, snowfallTotal) {
+  // Convert snowfall to mm equivalent (1cm snow ≈ 10mm water equivalent)
+  const snowfallMm = snowfallTotal * 10;
+  const totalIntensity = showersTotal + snowfallMm;
+  
+  if (totalIntensity > 15) return '#e74c3c';     // Red - Heavy (> 15mm total in 3h)
+  if (totalIntensity > 3) return '#f39c12';      // Orange - Medium (3-15mm total in 3h)
+  if (totalIntensity > 0) return '#f1c40f';      // Yellow - Light (> 0mm total in 3h)
+  return null;
+}
+
+/**
+ * Draw weather icon for showers or snowfall on chart
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {number} x - X position
+ * @param {number} y - Y position
+ * @param {string} color - Color of the icon
+ * @param {number} showersTotal - Total showers amount in mm (sum across interval)
+ * @param {number} snowfallTotal - Total snowfall amount in cm (sum across interval)
+ */
+function drawShowersSnowfallIcon(ctx, x, y, color, showersTotal, snowfallTotal) {
+  ctx.save();
+  
+  // Determine which icon to use based on predominant type
+  // If snowfall is present (even small amounts), show snow icon
+  // Otherwise show showers icon
+  const glyph = snowfallTotal > 0 ? '\uf01b' : '\uf01a';  // wi-snow : wi-showers
+  
+  ctx.font = '14px weathericons';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = color;
+  
+  try {
+    ctx.fillText(glyph, x, y);
+  } catch {
+    // Fallback: draw a simple circle if font not ready
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+  
+  ctx.restore();
+}
+
+// Plugin for showers/snowfall warning icons (one per 3-hour interval)
+export const showersSnowfallWarningPlugin = {
+  id: 'showersSnowfallWarning',
+  afterDraw(chart, args, opts) {
+    if (!opts || !opts.showers || !opts.snowfall) return;
+    
+    const xScale = chart.scales.x;
+    if (!xScale) return;
+    
+    const { ctx, chartArea } = chart;
+    const { left, right, top } = chartArea;
+    
+    ctx.save();
+    
+    // Intervalli di 3 ore: 0-2, 3-5, 6-8, 9-11, 12-14, 15-17, 18-20, 21-23
+    const threeHourIntervals = [
+      { start: 0, center: 1 },   // 00:00-02:59, centered at 01:30
+      { start: 3, center: 4 },   // 03:00-05:59, centered at 04:30  
+      { start: 6, center: 7 },   // 06:00-08:59, centered at 07:30
+      { start: 9, center: 10 },  // 09:00-11:59, centered at 10:30
+      { start: 12, center: 13 }, // 12:00-14:59, centered at 13:30
+      { start: 15, center: 16 }, // 15:00-17:59, centered at 16:30
+      { start: 18, center: 19 }, // 18:00-20:59, centered at 19:30
+      { start: 21, center: 22 }  // 21:00-23:59, centered at 22:30
+    ];
+    
+    threeHourIntervals.forEach(interval => {
+      const { start, center } = interval;
+      let showersTotal = 0;
+      let snowfallTotal = 0;
+      
+      // Sum showers and snowfall values for this 3-hour interval
+      for (let i = start; i < start + 3 && i < opts.showers.length; i++) {
+        showersTotal += opts.showers[i] || 0;
+        snowfallTotal += opts.snowfall[i] || 0;
+      }
+      
+      // Calculate warning color based on total precipitation
+      const color = getShowersSnowfallWarningColor(showersTotal, snowfallTotal);
+      
+      if (color) {
+        const x = xScale.getPixelForValue(center);
+        
+        // Only draw if within visible area
+        if (x >= left && x <= right) {
+          // Position at top of chart area
+          const y = top + 8;
+          drawShowersSnowfallIcon(ctx, x, y, color, showersTotal, snowfallTotal);
+        }
+      }
+    });
+    
+    ctx.restore();
+  }
+};
+
 function isTouchDevice() { return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0; }
 
 function isDarkMode() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
 
 function getWindDirectionColor() { return isDarkMode() ? '#f2f2f2' : '#3498db'; }
 
-export function buildChart(target, probabilityData, precipitationData, sunriseTime = null, sunsetTime = null) {
+export function buildChart(target, probabilityData, precipitationData, sunriseTime = null, sunsetTime = null, showersData = null, snowfallData = null) {
   const el = document.getElementById(target); if (!el) return;
   // Clean up existing tooltip element tied to this chart target to prevent duplicates
   const staleTip = document.getElementById('chartjs-tooltip-' + target);
@@ -615,8 +722,11 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
   }
   if (chartInstances[target]) chartInstances[target].destroy();
   const precipColors = precipitationData.map(getPrecipitationBarColor); const m = Math.max(...precipitationData, 1); const maxPrecip = m < 2 ? 2 : Math.ceil(m);
-  const plugins = [sunriseSunsetPlugin]; if (target === 'today-chart') plugins.push(currentHourLinePlugin); plugins.push(xAxisAnchorLabelsPlugin);
-  chartInstances[target] = new Chart(el, { plugins, data: { labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')), datasets: [{ label: 'Probabilità (%)', type: 'line', fill: true, tension: 0.4, backgroundColor: 'rgba(52,152,219,0.30)', borderColor: 'rgb(41,128,185)', borderWidth: 2, data: probabilityData, pointBackgroundColor: 'rgb(41,128,185)', pointRadius: 0, pointHoverRadius: 4, yAxisID: 'y' }, { label: 'Precipitazione (mm/h)', type: 'bar', backgroundColor: precipColors, borderColor: precipColors, borderWidth: 1, data: precipitationData, yAxisID: 'y1', order: 2 }] }, options: { responsive: true, maintainAspectRatio: false, layout: { padding: 2 }, onHover: (e, a, chart) => { if (isTouchDevice() && a.length) { if (chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout); chart._tooltipTimeout = setTimeout(() => { chart.tooltip.setActiveElements([], { x: 0, y: 0 }); chart.setActiveElements([]); chart.update('none'); }, 3000); } }, scales: { y: { min: 0, max: 100, position: 'left', grid: { drawOnChartArea: true, color: 'rgba(200,200,200,0.2)', drawTicks: false }, ticks: { display: false } }, y1: { min: 0, max: maxPrecip, position: 'right', grid: { drawOnChartArea: false, drawTicks: false }, ticks: { display: false } }, x: { grid: { display: false }, ticks: { display: false, maxRotation: 0, minRotation: 0, autoSkip: true, maxTicksLimit: 6, color: '#7f8c8d' } } }, plugins: { currentHourLine: { color: '#27ae60', overlayColor: 'rgba(128,128,128,0.18)' }, sunriseSunset: { sunrise: sunriseTime, sunset: sunsetTime }, legend: { display: false }, tooltip: { enabled: false, external: ({ chart, tooltip }) => { let tip = document.getElementById('chartjs-tooltip-' + target); if (!tip) { tip = document.createElement('div'); tip.id = 'chartjs-tooltip-' + target; Object.assign(tip.style, { position: 'absolute', pointerEvents: 'none', transition: 'all .08s ease', zIndex: 30 }); document.body.appendChild(tip); } if (!tooltip || tooltip.opacity === 0) { tip.style.opacity = 0; return; } const rows = []; if (tooltip.dataPoints?.length) { const dp = tooltip.dataPoints[0]; const idx = dp.dataIndex; const prob = Math.round(dp.parsed.y); const ds2 = chart.data.datasets[1]; let mm = 0; if (ds2 && ds2.data && ds2.data[idx] != null) mm = ds2.data[idx]; const precipStr = mm < 1 && mm > 0 ? mm.toFixed(1) : Math.round(mm); rows.push({ k: 'rain', t: `Pioggia: ${precipStr}mm (${prob}%)` }); if (sunriseTime && sunsetTime) { const hour = parseFloat(dp.label.split(':')[0]); const sr = timeStringToHours(sunriseTime); const ss = timeStringToHours(sunsetTime); if (sr && ss) { const daylight = ss - sr; if (Math.abs(hour - sr) < 1) rows.push({ k: 'sunrise', t: `Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)` }); else if (Math.abs(hour - ss) < 1) rows.push({ k: 'sunset', t: `Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)` }); } } } const title = tooltip.title?.[0] ? `Ore ${tooltip.title[0]}` : ''; let html = `<div style=\"font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;\">`; if (title) html += `<div style=\\"font-weight:600; margin-bottom:4px;\\">${title}</div>`; html += '<div style=\"display:flex; flex-direction:column; gap:2px;\">'; rows.forEach(r => { let icon = ''; if (r.k === 'rain') icon = '<i class=\"wi wi-umbrella\" style=\"margin-right:4px; color:#3498db;\"></i>'; else if (r.k === 'sunrise') icon = '<i class=\"wi wi-sunrise\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if (r.k === 'sunset') icon = '<i class=\"wi wi-sunset\" style=\"margin-right:4px; color:#ff3b30;\"></i>'; html += `<div style=\\"display:flex; align-items:center; font-size:12px; line-height:1.2;\\">${icon}<span>${r.t}</span></div>`; }); html += '</div></div>'; tip.innerHTML = html; const rect = chart.canvas.getBoundingClientRect(); const bodyRect = document.body.getBoundingClientRect(); const left = rect.left + window.pageXOffset + tooltip.caretX + 10; const top = rect.top + window.pageYOffset + tooltip.caretY - 10; tip.style.left = Math.min(left, bodyRect.width - 260) + 'px'; tip.style.top = top + 'px'; tip.style.opacity = 1; } } }, interaction: { mode: 'index', intersect: false } } });
+  const plugins = [sunriseSunsetPlugin]; if (target === 'today-chart') plugins.push(currentHourLinePlugin); 
+  // Add showers/snowfall warning plugin if data is available
+  if (showersData && snowfallData) plugins.push(showersSnowfallWarningPlugin);
+  plugins.push(xAxisAnchorLabelsPlugin);
+  chartInstances[target] = new Chart(el, { plugins, data: { labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')), datasets: [{ label: 'Probabilità (%)', type: 'line', fill: true, tension: 0.4, backgroundColor: 'rgba(52,152,219,0.30)', borderColor: 'rgb(41,128,185)', borderWidth: 2, data: probabilityData, pointBackgroundColor: 'rgb(41,128,185)', pointRadius: 0, pointHoverRadius: 4, yAxisID: 'y' }, { label: 'Precipitazione (mm/h)', type: 'bar', backgroundColor: precipColors, borderColor: precipColors, borderWidth: 1, data: precipitationData, yAxisID: 'y1', order: 2 }] }, options: { responsive: true, maintainAspectRatio: false, layout: { padding: 2 }, onHover: (e, a, chart) => { if (isTouchDevice() && a.length) { if (chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout); chart._tooltipTimeout = setTimeout(() => { chart.tooltip.setActiveElements([], { x: 0, y: 0 }); chart.setActiveElements([]); chart.update('none'); }, 3000); } }, scales: { y: { min: 0, max: 100, position: 'left', grid: { drawOnChartArea: true, color: 'rgba(200,200,200,0.2)', drawTicks: false }, ticks: { display: false } }, y1: { min: 0, max: maxPrecip, position: 'right', grid: { drawOnChartArea: false, drawTicks: false }, ticks: { display: false } }, x: { grid: { display: false }, ticks: { display: false, maxRotation: 0, minRotation: 0, autoSkip: true, maxTicksLimit: 6, color: '#7f8c8d' } } }, plugins: { currentHourLine: { color: '#27ae60', overlayColor: 'rgba(128,128,128,0.18)' }, sunriseSunset: { sunrise: sunriseTime, sunset: sunsetTime }, showersSnowfallWarning: { showers: showersData || [], snowfall: snowfallData || [] }, legend: { display: false }, tooltip: { enabled: false, external: ({ chart, tooltip }) => { let tip = document.getElementById('chartjs-tooltip-' + target); if (!tip) { tip = document.createElement('div'); tip.id = 'chartjs-tooltip-' + target; Object.assign(tip.style, { position: 'absolute', pointerEvents: 'none', transition: 'all .08s ease', zIndex: 30 }); document.body.appendChild(tip); } if (!tooltip || tooltip.opacity === 0) { tip.style.opacity = 0; return; } const rows = []; if (tooltip.dataPoints?.length) { const dp = tooltip.dataPoints[0]; const idx = dp.dataIndex; const prob = Math.round(dp.parsed.y); const ds2 = chart.data.datasets[1]; let mm = 0; if (ds2 && ds2.data && ds2.data[idx] != null) mm = ds2.data[idx]; const precipStr = mm < 1 && mm > 0 ? mm.toFixed(1) : Math.round(mm); rows.push({ k: 'rain', t: `Pioggia: ${precipStr}mm (${prob}%)` }); if (sunriseTime && sunsetTime) { const hour = parseFloat(dp.label.split(':')[0]); const sr = timeStringToHours(sunriseTime); const ss = timeStringToHours(sunsetTime); if (sr && ss) { const daylight = ss - sr; if (Math.abs(hour - sr) < 1) rows.push({ k: 'sunrise', t: `Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)` }); else if (Math.abs(hour - ss) < 1) rows.push({ k: 'sunset', t: `Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)` }); } } } const title = tooltip.title?.[0] ? `Ore ${tooltip.title[0]}` : ''; let html = `<div style=\"font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;\">`; if (title) html += `<div style=\\"font-weight:600; margin-bottom:4px;\\">${title}</div>`; html += '<div style=\"display:flex; flex-direction:column; gap:2px;\">'; rows.forEach(r => { let icon = ''; if (r.k === 'rain') icon = '<i class=\"wi wi-umbrella\" style=\"margin-right:4px; color:#3498db;\"></i>'; else if (r.k === 'sunrise') icon = '<i class=\"wi wi-sunrise\" style=\"margin-right:4px; color:#f39c12;\"></i>'; else if (r.k === 'sunset') icon = '<i class=\"wi wi-sunset\" style=\"margin-right:4px; color:#ff3b30;\"></i>'; html += `<div style=\\"display:flex; align-items:center; font-size:12px; line-height:1.2;\\">${icon}<span>${r.t}</span></div>`; }); html += '</div></div>'; tip.innerHTML = html; const rect = chart.canvas.getBoundingClientRect(); const bodyRect = document.body.getBoundingClientRect(); const left = rect.left + window.pageXOffset + tooltip.caretX + 10; const top = rect.top + window.pageYOffset + tooltip.caretY - 10; tip.style.left = Math.min(left, bodyRect.width - 260) + 'px'; tip.style.top = top + 'px'; tip.style.opacity = 1; } } }, interaction: { mode: 'index', intersect: false } } });
   // Force redraw once fonts are ready (prevents seeing raw unicode if font loads late)
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => { try { chartInstances[target].update(); } catch { } });
