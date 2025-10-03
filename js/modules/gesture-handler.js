@@ -100,16 +100,32 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
   const slideOutClass = swipeDirection > 0 ? 'swipe-transition-right' : 'swipe-transition-left';
   const slideInClass = swipeDirection > 0 ? 'swipe-transition-in-left' : 'swipe-transition-in-right';
   
-  // Apply slide-out animation if direction is specified
+  // Create clones of chart containers for slide-out animation (if direction is specified)
+  const chartClones = [];
   if (swipeDirection !== 0) {
     forecastCards.forEach(card => {
-      card.classList.add(slideOutClass);
+      const chartContainer = card.querySelector('.chart-container');
+      if (chartContainer) {
+        // Clone the chart container to animate it out while new content animates in
+        const clone = chartContainer.cloneNode(true);
+        clone.classList.add('chart-container-clone', slideOutClass.replace('swipe-transition-', 'swipe-clone-'));
+        // Position clone absolutely to overlay the original
+        clone.style.position = 'absolute';
+        clone.style.top = '0';
+        clone.style.left = '0';
+        clone.style.right = '0';
+        clone.style.width = '100%';
+        clone.style.zIndex = '10';
+        clone.style.pointerEvents = 'none';
+        
+        // Insert clone before the original chart container
+        chartContainer.parentNode.insertBefore(clone, chartContainer);
+        chartClones.push({ clone, card });
+      }
     });
   }
   
-  // Wait for slide-out animation to complete before switching mode
-  const animationDelay = swipeDirection !== 0 ? 300 : 0;
-  
+  // No delay needed - new content will slide in while clones slide out
   setTimeout(() => {
     // Import and use the existing switchToMode function from navigation-dots
     import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
@@ -150,11 +166,9 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
           unifiedPressureScale = calculateUnifiedPressureScale(weatherData.hourly.pressure_msl);
         }
         
-        // Remove slide-out classes and prepare for slide-in
+        // Apply slide-in animation to the new content (clones are already sliding out)
         if (swipeDirection !== 0) {
           forecastCards.forEach(card => {
-            card.classList.remove(slideOutClass);
-            // Add slide-in class
             card.classList.add(slideInClass);
           });
         }
@@ -209,11 +223,17 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
         updateNavigationDots(actualMode);
         showChartModeTooltip(actualMode, { duration: 800 });
         
-        // Clean up animation classes after slide-in animation completes
+        // Clean up animation classes and clones after animation completes
         if (swipeDirection !== 0) {
           setTimeout(() => {
             forecastCards.forEach(card => {
               card.classList.remove(slideInClass);
+            });
+            // Remove clones after animation
+            chartClones.forEach(({ clone }) => {
+              if (clone.parentNode) {
+                clone.parentNode.removeChild(clone);
+              }
             });
           }, 300);
         }
@@ -222,14 +242,19 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
       });
     }).catch(err => {
       console.warn('Could not switch mode via swipe:', err);
-      // Clean up animation classes on error
+      // Clean up animation classes and clones on error
       if (swipeDirection !== 0) {
         forecastCards.forEach(card => {
-          card.classList.remove(slideOutClass, slideInClass);
+          card.classList.remove(slideInClass);
+        });
+        chartClones.forEach(({ clone }) => {
+          if (clone.parentNode) {
+            clone.parentNode.removeChild(clone);
+          }
         });
       }
     });
-  }, animationDelay);
+  }, 0); // No delay - animations will overlap
 }
 
 /**
