@@ -75,7 +75,7 @@ Optional file `data-precipitations.json` (actuals):
 - [FR-010]: Chart mode “Precipitation” MUST show precipitation probability (%) as a line and precipitation (mm/h) as bars; include sunrise/sunset markers and a current‑hour line on Today.
 - [FR-011]: Chart mode “Temperature” MUST show temperature and apparent temperature as lines; MAY include humidity bars; MUST include sunrise/sunset markers and a current‑hour line on Today; SHOULD render cloud‑coverage icons every 3h.
 - [FR-012]: Chart mode “Wind” MUST show wind speed as bars and draw per‑hour wind direction arrows; include sunrise/sunset markers and a current‑hour line on Today.
-- [FR-013]: Chart mode “Pressure” MUST show pressure as a line; MUST show pressure delta bars centered around 1013 hPa; MUST draw a 1013 hPa reference line; MAY show weather icons (3‑hourly); include sunrise/sunset markers and a current‑hour line on Today.
+- [FR-013]: Chart mode “Pressure” MUST show pressure delta bars centered around 1013 hPa; MUST draw a 1013 hPa reference line; MAY show weather icons (3‑hourly); include sunrise/sunset markers and a current‑hour line on Today.
 - [FR-014]: Chart mode “Air Quality” MUST show EAQI as bars; MAY include a UV index line with alert threshold; MAY include cloud‑coverage icons; include sunrise/sunset markers and a current‑hour line on Today.
 - [FR-020]: Swiping MUST cycle through chart modes; navigation dots MUST reflect and control the active mode.
 - [FR-021]: In‑chart custom HTML tooltips MUST present contextual values and sunrise/sunset hints near boundary hours. Weather icons and current temperature MUST show short tooltips on tap/click.
@@ -248,7 +248,7 @@ Custom Chart.js Plugins (options objects):
 - Precipitation: `line(y='y', 0..100)` + `bar(y1='y1', 0..maxPrecip)`.
 - Temperature: `line(temp)` + `line(apparent, dashed)` + optional `bar(humidity)` + 21°C reference line.
 - Wind: `bar(speed)` + arrows plugin from `wind_direction_10m`.
-- Pressure: `line(pressure)` + hidden‑tooltip `bar(delta)` + 1013 line + optional weather icons.
+- Pressure: `bar(delta)` + 1013 line + optional weather icons.
 - Air Quality: `bar(EAQI)` + optional `line(UV)` + UV alert line.
 
 ## References
