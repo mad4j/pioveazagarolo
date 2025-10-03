@@ -114,7 +114,7 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
     // Import and use the existing switchToMode function from navigation-dots
     import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
       // Import chart building functions directly
-      import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice }) => {
+      import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice, calculateUnifiedPressureScale }) => {
         if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
 
         // Chart IDs and their corresponding day indices
@@ -142,6 +142,12 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
           if (!weatherData.air_quality || !weatherData.air_quality.hourly || !weatherData.air_quality.hourly.european_aqi) {
             actualMode = CHART_MODES.PRECIPITATION;
           }
+        }
+        
+        // Calculate unified pressure scale if switching to pressure mode
+        let unifiedPressureScale = null;
+        if (actualMode === CHART_MODES.PRESSURE && weatherData.hourly.pressure_msl && weatherData.hourly.pressure_msl.length >= 72) {
+          unifiedPressureScale = calculateUnifiedPressureScale(weatherData.hourly.pressure_msl);
         }
         
         // Remove slide-out classes and prepare for slide-in
@@ -179,7 +185,7 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
             const pressureSlice = getDaySlice(weatherData.hourly.pressure_msl, dayIndex);
             const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
             const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
-            buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
+            buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice, unifiedPressureScale);
           } else if (actualMode === CHART_MODES.AIR_QUALITY) {
             // Switch to air quality chart
             const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);

@@ -1,13 +1,14 @@
 import { CHART_MODES, chartModes } from './constants.js';
-import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice } from './charts.js';
+import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice, calculateUnifiedPressureScale } from './charts.js';
 
 /**
  * Builds appropriate chart based on current global mode
  * @param {string} chartId - Target chart ID
  * @param {Object} weatherData - Weather data object
  * @param {number} dayIndex - Day index (0, 1, 2)
+ * @param {Object} unifiedPressureScale - Optional unified pressure scale for pressure mode
  */
-export function buildAppropriateChart(chartId, weatherData, dayIndex) {
+export function buildAppropriateChart(chartId, weatherData, dayIndex, unifiedPressureScale = null) {
   if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
   
   // Use global mode (all charts should be in same mode)
@@ -28,7 +29,7 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex) {
     const pressureSlice = getDaySlice(weatherData.hourly.pressure_msl, dayIndex);
     const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
     const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
-    buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
+    buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice, unifiedPressureScale);
   } else if (currentMode === CHART_MODES.AIR_QUALITY && weatherData.air_quality && weatherData.air_quality.hourly && weatherData.air_quality.hourly.european_aqi) {
     const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
     const uvSlice = weatherData.hourly.uv_index ? getDaySlice(weatherData.hourly.uv_index, dayIndex) : null;
