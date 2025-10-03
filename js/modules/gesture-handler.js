@@ -85,96 +85,143 @@ function hideAllChartTooltips() {
  * Switches to a specific chart mode using the existing navigation system
  * @param {string} targetMode - The mode to switch to
  * @param {Object} weatherData - Weather data object
+ * @param {number} swipeDirection - Swipe direction: 1 for right, -1 for left
  */
-function switchToModeViaSwiping(targetMode, weatherData) {
+function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
   // Hide any visible tooltips immediately before switching modes
   hideAllTooltips();
-  // Import and use the existing switchToMode function from navigation-dots
-  import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
-    // Import chart building functions directly
-    import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice }) => {
-      if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
-
-      // Chart IDs and their corresponding day indices
-      const chartConfigs = [
-        { chartId: 'today-chart', dayIndex: 0 },
-        { chartId: 'tomorrow-chart', dayIndex: 1 },
-        { chartId: 'dayaftertomorrow-chart', dayIndex: 2 }
-      ];
-
-      // Check data availability before switching
-      let actualMode = targetMode;
-      if (targetMode === CHART_MODES.TEMPERATURE) {
-        if (!weatherData.hourly.temperature_2m || !weatherData.hourly.apparent_temperature) {
-          actualMode = CHART_MODES.PRECIPITATION;
-        }
-      } else if (targetMode === CHART_MODES.WIND) {
-        if (!weatherData.hourly.wind_speed_10m || !weatherData.hourly.wind_direction_10m) {
-          actualMode = CHART_MODES.PRECIPITATION;
-        }
-      } else if (targetMode === CHART_MODES.PRESSURE) {
-        if (!weatherData.hourly.pressure_msl) {
-          actualMode = CHART_MODES.PRECIPITATION;
-        }
-      } else if (targetMode === CHART_MODES.AIR_QUALITY) {
-        if (!weatherData.air_quality || !weatherData.air_quality.hourly || !weatherData.air_quality.hourly.european_aqi) {
-          actualMode = CHART_MODES.PRECIPITATION;
-        }
-      }
-
-      // Update all charts simultaneously
-      chartConfigs.forEach(({ chartId, dayIndex }) => {
-        // Update mode tracking for all charts
-        chartModes[chartId] = actualMode;
-
-        // Get sunrise/sunset times for this day
-        const sunriseTime = weatherData.daily.sunrise?.[dayIndex];
-        const sunsetTime = weatherData.daily.sunset?.[dayIndex];
-
-        if (actualMode === CHART_MODES.TEMPERATURE) {
-          // Switch to temperature chart
-          const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
-          const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
-          const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
-          const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
-          buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, cloudCoverageSlice);
-        } else if (actualMode === CHART_MODES.WIND) {
-          // Switch to wind chart
-          const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
-          const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
-          buildWindChart(chartId, windSpeedSlice, windDirectionSlice, sunriseTime, sunsetTime);
-        } else if (actualMode === CHART_MODES.PRESSURE) {
-          // Switch to pressure chart
-          const pressureSlice = getDaySlice(weatherData.hourly.pressure_msl, dayIndex);
-          const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
-          const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
-          buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
-        } else if (actualMode === CHART_MODES.AIR_QUALITY) {
-          // Switch to air quality chart
-          const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
-          const uvSlice = weatherData.hourly.uv_index ? getDaySlice(weatherData.hourly.uv_index, dayIndex) : null;
-          const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
-          buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime, cloudCoverageSlice);
-        } else {
-          // Switch to precipitation chart
-          const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
-          const precipitationSlice = getDaySlice(weatherData.hourly.precipitation, dayIndex);
-          buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime);
-        }
-      });
-
-      // Save the new mode
-      saveChartMode(actualMode);
-
-      // Update navigation dots and show a short-lived tooltip on swipe
-      updateNavigationDots(actualMode);
-      showChartModeTooltip(actualMode, { duration: 800 });
-
-      console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
+  
+  // Get all forecast cards for animation
+  const forecastCards = document.querySelectorAll('.forecast-card');
+  
+  // Determine animation classes based on swipe direction
+  // Right swipe (1) = going to previous mode = content slides right (out to right, in from left)
+  // Left swipe (-1) = going to next mode = content slides left (out to left, in from right)
+  const slideOutClass = swipeDirection > 0 ? 'swipe-transition-right' : 'swipe-transition-left';
+  const slideInClass = swipeDirection > 0 ? 'swipe-transition-in-left' : 'swipe-transition-in-right';
+  
+  // Apply slide-out animation if direction is specified
+  if (swipeDirection !== 0) {
+    forecastCards.forEach(card => {
+      card.classList.add(slideOutClass);
     });
-  }).catch(err => {
-    console.warn('Could not switch mode via swipe:', err);
-  });
+  }
+  
+  // Wait for slide-out animation to complete before switching mode
+  const animationDelay = swipeDirection !== 0 ? 300 : 0;
+  
+  setTimeout(() => {
+    // Import and use the existing switchToMode function from navigation-dots
+    import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
+      // Import chart building functions directly
+      import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice }) => {
+        if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
+
+        // Chart IDs and their corresponding day indices
+        const chartConfigs = [
+          { chartId: 'today-chart', dayIndex: 0 },
+          { chartId: 'tomorrow-chart', dayIndex: 1 },
+          { chartId: 'dayaftertomorrow-chart', dayIndex: 2 }
+        ];
+
+        // Check data availability before switching
+        let actualMode = targetMode;
+        if (targetMode === CHART_MODES.TEMPERATURE) {
+          if (!weatherData.hourly.temperature_2m || !weatherData.hourly.apparent_temperature) {
+            actualMode = CHART_MODES.PRECIPITATION;
+          }
+        } else if (targetMode === CHART_MODES.WIND) {
+          if (!weatherData.hourly.wind_speed_10m || !weatherData.hourly.wind_direction_10m) {
+            actualMode = CHART_MODES.PRECIPITATION;
+          }
+        } else if (targetMode === CHART_MODES.PRESSURE) {
+          if (!weatherData.hourly.pressure_msl) {
+            actualMode = CHART_MODES.PRECIPITATION;
+          }
+        } else if (targetMode === CHART_MODES.AIR_QUALITY) {
+          if (!weatherData.air_quality || !weatherData.air_quality.hourly || !weatherData.air_quality.hourly.european_aqi) {
+            actualMode = CHART_MODES.PRECIPITATION;
+          }
+        }
+        
+        // Remove slide-out classes and prepare for slide-in
+        if (swipeDirection !== 0) {
+          forecastCards.forEach(card => {
+            card.classList.remove(slideOutClass);
+            // Add slide-in class
+            card.classList.add(slideInClass);
+          });
+        }
+
+        // Update all charts simultaneously
+        chartConfigs.forEach(({ chartId, dayIndex }) => {
+          // Update mode tracking for all charts
+          chartModes[chartId] = actualMode;
+
+          // Get sunrise/sunset times for this day
+          const sunriseTime = weatherData.daily.sunrise?.[dayIndex];
+          const sunsetTime = weatherData.daily.sunset?.[dayIndex];
+
+          if (actualMode === CHART_MODES.TEMPERATURE) {
+            // Switch to temperature chart
+            const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
+            const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
+            const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
+            const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
+            buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, cloudCoverageSlice);
+          } else if (actualMode === CHART_MODES.WIND) {
+            // Switch to wind chart
+            const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
+            const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
+            buildWindChart(chartId, windSpeedSlice, windDirectionSlice, sunriseTime, sunsetTime);
+          } else if (actualMode === CHART_MODES.PRESSURE) {
+            // Switch to pressure chart
+            const pressureSlice = getDaySlice(weatherData.hourly.pressure_msl, dayIndex);
+            const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
+            const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
+            buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice);
+          } else if (actualMode === CHART_MODES.AIR_QUALITY) {
+            // Switch to air quality chart
+            const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
+            const uvSlice = weatherData.hourly.uv_index ? getDaySlice(weatherData.hourly.uv_index, dayIndex) : null;
+            const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
+            buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime, cloudCoverageSlice);
+          } else {
+            // Switch to precipitation chart
+            const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
+            const precipitationSlice = getDaySlice(weatherData.hourly.precipitation, dayIndex);
+            buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime);
+          }
+        });
+
+        // Save the new mode
+        saveChartMode(actualMode);
+
+        // Update navigation dots and show a short-lived tooltip on swipe
+        updateNavigationDots(actualMode);
+        showChartModeTooltip(actualMode, { duration: 800 });
+        
+        // Clean up animation classes after slide-in animation completes
+        if (swipeDirection !== 0) {
+          setTimeout(() => {
+            forecastCards.forEach(card => {
+              card.classList.remove(slideInClass);
+            });
+          }, 300);
+        }
+
+        console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
+      });
+    }).catch(err => {
+      console.warn('Could not switch mode via swipe:', err);
+      // Clean up animation classes on error
+      if (swipeDirection !== 0) {
+        forecastCards.forEach(card => {
+          card.classList.remove(slideOutClass, slideInClass);
+        });
+      }
+    });
+  }, animationDelay);
 }
 
 /**
@@ -271,8 +318,8 @@ function createSwipeHandler(element, weatherData) {
         vibrateModeSwitch();
 
         // Do not block native gestures; simply trigger mode switch
-        // Switch to new mode
-        switchToModeViaSwiping(nextMode, weatherData);
+        // Switch to new mode with animation direction
+        switchToModeViaSwiping(nextMode, weatherData, direction);
       }
     }
   };
