@@ -4,10 +4,9 @@
 [![Latest Release](https://img.shields.io/github/v/release/mad4j/pioveazagarolo)](https://github.com/mad4j/pioveazagarolo/releases/latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Live Demo](https://img.shields.io/badge/demo-live-green.svg)](https://mad4j.github.io/pioveazagarolo/)
+[![Installable PWA badge](https://img.shields.io/badge/PWA-installable-orange.svg)](https://mad4j.github.io/pioveazagarolo/)
 
-**Progressive Web App for Zagarolo weather forecasts** — Hourly rain probability for Today, Tomorrow, and the Day After Tomorrow with interactive charts and air quality indicators.
-
-![PWA Screenshot](https://img.shields.io/badge/PWA-installable-orange.svg)
+**Progressive Web App for Zagarolo weather forecasts** — Hourly rain probability for Today, Tomorrow, and the Day After Tomorrow with interactive charts, air quality indicators, and offline capability.
 
 ## ✨ Features
 
@@ -16,93 +15,94 @@
 - 📊 **Interactive charts** – Local Chart.js for hourly visualization
 - 🌫️ **Air quality** – EAQI (European Air Quality Index) indicators
 - 🔄 **Automatic updates** – Data fetched hourly (client refresh up to every 30 min)
-- 📱 **Responsive design** – Optimized for all devices
 - 🌙 **Offline mode** – Works without an internet connection
 - ⚡ **High performance** – Instant load via Service Worker caching
+- 🛰️ **Local assets** – No external CDN dependencies (Bootstrap, Chart.js bundled locally)
 
 ## 🏗️ Architecture & Technologies
 
-### Tech Stack
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6+)
-- **UI Framework**: Local Bootstrap 5
-- **Charts**: Local Chart.js
+- **UI Framework**: Bootstrap 5 (local)
+- **Charts**: Chart.js (local UMD build)
 - **PWA**: Service Worker + Web App Manifest
 - **Weather Data API**: Open-Meteo
-- **Build Tooling**: Node.js (utility scripts only)
-- **CI/CD**: GitHub Actions
+- **Data Files**: `data.json`, optional `data-precipitations.json`
+- **Build Tooling**: Node.js (utility scripts only; no bundler yet)
+- **CI/CD**: GitHub Actions (hourly data + release automation)
 - **Hosting**: GitHub Pages
 
 ### Project Structure
-```
+
+```text
 ├── index.html
-├── js/
-│   ├── modules/
-│   └── main.js
 ├── css/
-├── vendor/                # Local third‑party libraries (Bootstrap, Chart.js)
-├── data.json              # Forecast + current conditions (updated hourly)
-├── data-precipitations.json (optional observed hourly rain)
+├── js/
+│   ├── main.js
+│   └── modules/                # UI, charts, cache, icons, AQ, gestures, etc.
+├── vendor/                     # Local third‑party libraries (Bootstrap, Chart.js)
+├── data.json                   # Forecast + current conditions (hourly refresh)
+├── data-precipitations.json    # Optional observed hourly precipitation
 ├── service-worker.js
 ├── manifest.json
-└── .github/workflows/
+└── docs/                       # RFC & documentation
 ```
 
 ### Data Flow
-1. GitHub Actions workflow runs hourly
-2. Fetches Open-Meteo data (Zagarolo: 41.75°N, 12.875°E)
-3. Writes/updates `data.json` and (if available) `data-precipitations.json`
-4. App loads data with localStorage caching (TTL 3h)
-5. Service Worker provides offline capability (network / SW caching strategies)
 
-## 🚀 Demo & Installation
+1. Hourly GitHub Action fetches Open-Meteo data for Zagarolo (41.75°N, 12.875°E).
+1. Updates `data.json` (and `data-precipitations.json` if precipitation script used).
+1. Client fetches `data.json?nocache=<minute>` to mitigate stale caches.
+1. Data cached in `localStorage` (TTL 3 hours) and by the Service Worker (stale-while-revalidate for data files).
+1. Charts + UI render from cached or freshly fetched data; periodic client refresh every 30 minutes.
 
-### 🌐 Live Demo
-https://mad4j.github.io/pioveazagarolo/
+## 🌐 Live Demo
 
-### 📱 Install as PWA
-1. Open the app in a supported browser
-2. Use the browser’s “Install” or “Add to Home Screen”
-3. Launch it like a native app
+[Live deployment](https://mad4j.github.io/pioveazagarolo/)
 
 ## 🖐️ Interactions
 
-- Switch chart modes: horizontal swipe on cards or tap navigation dots.
-- Tooltips: tap weather icons or temperature for details (e.g., apparent temp, description).
-- Offline: once loaded, it works without a connection.
+- Swipe horizontally (mobile) or tap navigation dots to change chart modes.
+- Tap icons or temperature to view tooltips (apparent temperature, description, etc.).
+- Works offline after first load (network-first for navigation, caching for assets & data).
 
 ## 📂 Main Data Files
 
-- `data.json`: Current conditions + multi‑day forecast. Updated hourly by workflow. Client refresh interval: 30 minutes (with retry every 60s on failure).
-- `data-precipitations.json`: Optional observed hourly precipitation (current day only, up to 24 points, resets daily).
+- `data.json`: Current conditions + multi-day forecast (today, tomorrow, day after). Updated hourly.
+- `data-precipitations.json`: Optional observed hourly precipitation for the current day (resets daily).
 
 ## 🛠️ Local Development
 
 ### Prerequisites
+
 - Node.js 18+
 - Python 3 (or any static HTTP server)
 
 ### Quick Start
+
 ```bash
 git clone https://github.com/mad4j/pioveazagarolo.git
 cd pioveazagarolo
 npm install
 python -m http.server 8080
 # or: npx http-server -p 8080
-# Open http://localhost:8080
+# Then open http://localhost:8080
 ```
 
 ### Available Scripts
+
 ```bash
 npm run generate-changelog      # Generate changelog from tags
 npm run update-precipitation    # Incrementally update observed precipitation
 ```
 
 ### Validation Checklist
+
 Before committing:
+
 - App loads with no JavaScript errors
 - Service Worker registers
 - Charts render correctly
-- Offline reload works (stop server, refresh)
+- Offline reload works (disable network, refresh)
 
 ## 📄 Documentation
 
@@ -111,110 +111,166 @@ Before committing:
 ## 🔄 Release & Contributions
 
 ### Automated Release Process
-1. Run the GitHub Actions “Release” workflow
-2. Provide a SemVer (e.g., `1.8.0`)
-3. Workflow:
+
+1. Run the GitHub Actions “Release” workflow.
+1. Provide a SemVer (e.g., `1.8.0`).
+1. Workflow steps:
    - Bumps `package.json`
    - Creates & pushes tag
    - Regenerates `CHANGELOG.md`
    - Publishes GitHub Release with notes
 
 ### Contributing
+
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/AmazingFeature`
-3. Commit using Conventional Commits
-4. Push: `git push origin feature/AmazingFeature`
-5. Open a Pull Request
+1. Create a feature branch: `git checkout -b feature/AmazingFeature`
+1. Commit using Conventional Commits
+1. Push: `git push origin feature/AmazingFeature`
+1. Open a Pull Request
 
 ### Commit Guidelines
+
 Uses Conventional Commits: see [GUIDELINES_COMMITS.md](GUIDELINES_COMMITS.md)
 
 ## 📜 License & Credits
 
 ### License
+
 Released under [GNU GPL v3.0](LICENSE)
 
 ### Credits
+
 - **Weather Data**: [Open-Meteo](https://open-meteo.com/)
 - **Weather Icons**: [Weather Icons](https://github.com/erikflowers/weather-icons)
 - **UI Framework**: [Bootstrap 5](https://getbootstrap.com/)
 - **Charts**: [Chart.js](https://www.chartjs.org/)
 
 ### Location
-- **Zagarolo** (RM, Italy) – 41.75°N, 12.875°E (Lazio region)
 
----
+- **Zagarolo** (RM, Italy) – 41.75°N, 12.875°E (Lazio region)
 
 ## 🔮 Roadmap & Future Improvements
 
 ### 🎯 High Priority
+
 - TypeScript migration
 - Unit tests (e.g., `getRainIconClass`, caching)
 - Dark Mode (auto + manual toggle)
 - Lighthouse CI integration
 
 ### 🚀 Medium Priority
+
 - Lazy loading non-visible charts
 - English/Italian i18n (multi-language)
 - Dry Interval (“rain-free window”) detection
 - Optional rain alert push notifications
 
 ### 💡 Future Ideas
+
 - Multi-location via query string
 - Historical comparisons
 - Export charts (PNG/SVG)
 - Embeddable widget (iframe)
 
-<details>
-<summary>📋 Detailed Improvement List</summary>
+### Detailed Improvement Areas
 
-### Code Quality & Build
+Code Quality & Build:
+
 - Introduce bundler (Vite / esbuild) for minification
 - Add ESLint + Prettier
 - Extract meteorological helpers for testability
 
-### Performance
+Performance:
+
 - Pre-fetch next `data.json` before scheduled refresh
 - Brotli/Gzip compression (hosting level)
-- `navigationPreload` API for SW
+- `navigationPreload` API for Service Worker
 
-### PWA & Offline
+PWA & Offline:
+
 - Explicit offline fallback snapshot
 - IndexedDB persistence for historical trend analysis
 
-### Accessibility (a11y)
+Accessibility (a11y):
+
 - Skip link
 - Color contrast improvements (Lighthouse / axe)
-- Textual alternatives for charts
+- Text alternatives for charts
 - Support `prefers-reduced-motion`
 
+UX & UI:
+
+- Enhanced tooltips with phenomenon descriptions
+- Trend indicators vs previous run
+- Skeleton loading states
+
+Data & Features:
+
+- Cumulative daily precipitation
+- Extended air quality metrics (PM2.5, PM10, O3)
+
+SEO & Metadata:
+
+- Open Graph / Twitter Cards
+- JSON-LD with geo coordinates
+- Sitemap & robots.txt
+
+Security:
+
+- Content Security Policy & security headers
+- Subresource Integrity
+
+Monitoring:
+
+- Optional Web Vitals logging (privacy-first)
+- App version footer
+
+Maintenance:
+
+- Dependency update cadence
+- Issue templates & CONTRIBUTING.md
+- Dependabot integration
+
+---
+
+*This roadmap evolves based on user feedback. Contributions welcome!*
+
 ### UX & UI
+
 - Enhanced tooltips with phenomenon descriptions
 - Trend indicators vs previous run
 - Skeleton loading states
 
 ### Data & Features
+
 - Cumulative daily precipitation
 - Extended air quality metrics (PM2.5, PM10, O3)
 
 ### SEO & Metadata
+
 - Open Graph / Twitter Cards
 - JSON-LD with geo coordinates
 - Sitemap & robots.txt
 
 ### Security
+
 - Content Security Policy & security headers
 - Subresource Integrity
 
 ### Monitoring
+
 - Optional Web Vitals logging (privacy-first)
 - App version footer
 
 ### Maintenance
+
 - Dependency update cadence
 - Issue templates & CONTRIBUTING.md
 - Dependabot integration
 </details>
 
+*This roadmap evolves based on user feedback. Contributions welcome!*
+
 ---
+
 
