@@ -117,7 +117,7 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
             const img = document.createElement('img');
             img.src = canvas.toDataURL('image/png');
             img.style.width = '100%';
-            img.style.height = '100%';
+            img.style.height = 'auto';
             img.style.display = 'block';
             clone.appendChild(img);
           } catch (e) {
@@ -126,12 +126,17 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
           }
         }
         
+        // Get exact dimensions of the original chart container for proper alignment
+        const containerRect = chartContainer.getBoundingClientRect();
+        const containerHeight = chartContainer.offsetHeight;
+        
         // Position clone absolutely to overlay the original
         clone.style.position = 'absolute';
         clone.style.top = '0';
         clone.style.left = '0';
         clone.style.right = '0';
         clone.style.width = '100%';
+        clone.style.height = containerHeight + 'px';
         clone.style.zIndex = '10';
         clone.style.pointerEvents = 'none';
         
