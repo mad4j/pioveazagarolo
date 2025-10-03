@@ -5,6 +5,48 @@ export const chartInstances = {};
 
 export function getDaySlice(array, dayIndex) { const start = dayIndex * 24; return array.slice(start, start + 24); }
 
+/**
+ * Calculate unified pressure scale across all three days to ensure 1013 hPa line aligns
+ * @param {number[]} pressureData - Array of 72 hourly pressure values (3 days)
+ * @returns {{min: number, max: number}} Unified min and max pressure for all charts
+ */
+export function calculateUnifiedPressureScale(pressureData) {
+  if (!pressureData || pressureData.length < 72) return null;
+  
+  const referencePoint = 1013;
+  
+  // Get min and max across all 72 hours
+  const dataMin = Math.min(...pressureData.slice(0, 72));
+  const dataMax = Math.max(...pressureData.slice(0, 72));
+  
+  // Calculate natural data range with padding
+  const dataRange = dataMax - dataMin;
+  const basePadding = Math.max(dataRange * 0.15, 3); // 15% padding or minimum 3 hPa
+  
+  // Start with natural data bounds plus padding
+  let minPressure = dataMin - basePadding;
+  let maxPressure = dataMax + basePadding;
+  
+  // Ensure 1013 hPa reference line is visible within the chart
+  if (referencePoint < minPressure) {
+    // 1013 is below the current range, extend downward
+    minPressure = referencePoint - basePadding;
+  } else if (referencePoint > maxPressure) {
+    // 1013 is above the current range, extend upward  
+    maxPressure = referencePoint + basePadding;
+  }
+  
+  // Ensure minimum range for chart readability
+  const finalRange = maxPressure - minPressure;
+  if (finalRange < 10) {
+    const center = (minPressure + maxPressure) / 2;
+    minPressure = center - 5;
+    maxPressure = center + 5;
+  }
+  
+  return { min: minPressure, max: maxPressure };
+}
+
 // Plugin linea ora corrente
 export const currentHourLinePlugin = {
   id: 'currentHourLine', afterDraw(chart, args, opts) {
@@ -1014,7 +1056,7 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
   }
 }
 
-export function buildPressureChart(target, pressureData, sunriseTime = null, sunsetTime = null, weatherCodes = null, isDayData = null) {
+export function buildPressureChart(target, pressureData, sunriseTime = null, sunsetTime = null, weatherCodes = null, isDayData = null, unifiedScale = null) {
   const el = document.getElementById(target);
   if (!el) return;
   // Clean up existing tooltip before destroying chart to prevent duplicates
@@ -1026,35 +1068,45 @@ export function buildPressureChart(target, pressureData, sunriseTime = null, sun
   const pressureDeltas = pressureData.map(pressure => pressure - 1013);
   const deltasColors = pressureDeltas.map(getPressureDeltaBarColor);
   
-  // Calculate scale to ensure 1013 hPa is visible but not necessarily centered
-  const dataMin = Math.min(...pressureData);
-  const dataMax = Math.max(...pressureData);
+  let minPressure, maxPressure;
+  
+  // Use unified scale if provided, otherwise calculate individual scale
+  if (unifiedScale && typeof unifiedScale.min === 'number' && typeof unifiedScale.max === 'number') {
+    minPressure = unifiedScale.min;
+    maxPressure = unifiedScale.max;
+  } else {
+    // Calculate scale to ensure 1013 hPa is visible but not necessarily centered
+    const dataMin = Math.min(...pressureData);
+    const dataMax = Math.max(...pressureData);
+    const referencePoint = 1013;
+    
+    // Calculate natural data range with padding
+    const dataRange = dataMax - dataMin;
+    const basePadding = Math.max(dataRange * 0.15, 3); // 15% padding or minimum 3 hPa
+    
+    // Start with natural data bounds plus padding
+    minPressure = dataMin - basePadding;
+    maxPressure = dataMax + basePadding;
+    
+    // Ensure 1013 hPa reference line is visible within the chart
+    if (referencePoint < minPressure) {
+      // 1013 is below the current range, extend downward
+      minPressure = referencePoint - basePadding;
+    } else if (referencePoint > maxPressure) {
+      // 1013 is above the current range, extend upward  
+      maxPressure = referencePoint + basePadding;
+    }
+    
+    // Ensure minimum range for chart readability
+    const finalRange = maxPressure - minPressure;
+    if (finalRange < 10) {
+      const center = (minPressure + maxPressure) / 2;
+      minPressure = center - 5;
+      maxPressure = center + 5;
+    }
+  }
+  
   const referencePoint = 1013;
-  
-  // Calculate natural data range with padding
-  const dataRange = dataMax - dataMin;
-  const basePadding = Math.max(dataRange * 0.15, 3); // 15% padding or minimum 3 hPa
-  
-  // Start with natural data bounds plus padding
-  let minPressure = dataMin - basePadding;
-  let maxPressure = dataMax + basePadding;
-  
-  // Ensure 1013 hPa reference line is visible within the chart
-  if (referencePoint < minPressure) {
-    // 1013 is below the current range, extend downward
-    minPressure = referencePoint - basePadding;
-  } else if (referencePoint > maxPressure) {
-    // 1013 is above the current range, extend upward  
-    maxPressure = referencePoint + basePadding;
-  }
-  
-  // Ensure minimum range for chart readability
-  const finalRange = maxPressure - minPressure;
-  if (finalRange < 10) {
-    const center = (minPressure + maxPressure) / 2;
-    minPressure = center - 5;
-    maxPressure = center + 5;
-  }
   
   // Calculate delta scale range - center delta bars on 1013 hPa line
   const maxDelta = Math.max(...pressureDeltas.map(Math.abs));

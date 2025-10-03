@@ -1,6 +1,6 @@
-import { DAY_CONFIGS, ARIA_LABEL_DAY, dayFormatter, $, chartModes } from './constants.js';
+import { DAY_CONFIGS, ARIA_LABEL_DAY, dayFormatter, $, chartModes, CHART_MODES } from './constants.js';
 import { getRainIconClass, getWeatherDescription } from './icons.js';
-import { buildChart, getDaySlice } from './charts.js';
+import { buildChart, getDaySlice, calculateUnifiedPressureScale } from './charts.js';
 import { precipitationManager } from './precipitation.js';
 import { updateAirQualityDisplay } from './air-quality.js';
 import { buildAppropriateChart } from './chart-toggle.js';
@@ -337,6 +337,13 @@ export function displayData(data){
   // Update weather icons for all day cards
   updateWeatherIcons(data);
   
+  // Calculate unified pressure scale if in pressure mode
+  let unifiedPressureScale = null;
+  const currentMode = chartModes['today-chart'];
+  if (currentMode === CHART_MODES.PRESSURE && hourly.pressure_msl && hourly.pressure_msl.length >= 72) {
+    unifiedPressureScale = calculateUnifiedPressureScale(hourly.pressure_msl);
+  }
+  
   DAY_CONFIGS.forEach(cfg => {
     const i = cfg.index;
     const maxEl = $(`${cfg.key}-temp-max`); if (maxEl) maxEl.textContent = `${Math.round(daily.temperature_2m_max[i])}°`;
@@ -405,7 +412,7 @@ export function displayData(data){
       // }
     }
     
-    buildAppropriateChart(cfg.chartId, data, i);
+    buildAppropriateChart(cfg.chartId, data, i, unifiedPressureScale);
   });
   
   // Setup navigation dots
