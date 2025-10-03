@@ -2,6 +2,22 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.9.0] - 2025-10-03
+
+### Features
+- feat(pressure): remove line graph and update 1013hPa reference to purple (c50042e1)
+
+### Fix
+- Fix animation overflow in weather cards (5a9a8957)
+
+### Other
+- chore(release): prepare 1.9.0 (e7ed75e3)
+- Update service-worker.js (545c2ca4)
+- chore: aggiornamento dati meteo (rolling) (186c3713)
+- Initial plan (8d95d1a8)
+- chore: auto-update CHANGELOG for 1.9.9 (4cdd9ba2)
+- Initial plan (353b4e74)
+
 ## [1.9.9] - 2025-10-03
 
 ### Features
