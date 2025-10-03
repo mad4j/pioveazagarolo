@@ -2,6 +2,31 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.8.8] - 2025-10-03
+
+### Features
+- Add horizontal swipe animation for chart mode transitions (4907a11a)
+- Add requirements RFC and update documentation links (28d6778d)
+- Improve data fetch robustness and chart tooltip cleanup (3289f47d)
+- Improve weather icon tooltip debounce and dismissal (4497a269)
+
+### Other
+- chore(release): prepare 1.8.8 (ec356590)
+- Update service-worker.js (135e4959)
+- chore: aggiornamento dati meteo (rolling) (c7f39fa1)
+- Initial plan (1544640f)
+- chore: aggiornamento dati meteo (rolling) (ffe95379)
+- chore: aggiornamento dati meteo (rolling) (96dfe04f)
+- chore: aggiornamento dati meteo (rolling) (b1b76d41)
+- Update RFC-001-piove-a-zagarolo-requirements.md (37d0a08c)
+- Move _config.yml to project root (5d49f249)
+- Update copilot-instructions.md (3d95365f)
+- chore: aggiornamento dati meteo (rolling) (b68ee9ea)
+- chore: aggiornamento dati meteo (rolling) (e246343a)
+- Enhance air quality chart UV index styling and interaction (7ccdecfd)
+- Adjust dataset order in air quality chart (6a024956)
+- chore: aggiornamento dati meteo (rolling) (4a1900e0)
+
 ## [1.8.7] - 2025-09-21
 
 ### Features
