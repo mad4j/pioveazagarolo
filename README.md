@@ -1,237 +1,220 @@
-# Piove a Zagarolo? 🌧️
+# Is It Raining in Zagarolo? 🌧️
 
 [![Update Weather Data](https://github.com/mad4j/pioveazagarolo/actions/workflows/build.yml/badge.svg)](https://github.com/mad4j/pioveazagarolo/actions/workflows/build.yml)
 [![Latest Release](https://img.shields.io/github/v/release/mad4j/pioveazagarolo)](https://github.com/mad4j/pioveazagarolo/releases/latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Live Demo](https://img.shields.io/badge/demo-live-green.svg)](https://mad4j.github.io/pioveazagarolo/)
 
-**Progressive Web App per le previsioni meteo di Zagarolo** - Visualizza le probabilità di pioggia per oggi, domani e dopodomani con grafici orari interattivi e indicatori di qualità dell'aria.
+**Progressive Web App for Zagarolo weather forecasts** — Hourly rain probability for Today, Tomorrow, and the Day After Tomorrow with interactive charts and air quality indicators.
 
-![Screenshot dell'app](https://img.shields.io/badge/PWA-installabile-orange.svg)
+![PWA Screenshot](https://img.shields.io/badge/PWA-installable-orange.svg)
 
-## ✨ Caratteristiche
+## ✨ Features
 
-- 📱 **Progressive Web App** - Installabile come app nativa su desktop e mobile
-- 🌡️ **Previsioni complete** - Temperatura, precipitazioni, umidità, pressione e vento
-- 📊 **Grafici interattivi** - Chart.js per visualizzazioni orarie delle precipitazioni
-- 🌫️ **Qualità dell'aria** - Indicatori EAQI (European Air Quality Index)
-- 🔄 **Aggiornamento automatico** - Dati aggiornati ogni ora tramite Open-Meteo API
-- 📱 **Design responsive** - Ottimizzato per tutti i dispositivi
-- 🌙 **Modalità offline** - Funziona senza connessione internet
-- ⚡ **Performance elevate** - Caricamento istantaneo con Service Worker
+- 📱 **Progressive Web App** – Installable on desktop and mobile
+- 🌡️ **Complete forecasts** – Temperature, precipitation, humidity, pressure, wind
+- 📊 **Interactive charts** – Local Chart.js for hourly visualization
+- 🌫️ **Air quality** – EAQI (European Air Quality Index) indicators
+- 🔄 **Automatic updates** – Data fetched hourly (client refresh up to every 30 min)
+- 📱 **Responsive design** – Optimized for all devices
+- 🌙 **Offline mode** – Works without an internet connection
+- ⚡ **High performance** – Instant load via Service Worker caching
 
-## 🏗️ Architettura e Tecnologie
+## 🏗️ Architecture & Technologies
 
-### Stack Tecnologico
-- **Frontend**: HTML5, CSS3, JavaScript ES6+ (Vanilla)
-- **UI Framework**: Bootstrap 5 (locale)
-- **Grafici**: Chart.js (locale)
-- **PWA**: Service Worker, Web App Manifest
-- **API Dati**: Open-Meteo API
-- **Build**: Node.js (solo per script di utility)
+### Tech Stack
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6+)
+- **UI Framework**: Local Bootstrap 5
+- **Charts**: Local Chart.js
+- **PWA**: Service Worker + Web App Manifest
+- **Weather Data API**: Open-Meteo
+- **Build Tooling**: Node.js (utility scripts only)
 - **CI/CD**: GitHub Actions
 - **Hosting**: GitHub Pages
 
-### Struttura del Progetto
+### Project Structure
 ```
-├── index.html              # Pagina principale dell'applicazione
-├── js/                     # Logica JavaScript modulare
-│   ├── modules/           # Moduli dell'applicazione
-│   └── main.js            # Script principale
-├── css/                   # Fogli di stile
-├── vendor/                # Librerie di terze parti (Bootstrap, Chart.js)
-├── data.json              # Dati meteo (aggiornati automaticamente)
-├── service-worker.js      # Service Worker per PWA
-├── manifest.json          # Manifest PWA
-└── .github/workflows/     # Automazioni CI/CD
+├── index.html
+├── js/
+│   ├── modules/
+│   └── main.js
+├── css/
+├── vendor/                # Local third‑party libraries (Bootstrap, Chart.js)
+├── data.json              # Forecast + current conditions (updated hourly)
+├── data-precipitations.json (optional observed hourly rain)
+├── service-worker.js
+├── manifest.json
+└── .github/workflows/
 ```
 
-### Flusso dei Dati
-1. **GitHub Actions** esegue ogni ora il workflow di aggiornamento
-2. Scarica dati da **Open-Meteo API** (Zagarolo: 41.75°N, 12.875°E)
-3. Aggiorna `data.json` e `data-precipitations.json`
-4. L'app carica i dati con caching localStorage (3h TTL)
-5. **Service Worker** garantisce funzionamento offline
+### Data Flow
+1. GitHub Actions workflow runs hourly
+2. Fetches Open-Meteo data (Zagarolo: 41.75°N, 12.875°E)
+3. Writes/updates `data.json` and (if available) `data-precipitations.json`
+4. App loads data with localStorage caching (TTL 3h)
+5. Service Worker provides offline capability (network / SW caching strategies)
 
-## 🚀 Demo e Installazione
+## 🚀 Demo & Installation
 
-### 🌐 Demo Live
-Visita: **[https://mad4j.github.io/pioveazagarolo/](https://mad4j.github.io/pioveazagarolo/)**
+### 🌐 Live Demo
+https://mad4j.github.io/pioveazagarolo/
 
-### 📱 Installazione PWA
-1. Apri l'app nel browser
-2. Clicca sull'icona "Installa" nella barra superiore
-3. Segui le istruzioni del browser per installare l'app
-4. L'app sarà disponibile come applicazione nativa
+### 📱 Install as PWA
+1. Open the app in a supported browser
+2. Use the browser’s “Install” or “Add to Home Screen”
+3. Launch it like a native app
 
-## 🖐️ Interazioni
+## 🖐️ Interactions
 
-- Cambio modalità grafici: scorri orizzontalmente sulle card oppure tocca i puntini in basso.
-- Tooltip: tocca le icone meteo o la temperatura per dettagli (ad es. percepita, descrizione meteo).
-- Offline: dopo il primo avvio, l'app funziona anche senza connessione.
+- Switch chart modes: horizontal swipe on cards or tap navigation dots.
+- Tooltips: tap weather icons or temperature for details (e.g., apparent temp, description).
+- Offline: once loaded, it works without a connection.
 
-## File Dati Principali
+## 📂 Main Data Files
 
-- `data.json`: Previsioni e condizioni attuali (aggiornato ogni 30 min via GitHub Actions)
-- `data-precipitations.json`: Precipitazioni reali orarie del giorno corrente (build incrementale, max 24 valori, reset giornaliero)
+- `data.json`: Current conditions + multi‑day forecast. Updated hourly by workflow. Client refresh interval: 30 minutes (with retry every 60s on failure).
+- `data-precipitations.json`: Optional observed hourly precipitation (current day only, up to 24 points, resets daily).
 
-## 🛠️ Sviluppo Locale
+## 🛠️ Local Development
 
-### Prerequisiti
-- Node.js 18+ (per script di utility)
-- Python 3 (per server di sviluppo) o qualsiasi server HTTP statico
+### Prerequisites
+- Node.js 18+
+- Python 3 (or any static HTTP server)
 
-### Setup Rapido
+### Quick Start
 ```bash
-# Clona il repository
 git clone https://github.com/mad4j/pioveazagarolo.git
 cd pioveazagarolo
-
-# Installa dipendenze (solo per script)
 npm install
-
-# Avvia server di sviluppo
-python3 -m http.server 8080
-# oppure
-npx http-server -p 8080
-
-# Apri http://localhost:8080
+python -m http.server 8080
+# or: npx http-server -p 8080
+# Open http://localhost:8080
 ```
 
-### Script Disponibili
+### Available Scripts
 ```bash
-# Genera changelog da git tags
-npm run generate-changelog
-
-# Aggiorna precipitazioni incrementali
-npm run update-precipitation
+npm run generate-changelog      # Generate changelog from tags
+npm run update-precipitation    # Incrementally update observed precipitation
 ```
 
-### Validazione
-Prima di committare, verifica che:
-- L'app si carichi senza errori JavaScript
-- Il Service Worker si registri correttamente
-- I grafici si visualizzino correttamente
-- La modalità offline funzioni (ferma il server e ricarica)
+### Validation Checklist
+Before committing:
+- App loads with no JavaScript errors
+- Service Worker registers
+- Charts render correctly
+- Offline reload works (stop server, refresh)
 
-## � Documentazione
+## 📄 Documentation
 
-- Requisiti e interfacce (RFC): [docs/RFC-001-piove-a-zagarolo-requirements.md](docs/RFC-001-piove-a-zagarolo-requirements.md)
+- Requirements & interfaces (RFC): [docs/RFC-001-piove-a-zagarolo-requirements.md](docs/RFC-001-piove-a-zagarolo-requirements.md)
 
-## �🔄 Release e Contributi
+## 🔄 Release & Contributions
 
-### Processo di Release Automatico
-Per pubblicare una nuova versione:
-1. Usa il workflow GitHub **Release** (Actions > Release > Run workflow)
-2. Specifica la versione SemVer (es: `1.8.0`)
-3. Il workflow esegue automaticamente:
-   - Bump di `package.json`
-   - Creazione e push del tag
-   - Rigenerazione `CHANGELOG.md`
-   - Creazione GitHub Release con note
+### Automated Release Process
+1. Run the GitHub Actions “Release” workflow
+2. Provide a SemVer (e.g., `1.8.0`)
+3. Workflow:
+   - Bumps `package.json`
+   - Creates & pushes tag
+   - Regenerates `CHANGELOG.md`
+   - Publishes GitHub Release with notes
 
-### Contribuire al Progetto
-1. Fai fork del repository
-2. Crea un branch per la tua feature (`git checkout -b feature/AmazingFeature`)
-3. Commita le modifiche seguendo [Conventional Commits](GUIDELINES_COMMITS.md)
-4. Push al branch (`git push origin feature/AmazingFeature`)
-5. Apri una Pull Request
+### Contributing
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit using Conventional Commits
+4. Push: `git push origin feature/AmazingFeature`
+5. Open a Pull Request
 
-### Linee Guida Commit
-Il progetto usa [Conventional Commits](https://conventionalcommits.org/). Vedi [GUIDELINES_COMMITS.md](GUIDELINES_COMMITS.md) per dettagli.
+### Commit Guidelines
+Uses Conventional Commits: see [GUIDELINES_COMMITS.md](GUIDELINES_COMMITS.md)
 
-## 📜 Licenza e Crediti
+## 📜 License & Credits
 
-### Licenza
-Questo progetto è distribuito sotto licenza [GNU General Public License v3.0](LICENSE).
+### License
+Released under [GNU GPL v3.0](LICENSE)
 
-### Crediti
-- **Dati meteo**: [Open-Meteo API](https://open-meteo.com/) - Servizio gratuito per previsioni meteorologiche
-- **Icone meteo**: [Weather Icons](https://github.com/erikflowers/weather-icons) - Font iconografico per condizioni meteorologiche
-- **UI Framework**: [Bootstrap 5](https://getbootstrap.com/) - Framework CSS responsive
-- **Grafici**: [Chart.js](https://www.chartjs.org/) - Libreria JavaScript per grafici interattivi
+### Credits
+- **Weather Data**: [Open-Meteo](https://open-meteo.com/)
+- **Weather Icons**: [Weather Icons](https://github.com/erikflowers/weather-icons)
+- **UI Framework**: [Bootstrap 5](https://getbootstrap.com/)
+- **Charts**: [Chart.js](https://www.chartjs.org/)
 
-### Località
-- **Zagarolo** (RM, Italia) - Coordinate: 41.75°N, 12.875°E
-- Zona: Lazio, Provincia di Roma, Monti Prenestini
+### Location
+- **Zagarolo** (RM, Italy) – 41.75°N, 12.875°E (Lazio region)
 
 ---
 
-## 🔮 Roadmap e Miglioramenti Futuri
+## 🔮 Roadmap & Future Improvements
 
-Roadmap delle prossime evoluzioni pianificate (in ordine di priorità):
+### 🎯 High Priority
+- TypeScript migration
+- Unit tests (e.g., `getRainIconClass`, caching)
+- Dark Mode (auto + manual toggle)
+- Lighthouse CI integration
 
-### 🎯 Alta Priorità
-- **TypeScript Migration**: Migrazione a TypeScript per maggiore robustezza
-- **Unit Testing**: Test automatici per funzioni critiche (`getRainIconClass`, caching)
-- **Dark Mode**: Modalità scura automatica e toggle manuale
-- **Lighthouse CI**: Integrazione per monitoraggio performance/PWA/accessibilità
+### 🚀 Medium Priority
+- Lazy loading non-visible charts
+- English/Italian i18n (multi-language)
+- Dry Interval (“rain-free window”) detection
+- Optional rain alert push notifications
 
-### 🚀 Media Priorità  
-- **Lazy Loading**: Caricamento differito grafici non visibili
-- **Multi-lingua**: Supporto inglese con sistema i18n
-- **Finestra Asciutta**: Calcolo intervalli senza precipitazioni
-- **Push Notifications**: Notifiche opzionali per allerte pioggia
-
-### 💡 Idee Future
-- **Multi-località**: Supporto per altre città tramite query string
-- **Dati storici**: Confronto con medie storiche stesso periodo
-- **Export grafici**: Condivisione PNG/SVG dei grafici
-- **Widget embeddabile**: iframe per integrazione su altri siti
+### 💡 Future Ideas
+- Multi-location via query string
+- Historical comparisons
+- Export charts (PNG/SVG)
+- Embeddable widget (iframe)
 
 <details>
-<summary>📋 Lista dettagliata miglioramenti</summary>
+<summary>📋 Detailed Improvement List</summary>
 
-### Qualità del Codice & Build
-- Introdurre bundler (Vite/esbuild) per minificazione e tree-shaking
-- Aggiungere linting (ESLint) + formattazione (Prettier)
-- Estrarre funzioni meteo in moduli separati per testabilità
+### Code Quality & Build
+- Introduce bundler (Vite / esbuild) for minification
+- Add ESLint + Prettier
+- Extract meteorological helpers for testability
 
 ### Performance
-- Pre-caricare `data.json` prima del prossimo aggiornamento
-- Compressione Brotli/Gzip a livello hosting
-- `navigationPreload` API per ridurre latenza Service Worker
+- Pre-fetch next `data.json` before scheduled refresh
+- Brotli/Gzip compression (hosting level)
+- `navigationPreload` API for SW
 
 ### PWA & Offline
-- Fallback offline esplicito con ultimo snapshot
-- Persistenza IndexedDB per storico dati (analisi trend)
+- Explicit offline fallback snapshot
+- IndexedDB persistence for historical trend analysis
 
-### Accessibilità (a11y)
-- Skip link per navigazione rapida
-- Migliorare contrasto colori (Lighthouse/axe)
-- Descrizioni testuali alternative per grafici
-- Supporto `prefers-reduced-motion`
+### Accessibility (a11y)
+- Skip link
+- Color contrast improvements (Lighthouse / axe)
+- Textual alternatives for charts
+- Support `prefers-reduced-motion`
 
 ### UX & UI
-- Tooltip avanzati con descrizioni fenomeni ("6 mm/h = pioggia forte")
-- Indicatori trend rispetto al run precedente
-- Skeleton loading per carte prima del caricamento
+- Enhanced tooltips with phenomenon descriptions
+- Trend indicators vs previous run
+- Skeleton loading states
 
-### Dati & Funzionalità
-- Cumulato progressivo precipitazioni giornaliero
-- Supporto qualità dell'aria estesa (PM2.5, PM10, O3)
+### Data & Features
+- Cumulative daily precipitation
+- Extended air quality metrics (PM2.5, PM10, O3)
 
-### SEO & Metadati
-- Meta Open Graph/Twitter Card
-- JSON-LD con coordinate località
-- Sitemap e robots.txt
+### SEO & Metadata
+- Open Graph / Twitter Cards
+- JSON-LD with geo coordinates
+- Sitemap & robots.txt
 
-### Sicurezza
-- Content Security Policy e security headers
-- Subresource Integrity per risorse esterne
+### Security
+- Content Security Policy & security headers
+- Subresource Integrity
 
-### Monitoraggio
-- Web Vitals logging opzionale (privacy-first)
-- Versione app visibile nel footer
+### Monitoring
+- Optional Web Vitals logging (privacy-first)
+- App version footer
 
-### Manutenzione
-- Aggiornamento periodico dipendenze
-- GitHub Issue Templates e CONTRIBUTING.md
-- Dependabot per avvisi sicurezza
-
+### Maintenance
+- Dependency update cadence
+- Issue templates & CONTRIBUTING.md
+- Dependabot integration
 </details>
 
 ---
-
-*Sezione aggiornata in base a feedback utenti e necessità emergenti. Contributi e suggerimenti sono sempre benvenuti!*
 
