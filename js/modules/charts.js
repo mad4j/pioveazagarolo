@@ -603,18 +603,18 @@ export function getPressureDeltaBarColor(delta) {
 
 /**
  * Get warning color for showers/snowfall based on severity
- * @param {number} showers - Showers amount in mm/h
- * @param {number} snowfall - Snowfall amount in cm/h
+ * @param {number} showersTotal - Total showers amount in mm (sum across interval)
+ * @param {number} snowfallTotal - Total snowfall amount in cm (sum across interval)
  * @returns {string|null} Color code for warning icon or null if no warning
  */
-export function getShowersSnowfallWarningColor(showers, snowfall) {
+export function getShowersSnowfallWarningColor(showersTotal, snowfallTotal) {
   // Convert snowfall to mm equivalent (1cm snow ≈ 10mm water equivalent)
-  const snowfallMm = snowfall * 10;
-  const totalIntensity = showers + snowfallMm;
+  const snowfallMm = snowfallTotal * 10;
+  const totalIntensity = showersTotal + snowfallMm;
   
-  if (totalIntensity > 5) return '#e74c3c';      // Red - Heavy (> 5mm/h equivalent)
-  if (totalIntensity > 1) return '#f39c12';      // Orange - Medium (1-5mm/h equivalent)
-  if (totalIntensity > 0) return '#f1c40f';      // Yellow - Light (> 0mm/h equivalent)
+  if (totalIntensity > 15) return '#e74c3c';     // Red - Heavy (> 15mm total in 3h)
+  if (totalIntensity > 3) return '#f39c12';      // Orange - Medium (3-15mm total in 3h)
+  if (totalIntensity > 0) return '#f1c40f';      // Yellow - Light (> 0mm total in 3h)
   return null;
 }
 
@@ -624,16 +624,16 @@ export function getShowersSnowfallWarningColor(showers, snowfall) {
  * @param {number} x - X position
  * @param {number} y - Y position
  * @param {string} color - Color of the icon
- * @param {number} showers - Showers amount in mm/h
- * @param {number} snowfall - Snowfall amount in cm/h
+ * @param {number} showersTotal - Total showers amount in mm (sum across interval)
+ * @param {number} snowfallTotal - Total snowfall amount in cm (sum across interval)
  */
-function drawShowersSnowfallIcon(ctx, x, y, color, showers, snowfall) {
+function drawShowersSnowfallIcon(ctx, x, y, color, showersTotal, snowfallTotal) {
   ctx.save();
   
   // Determine which icon to use based on predominant type
   // If snowfall is present (even small amounts), show snow icon
   // Otherwise show showers icon
-  const glyph = snowfall > 0 ? '\uf01b' : '\uf01a';  // wi-snow : wi-showers
+  const glyph = snowfallTotal > 0 ? '\uf01b' : '\uf01a';  // wi-snow : wi-showers
   
   ctx.font = '14px weathericons';
   ctx.textAlign = 'center';
@@ -652,7 +652,7 @@ function drawShowersSnowfallIcon(ctx, x, y, color, showers, snowfall) {
   ctx.restore();
 }
 
-// Plugin for showers/snowfall warning icons
+// Plugin for showers/snowfall warning icons (one per 3-hour interval)
 export const showersSnowfallWarningPlugin = {
   id: 'showersSnowfallWarning',
   afterDraw(chart, args, opts) {
@@ -666,19 +666,40 @@ export const showersSnowfallWarningPlugin = {
     
     ctx.save();
     
-    // Draw warning icons for each hour
-    opts.showers.forEach((shower, index) => {
-      const snowfall = opts.snowfall[index] || 0;
-      const color = getShowersSnowfallWarningColor(shower, snowfall);
+    // Intervalli di 3 ore: 0-2, 3-5, 6-8, 9-11, 12-14, 15-17, 18-20, 21-23
+    const threeHourIntervals = [
+      { start: 0, center: 1 },   // 00:00-02:59, centered at 01:30
+      { start: 3, center: 4 },   // 03:00-05:59, centered at 04:30  
+      { start: 6, center: 7 },   // 06:00-08:59, centered at 07:30
+      { start: 9, center: 10 },  // 09:00-11:59, centered at 10:30
+      { start: 12, center: 13 }, // 12:00-14:59, centered at 13:30
+      { start: 15, center: 16 }, // 15:00-17:59, centered at 16:30
+      { start: 18, center: 19 }, // 18:00-20:59, centered at 19:30
+      { start: 21, center: 22 }  // 21:00-23:59, centered at 22:30
+    ];
+    
+    threeHourIntervals.forEach(interval => {
+      const { start, center } = interval;
+      let showersTotal = 0;
+      let snowfallTotal = 0;
+      
+      // Sum showers and snowfall values for this 3-hour interval
+      for (let i = start; i < start + 3 && i < opts.showers.length; i++) {
+        showersTotal += opts.showers[i] || 0;
+        snowfallTotal += opts.snowfall[i] || 0;
+      }
+      
+      // Calculate warning color based on total precipitation
+      const color = getShowersSnowfallWarningColor(showersTotal, snowfallTotal);
       
       if (color) {
-        const x = xScale.getPixelForValue(index);
+        const x = xScale.getPixelForValue(center);
         
         // Only draw if within visible area
         if (x >= left && x <= right) {
           // Position at top of chart area
           const y = top + 8;
-          drawShowersSnowfallIcon(ctx, x, y, color, shower, snowfall);
+          drawShowersSnowfallIcon(ctx, x, y, color, showersTotal, snowfallTotal);
         }
       }
     });
