@@ -691,6 +691,15 @@ footer .chart-mode-navigation {
   animation: slide-in-from-right 0.3s ease-out forwards;
 }
 
+/* Animation classes for cloned containers during transitions */
+.chart-container-clone.swipe-clone-left {
+  animation: slide-out-to-left 0.3s ease-out forwards;
+}
+
+.chart-container-clone.swipe-clone-right {
+  animation: slide-out-to-right 0.3s ease-out forwards;
+}
+
 /* Weather icon tooltips are now created dynamically using the same style as air quality tooltips */
 
 .footer-link {
