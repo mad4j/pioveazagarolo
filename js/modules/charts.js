@@ -726,7 +726,7 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
       scales, 
       plugins: { 
         temperature21Line: {
-          color: '#27ae60',
+          color: 'rgb(231,76,60)',
           lineWidth: 2,
           lineDash: [8, 4],
           opacity: 0.8,
