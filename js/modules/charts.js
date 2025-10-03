@@ -215,6 +215,48 @@ export const uvAlertLinePlugin = {
   }
 };
 
+// Plugin per linea 21°C in modalità temperatura
+export const temperature21LinePlugin = {
+  id: 'temperature21Line',
+  afterDraw(chart, args, opts) {
+    const yScale = chart.scales.y;
+    if (!yScale) return;
+    
+    const { ctx, chartArea } = chart;
+    const { left, right, top, bottom } = chartArea;
+    
+    // Get the y pixel position for 21°C
+    const y21 = yScale.getPixelForValue(21);
+    
+    // Only draw the line if 21°C is within the visible range
+    if (y21 >= top && y21 <= bottom) {
+      ctx.save();
+      ctx.strokeStyle = opts?.color || '#27ae60';
+      ctx.lineWidth = opts?.lineWidth || 2;
+      ctx.setLineDash(opts?.lineDash || [8, 4]);
+      ctx.globalAlpha = opts?.opacity || 0.8;
+      
+      ctx.beginPath();
+      ctx.moveTo(left, y21);
+      ctx.lineTo(right, y21);
+      ctx.stroke();
+      
+      // Etichetta a destra, sotto la linea
+      if (opts?.label) {
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        ctx.font = (opts.font && typeof opts.font === 'string') ? opts.font : '8px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        ctx.fillText(opts.label, right - 4, y21 + 2);
+      }
+      
+      ctx.restore();
+    }
+  }
+};
+
 // Plugin per icone meteo in modalità pressione (ogni 3 ore)
 export const pressureWeatherIconsPlugin = {
   id: 'pressureWeatherIcons',
@@ -548,10 +590,21 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
   if (chartInstances[target]) chartInstances[target].destroy();
   
   const tempColors = temperatureData.map(getTemperatureLineColor);
-  const minTemp = Math.min(...temperatureData, ...apparentTemperatureData) - 2;
-  const maxTemp = Math.max(...temperatureData, ...apparentTemperatureData) + 2;
+  let minTemp = Math.min(...temperatureData, ...apparentTemperatureData) - 2;
+  let maxTemp = Math.max(...temperatureData, ...apparentTemperatureData) + 2;
+  
+  // Ensure 21°C reference line is always visible in the chart
+  const referenceTemp = 21;
+  if (minTemp > referenceTemp) {
+    minTemp = referenceTemp - 2;
+  }
+  if (maxTemp < referenceTemp) {
+    maxTemp = referenceTemp + 2;
+  }
+  
   const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
+  plugins.push(temperature21LinePlugin);
   plugins.push(xAxisAnchorLabelsPlugin);
   
   // Build datasets array - always include temperature lines
@@ -672,6 +725,13 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
       }, 
       scales, 
       plugins: { 
+        temperature21Line: {
+          color: 'rgb(231,76,60)',
+          lineWidth: 2,
+          lineDash: [8, 4],
+          opacity: 0.8,
+          label: '21°C'
+        },
         currentHourLine: { 
           color: '#27ae60', 
           overlayColor: 'rgba(128,128,128,0.18)' 
