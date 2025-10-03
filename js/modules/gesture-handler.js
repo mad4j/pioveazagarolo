@@ -106,9 +106,26 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
     forecastCards.forEach(card => {
       const chartContainer = card.querySelector('.chart-container');
       if (chartContainer) {
-        // Clone the chart container to animate it out while new content animates in
-        const clone = chartContainer.cloneNode(true);
-        clone.classList.add('chart-container-clone', slideOutClass.replace('swipe-transition-', 'swipe-clone-'));
+        // Create a visual snapshot of the chart by converting canvas to image
+        const canvas = chartContainer.querySelector('canvas');
+        const clone = document.createElement('div');
+        clone.className = 'chart-container chart-container-clone ' + slideOutClass.replace('swipe-transition-', 'swipe-clone-');
+        
+        // If canvas exists, convert it to an image for the slide-out animation
+        if (canvas) {
+          try {
+            const img = document.createElement('img');
+            img.src = canvas.toDataURL('image/png');
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.display = 'block';
+            clone.appendChild(img);
+          } catch (e) {
+            // If canvas conversion fails, use empty clone
+            console.warn('Could not convert canvas to image:', e);
+          }
+        }
+        
         // Position clone absolutely to overlay the original
         clone.style.position = 'absolute';
         clone.style.top = '0';
