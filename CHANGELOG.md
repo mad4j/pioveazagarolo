@@ -2,6 +2,20 @@
 
 Generato da _scripts/generate-changelog.js
 
+## [1.9.9] - 2025-10-03
+
+### Features
+- feat: add 21°C reference line to temperature view (e0dd5b8e)
+
+### Docs
+- docs: update RFC with temperature21LinePlugin details (63ae6ccc)
+
+### Other
+- chore(release): prepare 1.9.9 (dd3ca8d1)
+- style: change 21°C line color to match temperature graph (8df08111)
+- chore: auto-update CHANGELOG for 1.8.8 (9912e37d)
+- Initial plan (51a5d44d)
+
 ## [1.8.8] - 2025-10-03
 
 ### Features
