@@ -619,34 +619,35 @@ export function getShowersSnowfallWarningColor(showers, snowfall) {
 }
 
 /**
- * Draw warning triangle icon on chart
+ * Draw weather icon for showers or snowfall on chart
  * @param {CanvasRenderingContext2D} ctx - Canvas context
  * @param {number} x - X position
  * @param {number} y - Y position
- * @param {string} color - Color of the warning icon
- * @param {number} size - Size of the triangle
+ * @param {string} color - Color of the icon
+ * @param {number} showers - Showers amount in mm/h
+ * @param {number} snowfall - Snowfall amount in cm/h
  */
-function drawWarningTriangle(ctx, x, y, color, size = 10) {
+function drawShowersSnowfallIcon(ctx, x, y, color, showers, snowfall) {
   ctx.save();
-  ctx.fillStyle = color;
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5;
   
-  // Draw triangle
-  ctx.beginPath();
-  ctx.moveTo(x, y - size / 2);           // Top point
-  ctx.lineTo(x - size / 2, y + size / 2); // Bottom left
-  ctx.lineTo(x + size / 2, y + size / 2); // Bottom right
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+  // Determine which icon to use based on predominant type
+  // If snowfall is present (even small amounts), show snow icon
+  // Otherwise show showers icon
+  const glyph = snowfall > 0 ? '\uf01b' : '\uf01a';  // wi-snow : wi-showers
   
-  // Draw exclamation mark
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 7px sans-serif';
+  ctx.font = '14px weathericons';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('!', x, y);
+  ctx.fillStyle = color;
+  
+  try {
+    ctx.fillText(glyph, x, y);
+  } catch {
+    // Fallback: draw a simple circle if font not ready
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, 2 * Math.PI);
+    ctx.fill();
+  }
   
   ctx.restore();
 }
@@ -677,7 +678,7 @@ export const showersSnowfallWarningPlugin = {
         if (x >= left && x <= right) {
           // Position at top of chart area
           const y = top + 8;
-          drawWarningTriangle(ctx, x, y, color, 10);
+          drawShowersSnowfallIcon(ctx, x, y, color, shower, snowfall);
         }
       }
     });
