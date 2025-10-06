@@ -613,8 +613,8 @@ export function getShowersSnowfallWarningColor(showersTotal, snowfallTotal) {
   const totalIntensity = showersTotal + snowfallMm;
   
   if (totalIntensity > 15) return '#e74c3c';     // Red - Heavy (> 15mm total in 3h)
-  if (totalIntensity > 3) return '#f39c12';      // Orange - Medium (3-15mm total in 3h)
-  if (totalIntensity > 0) return '#f1c40f';      // Yellow - Light (> 0mm total in 3h)
+  if (totalIntensity > 3) return '#8e44ad';      // Purple - Medium (3-15mm total in 3h)
+  if (totalIntensity > 0) return '#3498db';      // Blue - Light (> 0mm total in 3h)
   return null;
 }
 
