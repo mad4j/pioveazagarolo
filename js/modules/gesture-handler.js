@@ -107,9 +107,9 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
     });
   }
   
-  // Short delay allows slide-out to start, then immediately begin rebuild with slide-in
-  // This creates a seamless transition with minimal visible gap
-  const animationDelay = swipeDirection !== 0 ? 100 : 0;
+  // Delay allows slide-out to complete most of its animation
+  // Charts are rebuilt during this time, then slide-in begins with new content
+  const animationDelay = swipeDirection !== 0 ? 150 : 0;
   
   setTimeout(() => {
     // Import and use the existing switchToMode function from navigation-dots
@@ -150,17 +150,8 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
         if (actualMode === CHART_MODES.PRESSURE && weatherData.hourly.pressure_msl && weatherData.hourly.pressure_msl.length >= 72) {
           unifiedPressureScale = calculateUnifiedPressureScale(weatherData.hourly.pressure_msl);
         }
-        
-        // Remove slide-out classes and prepare for slide-in
-        if (swipeDirection !== 0) {
-          forecastCards.forEach(card => {
-            card.classList.remove(slideOutClass);
-            // Add slide-in class
-            card.classList.add(slideInClass);
-          });
-        }
 
-        // Update all charts simultaneously
+        // Update all charts simultaneously (while slide-out animation continues)
         chartConfigs.forEach(({ chartId, dayIndex }) => {
           // Update mode tracking for all charts
           chartModes[chartId] = actualMode;
@@ -202,6 +193,15 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
             buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime, showersSlice, snowfallSlice);
           }
         });
+
+        // Now that charts are rebuilt, swap from slide-out to slide-in animation
+        // This ensures the new content is visible when slide-in starts
+        if (swipeDirection !== 0) {
+          forecastCards.forEach(card => {
+            card.classList.remove(slideOutClass);
+            card.classList.add(slideInClass);
+          });
+        }
 
         // Save the new mode
         saveChartMode(actualMode);
