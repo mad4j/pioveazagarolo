@@ -1232,7 +1232,7 @@
     "current": {
       "time": "2025-10-09T21:15",
       "interval": 900,
-      "european_aqi": 21
+      "european_aqi": 23
     },
     "hourly_units": {
       "time": "iso8601",
