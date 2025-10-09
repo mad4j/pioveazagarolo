@@ -107,8 +107,9 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
     });
   }
   
-  // Wait for slide-out animation to complete before switching mode
-  const animationDelay = swipeDirection !== 0 ? 300 : 0;
+  // Short delay allows slide-out to start, then immediately begin rebuild with slide-in
+  // This creates a seamless transition with minimal visible gap
+  const animationDelay = swipeDirection !== 0 ? 100 : 0;
   
   setTimeout(() => {
     // Import and use the existing switchToMode function from navigation-dots
@@ -209,13 +210,13 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
         updateNavigationDots(actualMode);
         showChartModeTooltip(actualMode, { duration: 800 });
         
-        // Clean up animation classes after slide-in animation completes
+        // Clean up animation classes after animations complete
         if (swipeDirection !== 0) {
           setTimeout(() => {
             forecastCards.forEach(card => {
               card.classList.remove(slideInClass);
             });
-          }, 300);
+          }, 200);
         }
 
         console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
