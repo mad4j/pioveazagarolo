@@ -107,8 +107,9 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
     });
   }
   
-  // Wait for slide-out animation to complete before switching mode
-  const animationDelay = swipeDirection !== 0 ? 300 : 0;
+  // Delay allows slide-out to complete most of its animation
+  // Charts are rebuilt during this time, then slide-in begins with new content
+  const animationDelay = swipeDirection !== 0 ? 150 : 0;
   
   setTimeout(() => {
     // Import and use the existing switchToMode function from navigation-dots
@@ -149,17 +150,8 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
         if (actualMode === CHART_MODES.PRESSURE && weatherData.hourly.pressure_msl && weatherData.hourly.pressure_msl.length >= 72) {
           unifiedPressureScale = calculateUnifiedPressureScale(weatherData.hourly.pressure_msl);
         }
-        
-        // Remove slide-out classes and prepare for slide-in
-        if (swipeDirection !== 0) {
-          forecastCards.forEach(card => {
-            card.classList.remove(slideOutClass);
-            // Add slide-in class
-            card.classList.add(slideInClass);
-          });
-        }
 
-        // Update all charts simultaneously
+        // Update all charts simultaneously (while slide-out animation continues)
         chartConfigs.forEach(({ chartId, dayIndex }) => {
           // Update mode tracking for all charts
           chartModes[chartId] = actualMode;
@@ -202,6 +194,15 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
           }
         });
 
+        // Now that charts are rebuilt, swap from slide-out to slide-in animation
+        // This ensures the new content is visible when slide-in starts
+        if (swipeDirection !== 0) {
+          forecastCards.forEach(card => {
+            card.classList.remove(slideOutClass);
+            card.classList.add(slideInClass);
+          });
+        }
+
         // Save the new mode
         saveChartMode(actualMode);
 
@@ -209,13 +210,13 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
         updateNavigationDots(actualMode);
         showChartModeTooltip(actualMode, { duration: 800 });
         
-        // Clean up animation classes after slide-in animation completes
+        // Clean up animation classes after animations complete
         if (swipeDirection !== 0) {
           setTimeout(() => {
             forecastCards.forEach(card => {
               card.classList.remove(slideInClass);
             });
-          }, 300);
+          }, 200);
         }
 
         console.log(`📱 Swipe gesture: switched to ${actualMode} mode`);
