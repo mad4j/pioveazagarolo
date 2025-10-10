@@ -577,6 +577,42 @@ export function getPressureLineColor(v) { if (v > 1030) return '#e74c3c'; if (v 
 
 export function getHumidityBarColor(v) { if (v > 80) return '#99ccff'; if (v > 60) return '#b3d9ff'; if (v > 40) return '#b3e6b3'; if (v > 30) return '#ffeb99'; return '#ffcc99'; }
 
+/**
+ * Calculate comfort index based on temperature, humidity, and wind speed
+ * @param {number} temp - Temperature in °C
+ * @param {number} humidity - Relative humidity in %
+ * @param {number} windSpeed - Wind speed in km/h
+ * @returns {number} Comfort index from 0 (very uncomfortable) to 100 (very comfortable)
+ */
+export function calculateComfortIndex(temp, humidity, windSpeed) {
+  let comfort = 100; // Start from maximum comfort
+  
+  // Optimal temperature: 18-24°C
+  if (temp < 18) comfort -= (18 - temp) * 3;
+  if (temp > 24) comfort -= (temp - 24) * 3;
+  
+  // Optimal humidity: 30-60%
+  if (humidity < 30) comfort -= (30 - humidity) * 0.5;
+  if (humidity > 60) comfort -= (humidity - 60) * 0.8;
+  
+  // Wind: beyond 20 km/h starts to be annoying
+  if (windSpeed > 20) comfort -= (windSpeed - 20) * 1.5;
+  
+  return Math.max(0, Math.min(100, comfort));
+}
+
+/**
+ * Get color for comfort index value
+ * @param {number} comfort - Comfort index from 0-100
+ * @returns {string} Color code
+ */
+export function getComfortIndexColor(comfort) {
+  if (comfort >= 70) return '#27ae60';    // Green - comfortable
+  if (comfort >= 50) return '#f1c40f';    // Yellow - acceptable
+  if (comfort >= 30) return '#f39c12';    // Orange - uncomfortable
+  return '#e74c3c';                       // Red - very uncomfortable
+}
+
 export function getEAQIBarColor(eaqiValue) { 
   if (eaqiValue <= 20) return '#50f0e6';      // Good
   if (eaqiValue <= 40) return '#50ccaa';      // Fair  
@@ -733,7 +769,7 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
   }
 }
 
-export function buildTemperatureChart(target, temperatureData, apparentTemperatureData, humidityData = null, sunriseTime = null, sunsetTime = null) {
+export function buildTemperatureChart(target, temperatureData, apparentTemperatureData, humidityData = null, sunriseTime = null, sunsetTime = null, windSpeedData = null) {
   const el = document.getElementById(target); 
   if (!el) return; 
   // Clean up existing tooltip before destroying chart to prevent parentNode errors
@@ -758,6 +794,16 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
   plugins.push(temperature21LinePlugin);
   plugins.push(xAxisAnchorLabelsPlugin);
+  
+  // Calculate comfort index if we have all required data
+  let comfortIndexData = null;
+  if (humidityData && windSpeedData && Array.isArray(humidityData) && Array.isArray(windSpeedData)) {
+    comfortIndexData = temperatureData.map((temp, i) => {
+      const humidity = humidityData[i] || 50; // Default to 50% if missing
+      const windSpeed = windSpeedData[i] || 0; // Default to 0 if missing
+      return calculateComfortIndex(temp, humidity, windSpeed);
+    });
+  }
   
   // Build datasets array - always include temperature lines
   const datasets = [
@@ -791,6 +837,25 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
       yAxisID: 'y' 
     }
   ];
+  
+  // Add comfort index line if available
+  if (comfortIndexData) {
+    const comfortColors = comfortIndexData.map(getComfortIndexColor);
+    datasets.push({
+      label: 'Indice di Comfort',
+      type: 'line',
+      fill: false,
+      tension: 0.4,
+      backgroundColor: 'rgba(52,152,219,0.8)',
+      borderColor: 'rgb(52,152,219)',
+      borderWidth: 2,
+      data: comfortIndexData,
+      pointBackgroundColor: comfortColors,
+      pointRadius: 2,
+      pointHoverRadius: 5,
+      yAxisID: 'y2'
+    });
+  }
   
   // Build scales object
   let scales = { 
@@ -841,6 +906,32 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
         drawTicks: false 
       }, 
       ticks: { 
+        display: false,
+        min: 0,
+        max: 100
+      },
+      bounds: 'data',
+      afterBuildTicks: function(scale) {
+        // Force the scale to always be 0-100
+        scale.min = 0;
+        scale.max = 100;
+        return;
+      }
+    };
+  }
+  
+  // Add comfort index scale if comfort data is available
+  if (comfortIndexData) {
+    scales.y2 = {
+      min: 0,
+      max: 100,
+      beginAtZero: true,
+      position: 'right',
+      grid: {
+        drawOnChartArea: false,
+        drawTicks: false
+      },
+      ticks: {
         display: false,
         min: 0,
         max: 100
@@ -922,10 +1013,22 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
               if (ds2 && ds2.data && ds2.data[idx] != null) apparent = Math.round(ds2.data[idx]); 
               rows.push({ k: 'temp', t: `Temperatura: ${temp}°C` }); 
               if (Math.abs(temp - apparent) > 1) rows.push({ k: 'apparent', t: `Percepita: ${apparent}°C` }); 
-              // Add humidity info if available
-              const ds3 = chart.data.datasets[2]; 
-              if (ds3 && ds3.data && ds3.data[idx] != null) { 
-                const humidity = Math.round(ds3.data[idx]); 
+              
+              // Find comfort index dataset (it has label 'Indice di Comfort')
+              const comfortDataset = chart.data.datasets.find(ds => ds.label === 'Indice di Comfort');
+              if (comfortDataset && comfortDataset.data && comfortDataset.data[idx] != null) {
+                const comfort = Math.round(comfortDataset.data[idx]);
+                let comfortLabel = 'Molto scomodo';
+                if (comfort >= 70) comfortLabel = 'Confortevole';
+                else if (comfort >= 50) comfortLabel = 'Accettabile';
+                else if (comfort >= 30) comfortLabel = 'Scomodo';
+                rows.push({ k: 'comfort', t: `Comfort: ${comfort}/100 (${comfortLabel})` });
+              }
+              
+              // Add humidity info if available (find humidity dataset)
+              const humidityDataset = chart.data.datasets.find(ds => ds.label === 'Umidità (%)');
+              if (humidityDataset && humidityDataset.data && humidityDataset.data[idx] != null) { 
+                const humidity = Math.round(humidityDataset.data[idx]); 
                 rows.push({ k: 'humidity', t: `Umidità: ${humidity}%` }); 
               } 
               if (sunriseTime && sunsetTime) { 
@@ -947,6 +1050,7 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
               let icon = ''; 
               if (r.k === 'temp') icon = '<i class="wi wi-thermometer" style="margin-right:4px; color:#e74c3c;"></i>'; 
               else if (r.k === 'apparent') icon = '<i class="wi wi-thermometer-exterior" style="margin-right:4px; color:#e91e63;"></i>'; 
+              else if (r.k === 'comfort') icon = '<i class="wi wi-day-sunny" style="margin-right:4px; color:#3498db;"></i>';
               else if (r.k === 'humidity') icon = '<i class="wi wi-humidity" style="margin-right:4px; color:#3498db;"></i>';
               else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>'; 
               else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>'; 
