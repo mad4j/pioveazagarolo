@@ -9,7 +9,8 @@ export const CHART_MODES = {
   TEMPERATURE: 'temperature',
   WIND: 'wind',
   PRESSURE: 'pressure',
-  AIR_QUALITY: 'air-quality'
+  AIR_QUALITY: 'air-quality',
+  COMFORT: 'comfort'
 };
 
 export const DAY_CONFIGS = [

@@ -21,7 +21,8 @@ const MODE_ORDER = [
   CHART_MODES.TEMPERATURE,
   CHART_MODES.WIND,
   CHART_MODES.PRESSURE,
-  CHART_MODES.AIR_QUALITY
+  CHART_MODES.AIR_QUALITY,
+  CHART_MODES.COMFORT
 ];
 
 /**
@@ -115,7 +116,7 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
     // Import and use the existing switchToMode function from navigation-dots
     import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
       // Import chart building functions directly
-      import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice, calculateUnifiedPressureScale }) => {
+      import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, buildComfortChart, getDaySlice, calculateUnifiedPressureScale }) => {
         if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
 
         // Chart IDs and their corresponding day indices
@@ -141,6 +142,11 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
           }
         } else if (targetMode === CHART_MODES.AIR_QUALITY) {
           if (!weatherData.air_quality || !weatherData.air_quality.hourly || !weatherData.air_quality.hourly.european_aqi) {
+            actualMode = CHART_MODES.PRECIPITATION;
+          }
+        } else if (targetMode === CHART_MODES.COMFORT) {
+          if (!weatherData.hourly.temperature_2m || !weatherData.hourly.apparent_temperature || 
+              !weatherData.hourly.relative_humidity_2m || !weatherData.hourly.wind_speed_10m) {
             actualMode = CHART_MODES.PRECIPITATION;
           }
         }
@@ -184,6 +190,13 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
             const uvSlice = weatherData.hourly.uv_index ? getDaySlice(weatherData.hourly.uv_index, dayIndex) : null;
             const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
             buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime, cloudCoverageSlice);
+          } else if (actualMode === CHART_MODES.COMFORT) {
+            // Switch to comfort chart
+            const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
+            const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
+            const humiditySlice = getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex);
+            const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
+            buildComfortChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, windSpeedSlice, sunriseTime, sunsetTime);
           } else {
             // Switch to precipitation chart
             const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);

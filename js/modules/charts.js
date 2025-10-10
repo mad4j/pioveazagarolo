@@ -586,6 +586,42 @@ export function getEAQIBarColor(eaqiValue) {
   return '#7d2181';                           // Extremely poor
 }
 
+/**
+ * Calculate comfort index based on temperature, humidity and wind speed
+ * @param {number} temp - Temperature in °C
+ * @param {number} humidity - Relative humidity in %
+ * @param {number} windSpeed - Wind speed in km/h
+ * @returns {number} Comfort index 0-100
+ */
+export function calculateComfortIndex(temp, humidity, windSpeed) {
+  let comfort = 100; // Start from maximum comfort
+  
+  // Optimal temperature: 18-24°C
+  if (temp < 18) comfort -= (18 - temp) * 3;
+  if (temp > 24) comfort -= (temp - 24) * 3;
+  
+  // Optimal humidity: 30-60%
+  if (humidity < 30) comfort -= (30 - humidity) * 0.5;
+  if (humidity > 60) comfort -= (humidity - 60) * 0.8;
+  
+  // Wind: beyond 20 km/h starts to be annoying
+  if (windSpeed > 20) comfort -= (windSpeed - 20) * 1.5;
+  
+  return Math.max(0, Math.min(100, comfort));
+}
+
+/**
+ * Get color for comfort index value
+ * @param {number} comfort - Comfort index 0-100
+ * @returns {string} Color code
+ */
+export function getComfortColor(comfort) {
+  if (comfort >= 80) return '#27ae60';      // Green - comfortable
+  if (comfort >= 60) return '#f1c40f';      // Yellow - acceptable
+  if (comfort >= 40) return '#f39c12';      // Orange - uncomfortable
+  return '#e74c3c';                         // Red - very uncomfortable
+}
+
 export function getPressureDeltaBarColor(delta) {
   // Color mapping for pressure deltas (pressure - 1013)
   // Positive deltas (high pressure) - warmer colors
@@ -1689,6 +1725,251 @@ export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTim
             const left = rect.left + window.pageXOffset + tooltip.caretX + 10;
             const top = rect.top + window.pageYOffset + tooltip.caretY - 10;
 
+            tip.style.left = Math.min(left, bodyRect.width - 260) + 'px';
+            tip.style.top = top + 'px';
+            tip.style.opacity = 1;
+          }
+        }
+      }
+    }
+  });
+}
+
+/**
+ * Build Comfort Chart showing comfort index based on temperature, humidity and wind
+ * @param {string} target - Canvas element ID
+ * @param {number[]} temperatureData - Array of 24 temperature values in °C
+ * @param {number[]} apparentTemperatureData - Array of 24 apparent temperature values in °C
+ * @param {number[]} humidityData - Array of 24 humidity values in %
+ * @param {number[]} windSpeedData - Array of 24 wind speed values in km/h
+ * @param {string} sunriseTime - Sunrise time (HH:MM)
+ * @param {string} sunsetTime - Sunset time (HH:MM)
+ */
+export function buildComfortChart(target, temperatureData, apparentTemperatureData, humidityData, windSpeedData, sunriseTime = null, sunsetTime = null) {
+  const el = document.getElementById(target);
+  if (!el) return;
+  
+  // Clean up existing tooltip before destroying chart to prevent parentNode errors
+  const existingTooltip = document.getElementById('chartjs-tooltip-' + target);
+  if (existingTooltip && existingTooltip.parentNode) {
+    existingTooltip.parentNode.removeChild(existingTooltip);
+  }
+  
+  if (chartInstances[target]) chartInstances[target].destroy();
+  
+  // Calculate comfort index for each hour
+  const comfortData = temperatureData.map((temp, i) => {
+    const humidity = humidityData[i] || 50;
+    const windSpeed = windSpeedData[i] || 0;
+    return calculateComfortIndex(temp, humidity, windSpeed);
+  });
+  
+  // Calculate temperature delta (apparent - actual)
+  const tempDeltaData = temperatureData.map((temp, i) => {
+    const apparent = apparentTemperatureData[i] || temp;
+    return apparent - temp;
+  });
+  
+  // Color arrays
+  const comfortColors = comfortData.map(getComfortColor);
+  const humidityColors = humidityData.map(getHumidityBarColor);
+  
+  const plugins = [sunriseSunsetPlugin];
+  if (target === 'today-chart') plugins.push(currentHourLinePlugin);
+  plugins.push(xAxisAnchorLabelsPlugin);
+  
+  chartInstances[target] = new Chart(el, {
+    plugins,
+    data: {
+      labels: [...Array(24).keys()].map(h => `${h}:00`.padStart(5, '0')),
+      datasets: [
+        {
+          label: 'Indice Comfort',
+          type: 'line',
+          fill: true,
+          tension: 0.4,
+          backgroundColor: comfortColors.map(c => c + '40'), // Add transparency
+          borderColor: comfortColors,
+          borderWidth: 3,
+          data: comfortData,
+          pointBackgroundColor: comfortColors,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          yAxisID: 'y',
+          segment: {
+            borderColor: ctx => {
+              const value = ctx.p1.parsed.y;
+              return getComfortColor(value);
+            },
+            backgroundColor: ctx => {
+              const value = ctx.p1.parsed.y;
+              return getComfortColor(value) + '40';
+            }
+          }
+        },
+        {
+          label: 'Umidità (%)',
+          type: 'bar',
+          backgroundColor: humidityColors,
+          borderColor: humidityColors,
+          borderWidth: 1,
+          data: humidityData,
+          yAxisID: 'y1',
+          order: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: 2 },
+      onHover: (e, a, chart) => {
+        if (isTouchDevice() && a.length) {
+          if (chart._tooltipTimeout) clearTimeout(chart._tooltipTimeout);
+          chart._tooltipTimeout = setTimeout(() => {
+            chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+            chart.setActiveElements([]);
+            chart.update('none');
+          }, 3000);
+        }
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 100,
+          position: 'left',
+          grid: {
+            drawOnChartArea: true,
+            color: 'rgba(200,200,200,0.2)',
+            drawTicks: false
+          },
+          ticks: { display: false }
+        },
+        y1: {
+          min: 0,
+          max: 100,
+          beginAtZero: true,
+          position: 'right',
+          grid: {
+            drawOnChartArea: false,
+            drawTicks: false
+          },
+          ticks: {
+            display: false,
+            min: 0,
+            max: 100
+          },
+          bounds: 'data',
+          afterBuildTicks: function(scale) {
+            scale.min = 0;
+            scale.max = 100;
+            return;
+          }
+        },
+        x: {
+          grid: { display: false },
+          ticks: {
+            display: false,
+            maxRotation: 0,
+            minRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 6,
+            color: '#7f8c8d'
+          }
+        }
+      },
+      plugins: {
+        currentHourLine: {
+          color: '#27ae60',
+          overlayColor: 'rgba(128,128,128,0.18)'
+        },
+        sunriseSunset: {
+          sunrise: sunriseTime,
+          sunset: sunsetTime
+        },
+        legend: { display: false },
+        tooltip: {
+          enabled: false,
+          external: ({ chart, tooltip }) => {
+            let tip = document.getElementById('chartjs-tooltip-' + target);
+            if (!tip) {
+              tip = document.createElement('div');
+              tip.id = 'chartjs-tooltip-' + target;
+              Object.assign(tip.style, {
+                position: 'absolute',
+                pointerEvents: 'none',
+                transition: 'all .08s ease',
+                zIndex: 30
+              });
+              document.body.appendChild(tip);
+            }
+            
+            if (!tooltip || tooltip.opacity === 0) {
+              tip.style.opacity = 0;
+              return;
+            }
+            
+            const rows = [];
+            if (tooltip.dataPoints?.length) {
+              const dp = tooltip.dataPoints[0];
+              const idx = dp.dataIndex;
+              const comfort = Math.round(comfortData[idx]);
+              const temp = Math.round(temperatureData[idx]);
+              const apparent = Math.round(apparentTemperatureData[idx]);
+              const humidity = Math.round(humidityData[idx]);
+              const windSpeed = Math.round(windSpeedData[idx]);
+              const delta = Math.round(tempDeltaData[idx] * 10) / 10;
+              
+              // Determine comfort level
+              let comfortLevel = 'Molto scomodo';
+              if (comfort >= 80) comfortLevel = 'Confortevole';
+              else if (comfort >= 60) comfortLevel = 'Accettabile';
+              else if (comfort >= 40) comfortLevel = 'Scomodo';
+              
+              rows.push({ k: 'comfort', t: `Comfort: ${comfort}/100 (${comfortLevel})` });
+              rows.push({ k: 'temp', t: `Temperatura: ${temp}°C` });
+              if (Math.abs(delta) > 0.5) {
+                rows.push({ k: 'apparent', t: `Percepita: ${apparent}°C (${delta > 0 ? '+' : ''}${delta}°C)` });
+              }
+              rows.push({ k: 'humidity', t: `Umidità: ${humidity}%` });
+              rows.push({ k: 'wind', t: `Vento: ${windSpeed} km/h` });
+              
+              if (sunriseTime && sunsetTime) {
+                const hour = parseFloat(dp.label.split(':')[0]);
+                const sr = timeStringToHours(sunriseTime);
+                const ss = timeStringToHours(sunsetTime);
+                if (sr && ss) {
+                  const daylight = ss - sr;
+                  if (Math.abs(hour - sr) < 1) rows.push({ k: 'sunrise', t: `Alba: ${formatTime(sunriseTime)} (${formatDaylightHours(daylight)} di luce)` });
+                  else if (Math.abs(hour - ss) < 1) rows.push({ k: 'sunset', t: `Tramonto: ${formatTime(sunsetTime)} (${formatDaylightHours(daylight)} di luce)` });
+                }
+              }
+            }
+            
+            const title = tooltip.title?.[0] ? `Ore ${tooltip.title[0]}` : '';
+            let html = `<div style="font:12px 'Helvetica Neue',Arial; color:#ecf0f1; background:rgba(44,62,80,0.92); padding:6px 8px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,.35); max-width:240px;">`;
+            if (title) html += `<div style="font-weight:600; margin-bottom:4px;">${title}</div>`;
+            html += '<div style="display:flex; flex-direction:column; gap:2px;">';
+            rows.forEach(r => {
+              let icon = '';
+              if (r.k === 'comfort') icon = '<i class="wi wi-stars" style="margin-right:4px; color:#27ae60;"></i>';
+              else if (r.k === 'temp') icon = '<i class="wi wi-thermometer" style="margin-right:4px; color:#e74c3c;"></i>';
+              else if (r.k === 'apparent') icon = '<i class="wi wi-thermometer-exterior" style="margin-right:4px; color:#e91e63;"></i>';
+              else if (r.k === 'humidity') icon = '<i class="wi wi-humidity" style="margin-right:4px; color:#3498db;"></i>';
+              else if (r.k === 'wind') icon = '<i class="wi wi-strong-wind" style="margin-right:4px; color:#95a5a6;"></i>';
+              else if (r.k === 'sunrise') icon = '<i class="wi wi-sunrise" style="margin-right:4px; color:#f39c12;"></i>';
+              else if (r.k === 'sunset') icon = '<i class="wi wi-sunset" style="margin-right:4px; color:#ff3b30;"></i>';
+              html += `<div style="display:flex; align-items:center; font-size:12px; line-height:1.2;">${icon}<span>${r.t}</span></div>`;
+            });
+            html += '</div></div>';
+            
+            tip.innerHTML = html;
+            
+            const rect = chart.canvas.getBoundingClientRect();
+            const bodyRect = document.body.getBoundingClientRect();
+            const left = rect.left + window.pageXOffset + tooltip.caretX + 10;
+            const top = rect.top + window.pageYOffset + tooltip.caretY - 10;
+            
             tip.style.left = Math.min(left, bodyRect.width - 260) + 'px';
             tip.style.top = top + 'px';
             tip.style.opacity = 1;
