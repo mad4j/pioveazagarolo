@@ -12,8 +12,8 @@ Warning icons (colored weather icons) are displayed in the precipitation chart w
 
 | Severity | Condition | Color | Hex Code |
 |----------|-----------|-------|----------|
-| Light | > 0 and ≤ 3 mm total in 3h | Yellow | #f1c40f |
-| Medium | > 3 and ≤ 15 mm total in 3h | Orange | #f39c12 |
+| Light | > 0 and ≤ 3 mm total in 3h | Blue | #3498db |
+| Medium | > 3 and ≤ 15 mm total in 3h | Purple | #8e44ad |
 | Heavy | > 15 mm total in 3h | Red | #e74c3c |
 
 **Note**: Snowfall is converted to water equivalent (1 cm snow ≈ 10 mm water) for severity calculation.
@@ -24,7 +24,7 @@ Warning icons (colored weather icons) are displayed in the precipitation chart w
 - Snowfall: 0 cm
 
 **Expected Result**:
-- Yellow warning icons displayed at center of intervals with light precipitation
+- Blue warning icons displayed at center of intervals with light precipitation
 - Icons positioned at top of chart area
 - No overlap with precipitation bars
 
@@ -40,8 +40,8 @@ Warning icons (colored weather icons) are displayed in the precipitation chart w
 - Snowfall: 0 cm
 
 **Expected Result**:
-- Orange warning icons displayed
-- Icon color clearly distinguishable from yellow
+- Purple warning icons displayed
+- Icon color clearly distinguishable from blue
 
 **Status**: ✅ PASS
 
@@ -70,7 +70,7 @@ Warning icons (colored weather icons) are displayed in the precipitation chart w
 - Interval with total 0.2-0.9 cm snowfall across 3 hours (2-9 mm water equivalent)
 
 **Expected Result**:
-- Yellow or orange warning icons displayed
+- Blue or purple warning icons displayed
 - Correct severity calculation for snowfall
 - Snowfall icon (snow) displayed instead of showers
 
@@ -170,7 +170,7 @@ Warning icons (colored weather icons) are displayed in the precipitation chart w
 ![Full page with 3-hour interval warnings](https://github.com/user-attachments/assets/a208cadc-ae2e-4e16-8bf6-a505f5cf5fff)
 
 ### Today Card - Multiple Severity Levels
-- Intervals showing yellow, orange, and red icons based on summed 3-hour precipitation
+- Intervals showing blue, purple, and red icons based on summed 3-hour precipitation
 - Each icon represents total showers across 3-hour window
 
 ### Tomorrow Card - Snowfall Warnings  

@@ -6,6 +6,47 @@ import './modules/debug-mobile.js';
 
 let _fetchInFlight = false;
 let _retryTimer = null;
+let _splashHidden = false;
+
+// Load version info for splash screen
+async function loadSplashVersion() {
+  try {
+    const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
+    const response = await fetch(`package.json${randomQuery}`);
+    if (!response.ok) return;
+    const buildInfo = await response.json();
+    
+    const versionEl = document.getElementById('splash-version');
+    if (versionEl && buildInfo.version) {
+      const rawVersion = buildInfo.version.trim();
+      const m = rawVersion.match(/^(\d+)\.(\d+)\.(\d+)(?:([-][A-Za-z0-9.]+))?$/);
+      let display = rawVersion;
+      if (m) {
+        const [, maj, min, patch, suffix] = m;
+        if (patch === '0' && !suffix) {
+          display = `${maj}.${min}`;
+        }
+      }
+      versionEl.textContent = display;
+    }
+  } catch (error) {
+    console.warn('Could not load splash version:', error.message);
+  }
+}
+
+// Hide splash screen with animation
+function hideSplashScreen() {
+  if (_splashHidden) return;
+  _splashHidden = true;
+  
+  const splashScreen = document.getElementById('splash-screen');
+  if (splashScreen) {
+    splashScreen.classList.add('hidden');
+    setTimeout(() => {
+      splashScreen.remove();
+    }, 500); // Match animation duration
+  }
+}
 
 async function retrieveData() {
   try {
@@ -21,6 +62,7 @@ async function retrieveData() {
     
     displayData(data);
     saveCachedData(data);
+    hideSplashScreen();
     _fetchInFlight = false;
   } catch (e) {
     console.error('Errore:', e);
@@ -29,8 +71,10 @@ async function retrieveData() {
       // Try to load precipitation data even from cache
       try { await precipitationManager.loadActualData(); } catch {}
       displayData(cached.data);
+      hideSplashScreen();
     } else {
       showToast('Errore rete. Ritento fra 60 secondi...', 'error');
+      hideSplashScreen();
     }
     _fetchInFlight = false;
     if (_retryTimer) { clearTimeout(_retryTimer); _retryTimer = null; }
@@ -41,6 +85,9 @@ async function retrieveData() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Load version info for splash screen
+  loadSplashVersion();
+  
   const offlineBadge = document.getElementById('offline-badge');
   const updateOfflineBadge = () => { if (!offlineBadge) return; offlineBadge.hidden = navigator.onLine; };
   window.addEventListener('online', () => { updateOfflineBadge(); showToast('Connessione ripristinata', 'success', 3000, true); retrieveData(); });
@@ -51,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load precipitation data and then display
     precipitationManager.loadActualData().then(() => {
       displayData(cached.data);
+      hideSplashScreen();
     });
   }
   retrieveData();
