@@ -5,7 +5,6 @@ import { precipitationManager } from './precipitation.js';
 import { updateAirQualityDisplay } from './air-quality.js';
 import { buildAppropriateChart } from './chart-toggle.js';
 import { setupNavigationDots, syncNavigationDotsWithChartMode } from './navigation-dots.js';
-import { setupVersionTooltip } from './version-tooltip.js';
 import { setupSwipeGestures } from './gesture-handler.js';
 
 export function formatDate(dateString){ return dayFormatter.format(new Date(dateString)); }
@@ -421,9 +420,6 @@ export function displayData(data){
   // Setup swipe gestures for mode switching
   setupSwipeGestures(data);
   
-  // Setup version tooltip functionality
-  setupVersionTooltip();
-  
   // Tooltip display is now handled by navigation dots when user interacts
   
   const lastUpdated = $('last-updated'); 
@@ -445,35 +441,5 @@ export function displayData(data){
   // Questa funzione gestisce la visualizzazione delle icone colorate per l'indice europeo di qualità dell'aria
   if (data.air_quality) {
     updateAirQualityDisplay(data.air_quality);
-  }
-  
-  // Load and display version information
-  loadVersionInfo();
-}
-
-// Load version information from build-info.json
-async function loadVersionInfo() {
-  try {
-    const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
-    const response = await fetch(`package.json${randomQuery}`);
-    if (!response.ok) return;
-    const buildInfo = await response.json();
-    
-    const versionEl = $('app-version');
-    if (versionEl && buildInfo.version) {
-      const rawVersion = buildInfo.version.trim();
-      // Mostra senza patch solo se patch=0 e non ci sono suffissi (es. -rc)
-      const m = rawVersion.match(/^(\d+)\.(\d+)\.(\d+)(?:([-][A-Za-z0-9.]+))?$/);
-      let display = rawVersion;
-      if (m) {
-        const [, maj, min, patch, suffix] = m;
-        if (patch === '0' && !suffix) {
-          display = `${maj}.${min}`;
-        }
-      }
-      versionEl.textContent = display;
-    }
-  } catch (error) {
-    console.warn('Could not load version info:', error.message);
   }
 }
