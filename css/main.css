@@ -33,7 +33,7 @@
   transform: translate(-50%, -50%);
   width: 50%;
   height: 50%;
-  background: linear-gradient(135deg, var(--primary-color), #1d2b36);
+  background: var(--card-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,7 +65,7 @@
 }
 
 .splash-title {
-  color: #fff;
+  color: var(--text-primary);
   font-size: 1.8rem;
   font-weight: 600;
   margin: 0;
@@ -73,7 +73,7 @@
 }
 
 .splash-version {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   font-size: 1rem;
   font-weight: 400;
 }
