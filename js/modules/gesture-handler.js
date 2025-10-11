@@ -115,7 +115,7 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
     // Import and use the existing switchToMode function from navigation-dots
     import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
       // Import chart building functions directly
-      import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice, calculateUnifiedPressureScale }) => {
+      import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice, calculateUnifiedPressureScale, calculateUnifiedTemperatureScale }) => {
         if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
 
         // Chart IDs and their corresponding day indices
@@ -145,10 +145,13 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
           }
         }
         
-        // Calculate unified pressure scale if switching to pressure mode
+        // Calculate unified scales if switching to pressure or temperature mode
         let unifiedPressureScale = null;
+        let unifiedTemperatureScale = null;
         if (actualMode === CHART_MODES.PRESSURE && weatherData.hourly.pressure_msl && weatherData.hourly.pressure_msl.length >= 72) {
           unifiedPressureScale = calculateUnifiedPressureScale(weatherData.hourly.pressure_msl);
+        } else if (actualMode === CHART_MODES.TEMPERATURE && weatherData.hourly.temperature_2m && weatherData.hourly.apparent_temperature && weatherData.hourly.temperature_2m.length >= 72 && weatherData.hourly.apparent_temperature.length >= 72) {
+          unifiedTemperatureScale = calculateUnifiedTemperatureScale(weatherData.hourly.temperature_2m, weatherData.hourly.apparent_temperature);
         }
 
         // Update all charts simultaneously (while slide-out animation continues)
@@ -166,7 +169,7 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
             const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
             const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
             const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
-            buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, cloudCoverageSlice);
+            buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, unifiedTemperatureScale);
           } else if (actualMode === CHART_MODES.WIND) {
             // Switch to wind chart
             const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);

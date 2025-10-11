@@ -47,6 +47,38 @@ export function calculateUnifiedPressureScale(pressureData) {
   return { min: minPressure, max: maxPressure };
 }
 
+export function calculateUnifiedTemperatureScale(temperatureData, apparentTemperatureData) {
+  if (!temperatureData || temperatureData.length < 72) return null;
+  if (!apparentTemperatureData || apparentTemperatureData.length < 72) return null;
+  
+  const referenceTemp = 21;
+  
+  // Get min and max across all 72 hours for both temperature and apparent temperature
+  const dataMin = Math.min(
+    ...temperatureData.slice(0, 72),
+    ...apparentTemperatureData.slice(0, 72)
+  );
+  const dataMax = Math.max(
+    ...temperatureData.slice(0, 72),
+    ...apparentTemperatureData.slice(0, 72)
+  );
+  
+  // Start with natural data bounds plus padding
+  let minTemp = dataMin - 2;
+  let maxTemp = dataMax + 2;
+  
+  // Ensure 21°C reference line is visible within the chart
+  if (referenceTemp < minTemp) {
+    // 21°C is below the current range, extend downward
+    minTemp = referenceTemp - 2;
+  } else if (referenceTemp > maxTemp) {
+    // 21°C is above the current range, extend upward
+    maxTemp = referenceTemp + 2;
+  }
+  
+  return { min: minTemp, max: maxTemp };
+}
+
 // Plugin linea ora corrente
 export const currentHourLinePlugin = {
   id: 'currentHourLine', afterDraw(chart, args, opts) {
@@ -733,7 +765,7 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
   }
 }
 
-export function buildTemperatureChart(target, temperatureData, apparentTemperatureData, humidityData = null, sunriseTime = null, sunsetTime = null) {
+export function buildTemperatureChart(target, temperatureData, apparentTemperatureData, humidityData = null, sunriseTime = null, sunsetTime = null, unifiedScale = null) {
   const el = document.getElementById(target); 
   if (!el) return; 
   // Clean up existing tooltip before destroying chart to prevent parentNode errors
@@ -742,16 +774,24 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
   if (chartInstances[target]) chartInstances[target].destroy();
   
   const tempColors = temperatureData.map(getTemperatureLineColor);
-  let minTemp = Math.min(...temperatureData, ...apparentTemperatureData) - 2;
-  let maxTemp = Math.max(...temperatureData, ...apparentTemperatureData) + 2;
+  let minTemp, maxTemp;
   
-  // Ensure 21°C reference line is always visible in the chart
-  const referenceTemp = 21;
-  if (minTemp > referenceTemp) {
-    minTemp = referenceTemp - 2;
-  }
-  if (maxTemp < referenceTemp) {
-    maxTemp = referenceTemp + 2;
+  // Use unified scale if provided, otherwise calculate individual scale
+  if (unifiedScale && typeof unifiedScale.min === 'number' && typeof unifiedScale.max === 'number') {
+    minTemp = unifiedScale.min;
+    maxTemp = unifiedScale.max;
+  } else {
+    minTemp = Math.min(...temperatureData, ...apparentTemperatureData) - 2;
+    maxTemp = Math.max(...temperatureData, ...apparentTemperatureData) + 2;
+    
+    // Ensure 21°C reference line is always visible in the chart
+    const referenceTemp = 21;
+    if (minTemp > referenceTemp) {
+      minTemp = referenceTemp - 2;
+    }
+    if (maxTemp < referenceTemp) {
+      maxTemp = referenceTemp + 2;
+    }
   }
   
   const plugins = [sunriseSunsetPlugin];
