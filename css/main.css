@@ -78,6 +78,12 @@
   font-weight: 600;
 }
 
+.splash-author {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
 @keyframes splash-fade-in {
   from {
     opacity: 0;
