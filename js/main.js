@@ -6,54 +6,6 @@ import './modules/debug-mobile.js';
 
 let _fetchInFlight = false;
 let _retryTimer = null;
-let _splashStartTime = Date.now();
-let _splashMinDuration = 1000; // minimum display time in milliseconds
-
-// Load version info for splash screen
-async function loadSplashVersion() {
-  try {
-    const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
-    const response = await fetch(`package.json${randomQuery}`);
-    if (!response.ok) return;
-    const buildInfo = await response.json();
-    
-    const versionEl = document.getElementById('splash-version');
-    if (versionEl && buildInfo.version) {
-      const rawVersion = buildInfo.version.trim();
-      const m = rawVersion.match(/^(\d+)\.(\d+)\.(\d+)(?:([-][A-Za-z0-9.]+))?$/);
-      let display = rawVersion;
-      if (m) {
-        const [, maj, min, patch, suffix] = m;
-        if (patch === '0' && !suffix) {
-          display = `${maj}.${min}`;
-        }
-      }
-      versionEl.textContent = `v${display}`;
-    }
-  } catch (error) {
-    // Silently fail - version display is optional
-  }
-}
-
-// Hide splash screen with minimum display time guarantee
-function hideSplashScreen() {
-  const splashScreen = document.getElementById('splash-screen');
-  if (!splashScreen) return;
-  
-  const elapsed = Date.now() - _splashStartTime;
-  const remainingTime = Math.max(0, _splashMinDuration - elapsed);
-  
-  setTimeout(() => {
-    splashScreen.classList.add('fade-out');
-    // Show dashboard content as splash begins to fade
-    const dashboard = document.getElementById('dashboard-container');
-    if (dashboard) dashboard.hidden = false;
-    
-    setTimeout(() => {
-      splashScreen.remove();
-    }, 500); // wait for fade-out animation
-  }, remainingTime);
-}
 
 async function retrieveData() {
   try {
