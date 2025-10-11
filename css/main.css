@@ -31,9 +31,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  max-width: 1000px;
-  width: 96%;
-  min-height: 100vh;
+  width: 50%;
+  height: 50%;
   background: linear-gradient(135deg, var(--primary-color), #1d2b36);
   display: flex;
   align-items: center;
