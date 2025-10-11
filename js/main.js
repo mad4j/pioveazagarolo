@@ -7,7 +7,7 @@ import './modules/debug-mobile.js';
 let _fetchInFlight = false;
 let _retryTimer = null;
 let _splashStartTime = Date.now();
-let _splashMinDuration = 500; // minimum display time in milliseconds
+let _splashMinDuration = 1000; // minimum display time in milliseconds
 
 // Load version info for splash screen
 async function loadSplashVersion() {

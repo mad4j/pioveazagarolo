@@ -74,8 +74,8 @@
 
 .splash-version {
   color: var(--text-secondary);
-  font-size: 1rem;
-  font-weight: 400;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 @keyframes splash-fade-in {
