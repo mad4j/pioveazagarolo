@@ -6,6 +6,54 @@ import './modules/debug-mobile.js';
 
 let _fetchInFlight = false;
 let _retryTimer = null;
+let _splashStartTime = Date.now();
+let _splashMinDuration = 500; // minimum display time in milliseconds
+
+// Load version info for splash screen
+async function loadSplashVersion() {
+  try {
+    const randomQuery = `?nocache=${Math.floor(Date.now() / (60 * 1000))}`;
+    const response = await fetch(`package.json${randomQuery}`);
+    if (!response.ok) return;
+    const buildInfo = await response.json();
+    
+    const versionEl = document.getElementById('splash-version');
+    if (versionEl && buildInfo.version) {
+      const rawVersion = buildInfo.version.trim();
+      const m = rawVersion.match(/^(\d+)\.(\d+)\.(\d+)(?:([-][A-Za-z0-9.]+))?$/);
+      let display = rawVersion;
+      if (m) {
+        const [, maj, min, patch, suffix] = m;
+        if (patch === '0' && !suffix) {
+          display = `${maj}.${min}`;
+        }
+      }
+      versionEl.textContent = `v${display}`;
+    }
+  } catch (error) {
+    // Silently fail - version display is optional
+  }
+}
+
+// Hide splash screen with minimum display time guarantee
+function hideSplashScreen() {
+  const splashScreen = document.getElementById('splash-screen');
+  if (!splashScreen) return;
+  
+  const elapsed = Date.now() - _splashStartTime;
+  const remainingTime = Math.max(0, _splashMinDuration - elapsed);
+  
+  setTimeout(() => {
+    splashScreen.classList.add('fade-out');
+    // Show dashboard content as splash begins to fade
+    const dashboard = document.getElementById('dashboard-container');
+    if (dashboard) dashboard.hidden = false;
+    
+    setTimeout(() => {
+      splashScreen.remove();
+    }, 500); // wait for fade-out animation
+  }, remainingTime);
+}
 
 async function retrieveData() {
   try {
@@ -21,6 +69,7 @@ async function retrieveData() {
     
     displayData(data);
     saveCachedData(data);
+    hideSplashScreen(); // Hide splash screen after data is displayed
     _fetchInFlight = false;
   } catch (e) {
     console.error('Errore:', e);
@@ -29,8 +78,10 @@ async function retrieveData() {
       // Try to load precipitation data even from cache
       try { await precipitationManager.loadActualData(); } catch {}
       displayData(cached.data);
+      hideSplashScreen(); // Hide splash screen even when showing cached data
     } else {
       showToast('Errore rete. Ritento fra 60 secondi...', 'error');
+      hideSplashScreen(); // Hide splash screen even on error
     }
     _fetchInFlight = false;
     if (_retryTimer) { clearTimeout(_retryTimer); _retryTimer = null; }
@@ -41,6 +92,9 @@ async function retrieveData() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Load version info for splash screen
+  loadSplashVersion();
+  
   const offlineBadge = document.getElementById('offline-badge');
   const updateOfflineBadge = () => { if (!offlineBadge) return; offlineBadge.hidden = navigator.onLine; };
   window.addEventListener('online', () => { updateOfflineBadge(); showToast('Connessione ripristinata', 'success', 3000, true); retrieveData(); });
@@ -51,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load precipitation data and then display
     precipitationManager.loadActualData().then(() => {
       displayData(cached.data);
+      hideSplashScreen(); // Hide splash screen when cached data is displayed
     });
   }
   retrieveData();
