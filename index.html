@@ -17,7 +17,16 @@
 </head>
 
 <body>
-  <div class="dashboard-container">
+  <!-- Splash Screen -->
+  <div id="splash-screen" class="splash-screen">
+    <div class="splash-content">
+      <img src="watermark-512x512.png" alt="Piove a Zagarolo" class="splash-icon">
+      <h2 class="splash-title">Piove a Zagarolo?</h2>
+      <span id="splash-version" class="splash-version">---</span>
+    </div>
+  </div>
+
+  <div class="dashboard-container" id="dashboard-container" hidden>
     <div class="header">
       <div class="header-left">
         <span class="last-updated"><i class="wi wi-time-4" aria-hidden="true"></i><span id="last-updated">---</span></span>
