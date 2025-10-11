@@ -45,6 +45,10 @@ function hideSplashScreen() {
   
   setTimeout(() => {
     splashScreen.classList.add('fade-out');
+    // Show dashboard content as splash begins to fade
+    const dashboard = document.getElementById('dashboard-container');
+    if (dashboard) dashboard.hidden = false;
+    
     setTimeout(() => {
       splashScreen.remove();
     }, 500); // wait for fade-out animation
