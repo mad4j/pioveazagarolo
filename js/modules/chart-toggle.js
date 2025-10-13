@@ -1,5 +1,5 @@
 import { CHART_MODES, chartModes } from './constants.js';
-import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice, calculateUnifiedPressureScale } from './charts.js';
+import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice, calculateUnifiedPressureScale, calculateUnifiedTemperatureScale } from './charts.js';
 
 /**
  * Builds appropriate chart based on current global mode
@@ -7,8 +7,9 @@ import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, 
  * @param {Object} weatherData - Weather data object
  * @param {number} dayIndex - Day index (0, 1, 2)
  * @param {Object} unifiedPressureScale - Optional unified pressure scale for pressure mode
+ * @param {Object} unifiedTemperatureScale - Optional unified temperature scale for temperature mode
  */
-export function buildAppropriateChart(chartId, weatherData, dayIndex, unifiedPressureScale = null) {
+export function buildAppropriateChart(chartId, weatherData, dayIndex, unifiedPressureScale = null, unifiedTemperatureScale = null) {
   if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
   
   // Use global mode (all charts should be in same mode)
@@ -20,7 +21,7 @@ export function buildAppropriateChart(chartId, weatherData, dayIndex, unifiedPre
     const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
     const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
     const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
-    buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime);
+    buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, unifiedTemperatureScale);
   } else if (currentMode === CHART_MODES.WIND && weatherData.hourly.wind_speed_10m && weatherData.hourly.wind_direction_10m) {
     const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
     const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
