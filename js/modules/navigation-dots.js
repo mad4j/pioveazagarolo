@@ -157,6 +157,32 @@ export function updateNavigationDots(activeMode) {
 }
 
 /**
+ * Checks if a chart mode has available data
+ * @param {string} mode - The chart mode to check
+ * @param {Object} weatherData - Weather data object
+ * @returns {boolean} True if the mode has available data
+ */
+function isModeDataAvailable(mode, weatherData) {
+  if (!weatherData || !weatherData.daily || !weatherData.hourly) {
+    return false;
+  }
+  
+  if (mode === CHART_MODES.TEMPERATURE) {
+    return !!(weatherData.hourly.temperature_2m && weatherData.hourly.apparent_temperature);
+  } else if (mode === CHART_MODES.WIND) {
+    return !!(weatherData.hourly.wind_speed_10m && weatherData.hourly.wind_direction_10m);
+  } else if (mode === CHART_MODES.PRESSURE) {
+    return !!weatherData.hourly.pressure_msl;
+  } else if (mode === CHART_MODES.AIR_QUALITY) {
+    return !!(weatherData.air_quality && weatherData.air_quality.hourly && weatherData.air_quality.hourly.european_aqi);
+  } else if (mode === CHART_MODES.PRECIPITATION) {
+    return true; // Precipitation is always available (default/fallback)
+  }
+  
+  return false;
+}
+
+/**
  * Sets up event listeners for navigation dots
  * @param {Object} weatherData - Weather data object to pass to chart toggle
  */
@@ -179,26 +205,28 @@ export function setupNavigationDots(weatherData) {
       
       // Only switch if clicking a different mode
       if (mode !== currentMode) {
+        // Check if the requested mode has available data
+        const actualMode = isModeDataAvailable(mode, weatherData) ? mode : CHART_MODES.PRECIPITATION;
+        
         // Provide haptic feedback for successful mode switch
         vibrateModeSwitch();
         
-        // Update chart modes directly to the clicked mode
+        // Update chart modes directly to the actual mode (may be fallback)
         Object.keys(chartModes).forEach(chartId => {
-          chartModes[chartId] = mode;
+          chartModes[chartId] = actualMode;
         });
         
         // Save the new mode
-        saveChartMode(mode);
+        saveChartMode(actualMode);
         
         // Trigger chart updates using the existing toggle system
-        // We'll simulate this by calling toggleChartMode until we get to the desired mode
-        switchToMode(mode, weatherData);
+        switchToMode(actualMode, weatherData);
         
-        // Update navigation dots visual state
-        updateNavigationDots(mode);
+        // Update navigation dots visual state with the actual mode
+        updateNavigationDots(actualMode);
         
         // Show tooltip to indicate the active mode
-        showChartModeTooltip(mode);
+        showChartModeTooltip(actualMode);
       }
     };
     
