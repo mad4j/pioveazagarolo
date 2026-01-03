@@ -379,7 +379,10 @@ export function setupSwipeGestures(weatherData) {
     if (!card.style.msTouchAction) card.style.msTouchAction = 'pan-y';
   });
 
-  console.log(`📱 Swipe gestures enabled on ${forecastCards.length} forecast cards`);
+  // Only log when we actually added new handlers
+  if (handlers.length > 0) {
+    console.log(`📱 Swipe gestures enabled on ${handlers.length} forecast cards`);
+  }
 
   // Return cleanup function for all handlers
   return {
