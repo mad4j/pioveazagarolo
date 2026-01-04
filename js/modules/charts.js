@@ -3,6 +3,41 @@ import { getRainIconClass, getWeatherDescription, getCloudCoverIconClass, getClo
 
 export const chartInstances = {};
 
+/**
+ * Ensure Chart.js library is loaded before proceeding
+ * @returns {Promise<boolean>} Resolves to true when Chart is available
+ */
+async function ensureChartLoaded() {
+  // If Chart is already available, return immediately
+  if (typeof Chart !== 'undefined') {
+    return true;
+  }
+  
+  // Wait for Chart.js to load with timeout
+  return new Promise((resolve) => {
+    let attempts = 0;
+    const maxAttempts = 50; // 50 * 100ms = 5 seconds max wait
+    
+    const checkChart = () => {
+      if (typeof Chart !== 'undefined') {
+        resolve(true);
+        return;
+      }
+      
+      attempts++;
+      if (attempts >= maxAttempts) {
+        console.error('Chart.js failed to load within timeout');
+        resolve(false);
+        return;
+      }
+      
+      setTimeout(checkChart, 100);
+    };
+    
+    checkChart();
+  });
+}
+
 export function getDaySlice(array, dayIndex) { const start = dayIndex * 24; return array.slice(start, start + 24); }
 
 /**
@@ -746,8 +781,15 @@ function isDarkMode() { return window.matchMedia && window.matchMedia('(prefers-
 
 function getWindDirectionColor() { return isDarkMode() ? '#f2f2f2' : '#3498db'; }
 
-export function buildChart(target, probabilityData, precipitationData, sunriseTime = null, sunsetTime = null, showersData = null, snowfallData = null) {
+export async function buildChart(target, probabilityData, precipitationData, sunriseTime = null, sunsetTime = null, showersData = null, snowfallData = null) {
   const el = document.getElementById(target); if (!el) return;
+  
+  // Ensure Chart.js is loaded before proceeding
+  const chartLoaded = await ensureChartLoaded();
+  if (!chartLoaded) {
+    console.error('Cannot build chart: Chart.js library not available');
+    return;
+  }
   // Clean up existing tooltip element tied to this chart target to prevent duplicates
   const staleTip = document.getElementById('chartjs-tooltip-' + target);
   if (staleTip && staleTip.parentNode) { try { staleTip.parentNode.removeChild(staleTip); } catch {}
@@ -765,9 +807,16 @@ export function buildChart(target, probabilityData, precipitationData, sunriseTi
   }
 }
 
-export function buildTemperatureChart(target, temperatureData, apparentTemperatureData, humidityData = null, sunriseTime = null, sunsetTime = null, unifiedScale = null) {
+export async function buildTemperatureChart(target, temperatureData, apparentTemperatureData, humidityData = null, sunriseTime = null, sunsetTime = null, unifiedScale = null) {
   const el = document.getElementById(target); 
   if (!el) return; 
+  
+  // Ensure Chart.js is loaded before proceeding
+  const chartLoaded = await ensureChartLoaded();
+  if (!chartLoaded) {
+    console.error('Cannot build temperature chart: Chart.js library not available');
+    return;
+  } 
   // Clean up existing tooltip before destroying chart to prevent parentNode errors
   const staleTip = document.getElementById('chartjs-tooltip-' + target);
   if (staleTip && staleTip.parentNode) { try { staleTip.parentNode.removeChild(staleTip); } catch {} }
@@ -1017,9 +1066,16 @@ export function buildTemperatureChart(target, temperatureData, apparentTemperatu
   }
 }
 
-export function buildWindChart(target, windSpeedData, windDirectionData, sunriseTime = null, sunsetTime = null) {
+export async function buildWindChart(target, windSpeedData, windDirectionData, sunriseTime = null, sunsetTime = null) {
   const el = document.getElementById(target);
   if (!el) return;
+  
+  // Ensure Chart.js is loaded before proceeding
+  const chartLoaded = await ensureChartLoaded();
+  if (!chartLoaded) {
+    console.error('Cannot build wind chart: Chart.js library not available');
+    return;
+  }
   
   // Clean up existing tooltip before destroying chart to prevent parentNode errors
   const existingTooltip = document.getElementById('chartjs-tooltip-' + target);
@@ -1208,9 +1264,16 @@ export function buildWindChart(target, windSpeedData, windDirectionData, sunrise
   }
 }
 
-export function buildPressureChart(target, pressureData, sunriseTime = null, sunsetTime = null, weatherCodes = null, isDayData = null, unifiedScale = null) {
+export async function buildPressureChart(target, pressureData, sunriseTime = null, sunsetTime = null, weatherCodes = null, isDayData = null, unifiedScale = null) {
   const el = document.getElementById(target);
   if (!el) return;
+  
+  // Ensure Chart.js is loaded before proceeding
+  const chartLoaded = await ensureChartLoaded();
+  if (!chartLoaded) {
+    console.error('Cannot build pressure chart: Chart.js library not available');
+    return;
+  }
   // Clean up existing tooltip before destroying chart to prevent duplicates
   const staleTip = document.getElementById('chartjs-tooltip-' + target);
   if (staleTip && staleTip.parentNode) { try { staleTip.parentNode.removeChild(staleTip); } catch {} }
@@ -1500,9 +1563,17 @@ function getItalianWindName(compassDirection) {
  * @param {string} sunriseTime - Orario alba (opzionale)
  * @param {string} sunsetTime - Orario tramonto (opzionale) 
  */
-export function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTime = null, sunsetTime = null, cloudCoverageData = null) {
+export async function buildAirQualityChart(target, eaqiData, uvData = null, sunriseTime = null, sunsetTime = null, cloudCoverageData = null) {
   const el = document.getElementById(target);
   if (!el) return;
+  
+  // Ensure Chart.js is loaded before proceeding
+  const chartLoaded = await ensureChartLoaded();
+  if (!chartLoaded) {
+    console.error('Cannot build air quality chart: Chart.js library not available');
+    return;
+  }
+  
   if (chartInstances[target]) chartInstances[target].destroy();
 
   // Mappa i colori EAQI per ogni valore
