@@ -183,9 +183,14 @@
   font-size: 1.1rem;
 }
 
+#theme-toggle,
 #install-button,
 #update-button {
   color: #fff;
+}
+
+#theme-toggle {
+  background-color: var(--primary-color);
 }
 
 #install-button {
@@ -196,6 +201,7 @@
   background-color: var(--accent-color);
 }
 
+#theme-toggle:focus-visible,
 #install-button:focus-visible,
 #update-button:focus-visible {
   outline: 2px solid #fff;
@@ -338,9 +344,13 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  #offline-badge {
+  :root:not([data-theme="light"]) #offline-badge {
     background: linear-gradient(135deg, #4b565b, #3a4347);
   }
+}
+
+:root[data-theme="dark"] #offline-badge {
+  background: linear-gradient(135deg, #4b565b, #3a4347);
 }
 
 body {
@@ -371,9 +381,13 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
-  .current-conditions-card {
+  :root:not([data-theme="light"]) .current-conditions-card {
     background: linear-gradient(135deg, #2a2d31, #26292d);
   }
+}
+
+:root[data-theme="dark"] .current-conditions-card {
+  background: linear-gradient(135deg, #2a2d31, #26292d);
 }
 
 .current-main {
@@ -944,9 +958,9 @@ footer .chart-mode-navigation {
   }
 }
 
-/* Dark mode */
+/* Dark mode - applied via system preference or manual override */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --light-bg: #1f2124;
     --card-bg: #2a2d31;
     --text-primary: #f2f2f2;
@@ -956,40 +970,87 @@ footer .chart-mode-navigation {
     --air-quality-needle: #f2f2f2;
   }
 
-  body {
+  :root:not([data-theme="light"]) body {
     background-color: var(--light-bg);
   }
 
-  .forecast-card {
+  :root:not([data-theme="light"]) .forecast-card {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
 
-  .header h1 {
+  :root:not([data-theme="light"]) .header h1 {
     color: var(--secondary-color);
   }
 
-  .rain-percentage {
+  :root:not([data-theme="light"]) .rain-percentage {
     color: var(--secondary-color);
   }
 
-  .current-temp {
+  :root:not([data-theme="light"]) .current-temp {
     color: var(--secondary-color);
   }
 
   /* Day titles (Oggi, Domani, Dopodomani) lighter for readability on dark bg */
-  .day-title {
+  :root:not([data-theme="light"]) .day-title {
     color: var(--text-primary);
   }
 
-  .high-chance {
+  :root:not([data-theme="light"]) .high-chance {
     background-color: rgba(231, 76, 60, 0.18);
   }
 
-  .medium-chance {
+  :root:not([data-theme="light"]) .medium-chance {
     background-color: rgba(241, 196, 15, 0.18);
   }
 
-  .low-chance {
+  :root:not([data-theme="light"]) .low-chance {
     background-color: rgba(46, 204, 113, 0.18);
   }
+}
+
+/* Manual dark mode override - applies dark theme even when system is light */
+:root[data-theme="dark"] {
+  --light-bg: #1f2124;
+  --card-bg: #2a2d31;
+  --text-primary: #f2f2f2;
+  --text-secondary: #c5c5c5;
+  --text-muted: #9aa0a6;
+  --border-color: #3a3d40;
+  --air-quality-needle: #f2f2f2;
+}
+
+:root[data-theme="dark"] body {
+  background-color: var(--light-bg);
+}
+
+:root[data-theme="dark"] .forecast-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme="dark"] .header h1 {
+  color: var(--secondary-color);
+}
+
+:root[data-theme="dark"] .rain-percentage {
+  color: var(--secondary-color);
+}
+
+:root[data-theme="dark"] .current-temp {
+  color: var(--secondary-color);
+}
+
+:root[data-theme="dark"] .day-title {
+  color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .high-chance {
+  background-color: rgba(231, 76, 60, 0.18);
+}
+
+:root[data-theme="dark"] .medium-chance {
+  background-color: rgba(241, 196, 15, 0.18);
+}
+
+:root[data-theme="dark"] .low-chance {
+  background-color: rgba(46, 204, 113, 0.18);
 }

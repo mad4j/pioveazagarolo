@@ -2,12 +2,14 @@
 import { displayData, showToast } from './modules/ui.js';
 import { loadCachedData, saveCachedData } from './modules/cache.js';
 import { precipitationManager } from './modules/precipitation.js';
+import { initTheme, toggleTheme, getThemeName, isDarkMode } from './modules/theme.js';
 import './modules/debug-mobile.js';
 
 let _fetchInFlight = false;
 let _retryTimer = null;
 let _splashStartTime = Date.now();
 let _splashMinDuration = 1000; // minimum display time in milliseconds
+let _currentData = null; // Store current data for theme change refresh
 
 // Load version info for splash screen
 async function loadSplashVersion() {
@@ -32,6 +34,21 @@ async function loadSplashVersion() {
     }
   } catch (error) {
     // Silently fail - version display is optional
+  }
+}
+
+// Update theme toggle button icon based on current theme
+function updateThemeIcon() {
+  const themeIcon = document.getElementById('theme-icon');
+  if (!themeIcon) return;
+  
+  // Update icon based on current theme state
+  if (isDarkMode()) {
+    // Currently in dark mode, show moon icon
+    themeIcon.className = 'wi wi-night-clear';
+  } else {
+    // Currently in light mode, show sun icon
+    themeIcon.className = 'wi wi-day-sunny';
   }
 }
 
@@ -67,6 +84,7 @@ async function retrieveData() {
     // Load actual precipitation data
     await precipitationManager.loadActualData();
     
+    _currentData = data; // Store for theme change refresh
     await displayData(data);
     saveCachedData(data);
     hideSplashScreen(); // Hide splash screen after data is displayed
@@ -77,6 +95,7 @@ async function retrieveData() {
     if (cached) {
       // Try to load precipitation data even from cache
       try { await precipitationManager.loadActualData(); } catch {}
+      _currentData = cached.data; // Store for theme change refresh
       await displayData(cached.data);
       hideSplashScreen(); // Hide splash screen even when showing cached data
     } else {
@@ -92,6 +111,30 @@ async function retrieveData() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize theme before anything else
+  initTheme();
+  updateThemeIcon();
+  
+  // Setup theme toggle button
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      toggleTheme();
+      updateThemeIcon();
+      showToast(`Tema: ${getThemeName()}`, 'info', 2000, true);
+      
+      // Trigger chart redraw to update colors
+      window.dispatchEvent(new CustomEvent('themechange'));
+    });
+  }
+  
+  // Listen for theme changes and refresh charts
+  window.addEventListener('themechange', async () => {
+    if (_currentData) {
+      await displayData(_currentData);
+    }
+  });
+  
   // Load version info for splash screen
   loadSplashVersion();
   
@@ -103,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const cached = loadCachedData(); 
   if (cached) {
     // Load precipitation data and then display
+    _currentData = cached.data; // Store for theme change refresh
     precipitationManager.loadActualData().then(async () => {
       await displayData(cached.data);
       hideSplashScreen(); // Hide splash screen when cached data is displayed

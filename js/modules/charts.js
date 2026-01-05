@@ -1,5 +1,6 @@
 import { DAY_CONFIGS } from './constants.js';
 import { getRainIconClass, getWeatherDescription, getCloudCoverIconClass, getCloudCoverDescription } from './icons.js';
+import { isDarkMode } from './theme.js';
 
 export const chartInstances = {};
 
@@ -776,8 +777,6 @@ export const showersSnowfallWarningPlugin = {
 };
 
 function isTouchDevice() { return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0; }
-
-function isDarkMode() { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
 
 function getWindDirectionColor() { return isDarkMode() ? '#f2f2f2' : '#3498db'; }
 
