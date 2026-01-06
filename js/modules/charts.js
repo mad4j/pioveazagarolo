@@ -113,9 +113,9 @@ export function calculateUnifiedTemperatureScale(temperatureData, apparentTemper
   }
   
   // Ensure 0°C reference line is visible within the chart when minimum temperature is below zero
-  if (dataMin < zeroTemp && zeroTemp > maxTemp) {
-    // 0°C is above the current range, extend upward
-    maxTemp = zeroTemp + 2;
+  if (dataMin < zeroTemp && zeroTemp < minTemp) {
+    // 0°C is below the current range, extend downward
+    minTemp = zeroTemp - 2;
   }
   
   return { min: minTemp, max: maxTemp };
