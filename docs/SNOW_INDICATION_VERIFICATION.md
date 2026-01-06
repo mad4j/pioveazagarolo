@@ -37,11 +37,12 @@ The application recognizes the following WMO weather codes for snow conditions:
 #### Precipitation Charts
 - **Location**: Below each daily card
 - **Display**: Color-coded warning triangles in 3-hour intervals
-- **Colors**: 
-  - Yellow: Light snow (< 5mm water equivalent)
-  - Orange: Moderate snow (5-10mm water equivalent)
-  - Red: Heavy snow (> 10mm water equivalent)
+- **Colors**: Based on combined showers + snowfall intensity (see `getShowersSnowfallWarningColor()` in charts.js)
+  - Yellow: Light precipitation (< 5mm water equivalent per 3h)
+  - Orange: Moderate precipitation (5-10mm water equivalent per 3h)
+  - Red: Heavy precipitation (> 10mm water equivalent per 3h)
 - **Icon**: Snow icon (snowflake) vs rain icon (droplets) based on snowfall data
+- **Note**: 1cm snow ≈ 10mm water equivalent (conversion factor from charts.js line 679)
 
 ### 3. Snowfall Data Integration (✅ Verified)
 
@@ -71,7 +72,6 @@ All snow-related text is properly localized in Italian:
 ### Test 1: Normal Weather (No Snow)
 **Data**: Current production data.json (no snow conditions)
 **Result**: ✅ Application displays rain/cloud icons appropriately
-**Screenshot**: [snow-indication-current-state.png]
 
 ### Test 2: Moderate Snow Conditions
 **Data**: Modified data.json with weather code 73 (moderate snow)
@@ -85,10 +85,10 @@ All snow-related text is properly localized in Italian:
 3. Warning triangles appear in chart above precipitation graph
 4. Icons correctly show snowflake instead of rain droplet
 
-**Screenshots**:
-- [snow-indication-with-snow-icon.png] - Daily card with snow icon
-- [snow-indication-with-tooltip.png] - Tooltip displaying "Neve"
-- [snow-indication-chart-detail.png] - Chart with snow warning icons
+**Documentation**: See PR description for screenshots showing:
+- Daily card with snow icon
+- Tooltip displaying "Neve"  
+- Chart with snow warning icons
 
 ### Test 3: Snow Showers (Code 85, 86)
 **Data**: Weather codes 85-86 in test data
