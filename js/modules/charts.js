@@ -112,9 +112,13 @@ export function calculateUnifiedTemperatureScale(temperatureData, apparentTemper
     maxTemp = referenceTemp + 2;
   }
   
-  // Ensure 0°C reference line is visible within the chart when minimum temperature is below zero
-  if (dataMin < zeroTemp && zeroTemp < minTemp) {
-    // 0°C is below the current range, extend downward
+  // Ensure 0°C reference line is visible within the chart when data goes below zero
+  // The scale already includes dataMin - 2, but we explicitly ensure 0°C is visible
+  if (dataMin < zeroTemp && zeroTemp > maxTemp) {
+    // Data goes below zero, but 0°C is above current range - extend upward
+    maxTemp = zeroTemp + 2;
+  } else if (dataMin < zeroTemp && zeroTemp < minTemp) {
+    // Data goes below zero, but 0°C is below current range - extend downward
     minTemp = zeroTemp - 2;
   }
   
@@ -373,7 +377,7 @@ export const temperature21LinePlugin = {
   }
 };
 
-// Plugin per linea 0°C in modalità temperatura
+// Plugin for 0°C line in temperature mode
 export const temperatureZeroLinePlugin = {
   id: 'temperatureZeroLine',
   afterDraw(chart, args, opts) {
@@ -399,7 +403,7 @@ export const temperatureZeroLinePlugin = {
       ctx.lineTo(right, y0);
       ctx.stroke();
       
-      // Etichetta a destra, sotto la linea
+      // Label on the right, below the line
       if (opts?.label) {
         ctx.setLineDash([]);
         ctx.globalAlpha = 1;
