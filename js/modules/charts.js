@@ -87,6 +87,7 @@ export function calculateUnifiedTemperatureScale(temperatureData, apparentTemper
   if (!apparentTemperatureData || apparentTemperatureData.length < 72) return null;
   
   const referenceTemp = 21;
+  const zeroTemp = 0;
   
   // Get min and max across all 72 hours for both temperature and apparent temperature
   const dataMin = Math.min(
@@ -109,6 +110,16 @@ export function calculateUnifiedTemperatureScale(temperatureData, apparentTemper
   } else if (referenceTemp > maxTemp) {
     // 21°C is above the current range, extend upward
     maxTemp = referenceTemp + 2;
+  }
+  
+  // Ensure 0°C reference line is visible within the chart when data goes below zero
+  // The scale already includes dataMin - 2, but we explicitly ensure 0°C is visible
+  if (dataMin < zeroTemp && zeroTemp > maxTemp) {
+    // Data goes below zero, but 0°C is above current range - extend upward
+    maxTemp = zeroTemp + 2;
+  } else if (dataMin < zeroTemp && zeroTemp < minTemp) {
+    // Data goes below zero, but 0°C is below current range - extend downward
+    minTemp = zeroTemp - 2;
   }
   
   return { min: minTemp, max: maxTemp };
@@ -359,6 +370,48 @@ export const temperature21LinePlugin = {
         ctx.textAlign = 'right';
         ctx.textBaseline = 'top';
         ctx.fillText(opts.label, right - 4, y21 + 2);
+      }
+      
+      ctx.restore();
+    }
+  }
+};
+
+// Plugin for 0°C line in temperature mode
+export const temperatureZeroLinePlugin = {
+  id: 'temperatureZeroLine',
+  afterDraw(chart, args, opts) {
+    const yScale = chart.scales.y;
+    if (!yScale) return;
+    
+    const { ctx, chartArea } = chart;
+    const { left, right, top, bottom } = chartArea;
+    
+    // Get the y pixel position for 0°C
+    const y0 = yScale.getPixelForValue(0);
+    
+    // Only draw the line if 0°C is within the visible range
+    if (y0 >= top && y0 <= bottom) {
+      ctx.save();
+      ctx.strokeStyle = opts?.color || '#3498db';
+      ctx.lineWidth = opts?.lineWidth || 2;
+      ctx.setLineDash(opts?.lineDash || [8, 4]);
+      ctx.globalAlpha = opts?.opacity || 0.8;
+      
+      ctx.beginPath();
+      ctx.moveTo(left, y0);
+      ctx.lineTo(right, y0);
+      ctx.stroke();
+      
+      // Label on the right, below the line
+      if (opts?.label) {
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        ctx.font = (opts.font && typeof opts.font === 'string') ? opts.font : '8px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        ctx.fillText(opts.label, right - 4, y0 + 2);
       }
       
       ctx.restore();
@@ -846,6 +899,13 @@ export async function buildTemperatureChart(target, temperatureData, apparentTem
   const plugins = [sunriseSunsetPlugin];
   if (target === 'today-chart') plugins.push(currentHourLinePlugin);
   plugins.push(temperature21LinePlugin);
+  
+  // Add zero degree line plugin if minimum temperature is below zero
+  const dataMinTemp = Math.min(...temperatureData, ...apparentTemperatureData);
+  if (dataMinTemp < 0) {
+    plugins.push(temperatureZeroLinePlugin);
+  }
+  
   plugins.push(xAxisAnchorLabelsPlugin);
   
   // Build datasets array - always include temperature lines
@@ -973,6 +1033,13 @@ export async function buildTemperatureChart(target, temperatureData, apparentTem
           lineDash: [8, 4],
           opacity: 0.8,
           label: '21°C'
+        },
+        temperatureZeroLine: {
+          color: '#3498db',
+          lineWidth: 2,
+          lineDash: [8, 4],
+          opacity: 0.8,
+          label: '0°C'
         },
         currentHourLine: { 
           color: '#27ae60', 
