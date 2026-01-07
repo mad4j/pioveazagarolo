@@ -450,13 +450,21 @@ body {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
+  z-index: 1;
 }
 
 .header-title {
-  flex: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
+  pointer-events: none;
+}
+
+.header-title h1 {
+  pointer-events: auto;
 }
 
 .header-buttons {
@@ -464,6 +472,7 @@ body {
   display: flex;
   gap: 0.25rem;
   align-items: center;
+  z-index: 1;
 }
 
 .header h1 {
