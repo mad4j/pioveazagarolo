@@ -1,4 +1,4 @@
-/* Font Montserrat caricato tramite <link> nel HTML per performance ottimali */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 
 :root {
   --primary-color: #2c3e50;
