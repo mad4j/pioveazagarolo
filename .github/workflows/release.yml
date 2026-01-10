@@ -31,6 +31,9 @@ jobs:
           if git rev-parse -q --verify "refs/tags/${{ github.event.inputs.version }}" >/dev/null; then
             echo "Tag già esistente"; exit 2; fi
 
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
       - name: Bump version in package.json
         run: |
           node -e "const fs=require('fs');const f='package.json';let p=JSON.parse(fs.readFileSync(f,'utf8'));p.version='${{ github.event.inputs.version }}';fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n');"
@@ -39,15 +42,25 @@ jobs:
           git add package.json
           git commit -m "chore(release): prepare ${{ github.event.inputs.version }}" || echo "No change"
 
+      - name: Update build-info.json
+        run: |
+          npm run build-info
+          if ! git diff --quiet build-info.json; then
+            git add build-info.json
+            git commit -m "chore(release): update build-info.json to ${{ github.event.inputs.version }}"
+          fi
+
       - name: Create tag
         run: |
           git tag ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
           git push origin HEAD:main --follow-tags
 
-      - name: Install deps & generate changelog
+      - name: Generate changelog
         run: |
-          npm install --no-audit --no-fund
           npm run generate-changelog || true
+
+      - name: Commit CHANGELOG if changed
+        run: |
           if ! git diff --quiet CHANGELOG.md; then
             git add CHANGELOG.md
             git commit -m "chore: auto-update CHANGELOG for ${{ github.event.inputs.version }}" || true
