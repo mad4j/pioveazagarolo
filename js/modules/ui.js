@@ -349,24 +349,25 @@ export async function displayData(data){
   
   // Build all charts in parallel for better performance
   const chartPromises = DAY_CONFIGS.map(async (cfg) => {
-    const i = cfg.index;
-    const maxEl = $(`${cfg.key}-temp-max`); if (maxEl) maxEl.textContent = `${Math.round(daily.temperature_2m_max[i])}°`;
-    const minEl = $(`${cfg.key}-temp-min`); if (minEl) minEl.textContent = `${Math.round(daily.temperature_2m_min[i])}°`;
-    const percEl = $(`${cfg.key}-percentage`);
-    if (percEl) {
-      const val = daily.precipitation_probability_max[i];
-      // Avoid duplicating wrapping if displayData is called multiple times
-      if (!percEl.dataset.enhanced || percEl.dataset.value !== String(val)) {
-        percEl.innerHTML = `<span class="value">${val}</span><span class="percent-symbol" aria-hidden="true">%</span>`;
-        percEl.dataset.enhanced = 'true';
-        percEl.dataset.value = String(val);
+    try {
+      const i = cfg.index;
+      const maxEl = $(`${cfg.key}-temp-max`); if (maxEl) maxEl.textContent = `${Math.round(daily.temperature_2m_max[i])}°`;
+      const minEl = $(`${cfg.key}-temp-min`); if (minEl) minEl.textContent = `${Math.round(daily.temperature_2m_min[i])}°`;
+      const percEl = $(`${cfg.key}-percentage`);
+      if (percEl) {
+        const val = daily.precipitation_probability_max[i];
+        // Avoid duplicating wrapping if displayData is called multiple times
+        if (!percEl.dataset.enhanced || percEl.dataset.value !== String(val)) {
+          percEl.innerHTML = `<span class="value">${val}</span><span class="percent-symbol" aria-hidden="true">%</span>`;
+          percEl.dataset.enhanced = 'true';
+          percEl.dataset.value = String(val);
+        }
       }
-    }
-    const mmEl = $(`${cfg.key}-mm`); if (mmEl) { const v = daily.precipitation_sum[i]; mmEl.textContent = `${v===0 ? '0' : v.toFixed(1)} mm`; }
-    const dateEl = $(`${cfg.key}-date`); if (dateEl) dateEl.textContent = formatDate(daily.time[i]);
-    updateCardClass(cfg.cardId, daily.precipitation_probability_max[i]);
-    let probSlice = getDaySlice(hourly.precipitation_probability, i);
-    let precipSlice = getDaySlice(hourly.precipitation, i);
+      const mmEl = $(`${cfg.key}-mm`); if (mmEl) { const v = daily.precipitation_sum[i]; mmEl.textContent = `${v===0 ? '0' : v.toFixed(1)} mm`; }
+      const dateEl = $(`${cfg.key}-date`); if (dateEl) dateEl.textContent = formatDate(daily.time[i]);
+      updateCardClass(cfg.cardId, daily.precipitation_probability_max[i]);
+      let probSlice = getDaySlice(hourly.precipitation_probability, i);
+      let precipSlice = getDaySlice(hourly.precipitation, i);
     
     // For today's chart (index 0), blend actual and forecast data
     if (i === 0) {
@@ -416,11 +417,19 @@ export async function displayData(data){
       // }
     }
     
-    await buildAppropriateChart(cfg.chartId, data, i, unifiedPressureScale, unifiedTemperatureScale);
+      await buildAppropriateChart(cfg.chartId, data, i, unifiedPressureScale, unifiedTemperatureScale);
+    } catch (chartError) {
+      console.error(`❌ Error building chart ${cfg.chartId}:`, chartError);
+      // Continue with other charts even if one fails
+    }
   });
   
-  // Wait for all charts to be built
-  await Promise.all(chartPromises);
+  // Wait for all charts to be built (using allSettled to not fail on individual errors)
+  const results = await Promise.allSettled(chartPromises);
+  const failedCharts = results.filter(r => r.status === 'rejected').length;
+  if (failedCharts > 0) {
+    console.warn(`⚠️ ${failedCharts} chart(s) failed to render`);
+  }
   
   // Setup navigation dots
   setupNavigationDots(data);

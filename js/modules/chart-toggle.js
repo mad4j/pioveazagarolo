@@ -10,12 +10,16 @@ import { buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, 
  * @param {Object} unifiedTemperatureScale - Optional unified temperature scale for temperature mode
  */
 export async function buildAppropriateChart(chartId, weatherData, dayIndex, unifiedPressureScale = null, unifiedTemperatureScale = null) {
-  if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
+  if (!weatherData || !weatherData.daily || !weatherData.hourly) {
+    console.warn(`⚠️ Cannot build chart ${chartId}: missing weather data`);
+    return;
+  }
   
-  // Use global mode (all charts should be in same mode)
-  const currentMode = chartModes['today-chart'];
-  const sunriseTime = weatherData.daily.sunrise?.[dayIndex];
-  const sunsetTime = weatherData.daily.sunset?.[dayIndex];
+  try {
+    // Use global mode (all charts should be in same mode)
+    const currentMode = chartModes['today-chart'];
+    const sunriseTime = weatherData.daily.sunrise?.[dayIndex];
+    const sunsetTime = weatherData.daily.sunset?.[dayIndex];
   
   if (currentMode === CHART_MODES.TEMPERATURE && weatherData.hourly.temperature_2m && weatherData.hourly.apparent_temperature) {
     const temperatureSlice = getDaySlice(weatherData.hourly.temperature_2m, dayIndex);
@@ -44,5 +48,9 @@ export async function buildAppropriateChart(chartId, weatherData, dayIndex, unif
     const showersSlice = weatherData.hourly.showers ? getDaySlice(weatherData.hourly.showers, dayIndex) : null;
     const snowfallSlice = weatherData.hourly.snowfall ? getDaySlice(weatherData.hourly.snowfall, dayIndex) : null;
     await buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime, showersSlice, snowfallSlice);
+  }
+  } catch (error) {
+    console.error(`❌ Error in buildAppropriateChart for ${chartId}:`, error);
+    throw error; // Re-throw to be caught by caller
   }
 }

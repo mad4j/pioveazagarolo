@@ -13,20 +13,23 @@ async function ensureChartLoaded() {
     return true;
   }
   
-  // Wait for Chart.js to load with timeout
+  console.log('⏳ Waiting for Chart.js library to load...');
+  
+  // Wait for Chart.js to load with timeout (increased to 10s for slow connections)
   return new Promise((resolve) => {
     let attempts = 0;
-    const maxAttempts = 50; // 50 * 100ms = 5 seconds max wait
+    const maxAttempts = 100; // 100 * 100ms = 10 seconds max wait
     
     const checkChart = () => {
       if (typeof Chart !== 'undefined') {
+        console.log('✅ Chart.js library loaded successfully');
         resolve(true);
         return;
       }
       
       attempts++;
       if (attempts >= maxAttempts) {
-        console.error('Chart.js failed to load within timeout');
+        console.error('❌ Chart.js failed to load within 10s timeout');
         resolve(false);
         return;
       }
@@ -840,9 +843,16 @@ export async function buildChart(target, probabilityData, precipitationData, sun
   // Ensure Chart.js is loaded before proceeding
   const chartLoaded = await ensureChartLoaded();
   if (!chartLoaded) {
-    console.error('Cannot build chart: Chart.js library not available');
+    console.error(`❌ Cannot build chart ${target}: Chart.js library not available`);
     return;
   }
+  
+  // Verify canvas dimensions (must be visible and sized)
+  const rect = el.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) {
+    console.warn(`⚠️ Canvas ${target} has zero dimensions (${rect.width}x${rect.height}), chart may not render properly`);
+  }
+  
   // Clean up existing tooltip element tied to this chart target to prevent duplicates
   const staleTip = document.getElementById('chartjs-tooltip-' + target);
   if (staleTip && staleTip.parentNode) { try { staleTip.parentNode.removeChild(staleTip); } catch {}
@@ -867,9 +877,16 @@ export async function buildTemperatureChart(target, temperatureData, apparentTem
   // Ensure Chart.js is loaded before proceeding
   const chartLoaded = await ensureChartLoaded();
   if (!chartLoaded) {
-    console.error('Cannot build temperature chart: Chart.js library not available');
+    console.error(`❌ Cannot build temperature chart ${target}: Chart.js library not available`);
     return;
-  } 
+  }
+  
+  // Verify canvas dimensions
+  const rect = el.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) {
+    console.warn(`⚠️ Canvas ${target} has zero dimensions (${rect.width}x${rect.height}) for temperature chart`);
+  }
+  
   // Clean up existing tooltip before destroying chart to prevent parentNode errors
   const staleTip = document.getElementById('chartjs-tooltip-' + target);
   if (staleTip && staleTip.parentNode) { try { staleTip.parentNode.removeChild(staleTip); } catch {} }
