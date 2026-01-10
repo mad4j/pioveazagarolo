@@ -288,7 +288,7 @@ export function showToast(message, type = 'info', duration = 5000, silent = fals
   function dismiss(){ if (timer) clearTimeout(timer); toast.style.animation='toast-out .35s forwards'; setTimeout(()=>toast.remove(),360);}  
 }
 
-export function displayData(data){
+export async function displayData(data){
   if (!data || !data.daily || !data.hourly) return;
   try {
     const { current } = data;
@@ -347,7 +347,8 @@ export function displayData(data){
     unifiedTemperatureScale = calculateUnifiedTemperatureScale(hourly.temperature_2m, hourly.apparent_temperature);
   }
   
-  DAY_CONFIGS.forEach(cfg => {
+  // Build all charts in parallel for better performance
+  const chartPromises = DAY_CONFIGS.map(async (cfg) => {
     const i = cfg.index;
     const maxEl = $(`${cfg.key}-temp-max`); if (maxEl) maxEl.textContent = `${Math.round(daily.temperature_2m_max[i])}°`;
     const minEl = $(`${cfg.key}-temp-min`); if (minEl) minEl.textContent = `${Math.round(daily.temperature_2m_min[i])}°`;
@@ -415,8 +416,11 @@ export function displayData(data){
       // }
     }
     
-    buildAppropriateChart(cfg.chartId, data, i, unifiedPressureScale, unifiedTemperatureScale);
+    await buildAppropriateChart(cfg.chartId, data, i, unifiedPressureScale, unifiedTemperatureScale);
   });
+  
+  // Wait for all charts to be built
+  await Promise.all(chartPromises);
   
   // Setup navigation dots
   setupNavigationDots(data);

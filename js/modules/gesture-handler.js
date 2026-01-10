@@ -115,7 +115,7 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
     // Import and use the existing switchToMode function from navigation-dots
     import('./navigation-dots.js').then(({ updateNavigationDots, showChartModeTooltip }) => {
       // Import chart building functions directly
-      import('./charts.js').then(({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice, calculateUnifiedPressureScale, calculateUnifiedTemperatureScale }) => {
+      import('./charts.js').then(async ({ buildChart, buildTemperatureChart, buildWindChart, buildPressureChart, buildAirQualityChart, getDaySlice, calculateUnifiedPressureScale, calculateUnifiedTemperatureScale }) => {
         if (!weatherData || !weatherData.daily || !weatherData.hourly) return;
 
         // Chart IDs and their corresponding day indices
@@ -155,7 +155,7 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
         }
 
         // Update all charts simultaneously (while slide-out animation continues)
-        chartConfigs.forEach(({ chartId, dayIndex }) => {
+        const chartPromises = chartConfigs.map(async ({ chartId, dayIndex }) => {
           // Update mode tracking for all charts
           chartModes[chartId] = actualMode;
 
@@ -169,33 +169,36 @@ function switchToModeViaSwiping(targetMode, weatherData, swipeDirection = 0) {
             const apparentTempSlice = getDaySlice(weatherData.hourly.apparent_temperature, dayIndex);
             const humiditySlice = weatherData.hourly.relative_humidity_2m ? getDaySlice(weatherData.hourly.relative_humidity_2m, dayIndex) : null;
             const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
-            buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, unifiedTemperatureScale);
+            await buildTemperatureChart(chartId, temperatureSlice, apparentTempSlice, humiditySlice, sunriseTime, sunsetTime, unifiedTemperatureScale);
           } else if (actualMode === CHART_MODES.WIND) {
             // Switch to wind chart
             const windSpeedSlice = getDaySlice(weatherData.hourly.wind_speed_10m, dayIndex);
             const windDirectionSlice = getDaySlice(weatherData.hourly.wind_direction_10m, dayIndex);
-            buildWindChart(chartId, windSpeedSlice, windDirectionSlice, sunriseTime, sunsetTime);
+            await buildWindChart(chartId, windSpeedSlice, windDirectionSlice, sunriseTime, sunsetTime);
           } else if (actualMode === CHART_MODES.PRESSURE) {
             // Switch to pressure chart
             const pressureSlice = getDaySlice(weatherData.hourly.pressure_msl, dayIndex);
             const weatherCodeSlice = weatherData.hourly.weather_code ? getDaySlice(weatherData.hourly.weather_code, dayIndex) : null;
             const isDaySlice = weatherData.hourly.is_day ? getDaySlice(weatherData.hourly.is_day, dayIndex) : null;
-            buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice, unifiedPressureScale);
+            await buildPressureChart(chartId, pressureSlice, sunriseTime, sunsetTime, weatherCodeSlice, isDaySlice, unifiedPressureScale);
           } else if (actualMode === CHART_MODES.AIR_QUALITY) {
             // Switch to air quality chart
             const eaqiSlice = getDaySlice(weatherData.air_quality.hourly.european_aqi, dayIndex);
             const uvSlice = weatherData.hourly.uv_index ? getDaySlice(weatherData.hourly.uv_index, dayIndex) : null;
             const cloudCoverageSlice = weatherData.hourly.cloud_cover ? getDaySlice(weatherData.hourly.cloud_cover, dayIndex) : null;
-            buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime, cloudCoverageSlice);
+            await buildAirQualityChart(chartId, eaqiSlice, uvSlice, sunriseTime, sunsetTime, cloudCoverageSlice);
           } else {
             // Switch to precipitation chart
             const probabilitySlice = getDaySlice(weatherData.hourly.precipitation_probability, dayIndex);
             const precipitationSlice = getDaySlice(weatherData.hourly.precipitation, dayIndex);
             const showersSlice = weatherData.hourly.showers ? getDaySlice(weatherData.hourly.showers, dayIndex) : null;
             const snowfallSlice = weatherData.hourly.snowfall ? getDaySlice(weatherData.hourly.snowfall, dayIndex) : null;
-            buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime, showersSlice, snowfallSlice);
+            await buildChart(chartId, probabilitySlice, precipitationSlice, sunriseTime, sunsetTime, showersSlice, snowfallSlice);
           }
         });
+
+        // Wait for all charts to be built
+        await Promise.all(chartPromises);
 
         // Now that charts are rebuilt, swap from slide-out to slide-in animation
         // This ensures the new content is visible when slide-in starts
@@ -379,7 +382,10 @@ export function setupSwipeGestures(weatherData) {
     if (!card.style.msTouchAction) card.style.msTouchAction = 'pan-y';
   });
 
-  console.log(`📱 Swipe gestures enabled on ${forecastCards.length} forecast cards`);
+  // Only log when we actually added new handlers
+  if (handlers.length > 0) {
+    console.log(`📱 Swipe gestures enabled on ${handlers.length} forecast cards`);
+  }
 
   // Return cleanup function for all handlers
   return {

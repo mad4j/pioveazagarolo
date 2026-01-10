@@ -450,13 +450,20 @@ body {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
+  z-index: 1;
 }
 
 .header-title {
-  flex: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
   align-items: center;
+  pointer-events: none;
+}
+
+.header-title h1 {
+  pointer-events: auto;
 }
 
 .header-buttons {
@@ -464,6 +471,7 @@ body {
   display: flex;
   gap: 0.25rem;
   align-items: center;
+  z-index: 1;
 }
 
 .header h1 {
@@ -471,6 +479,7 @@ body {
   font-weight: 600;
   color: var(--primary-color);
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .forecast-card {
@@ -873,7 +882,7 @@ footer .chart-mode-navigation {
   }
 
   .header h1 {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
   }
 
   .header-left .last-updated {
