@@ -67,7 +67,7 @@ async function retrieveData() {
     // Load actual precipitation data
     await precipitationManager.loadActualData();
     
-    displayData(data);
+    await displayData(data);
     saveCachedData(data);
     hideSplashScreen(); // Hide splash screen after data is displayed
     _fetchInFlight = false;
@@ -77,7 +77,7 @@ async function retrieveData() {
     if (cached) {
       // Try to load precipitation data even from cache
       try { await precipitationManager.loadActualData(); } catch {}
-      displayData(cached.data);
+      await displayData(cached.data);
       hideSplashScreen(); // Hide splash screen even when showing cached data
     } else {
       showToast('Errore rete. Ritento fra 60 secondi...', 'error');
@@ -103,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const cached = loadCachedData(); 
   if (cached) {
     // Load precipitation data and then display
-    precipitationManager.loadActualData().then(() => {
-      displayData(cached.data);
+    precipitationManager.loadActualData().then(async () => {
+      await displayData(cached.data);
       hideSplashScreen(); // Hide splash screen when cached data is displayed
     });
   }

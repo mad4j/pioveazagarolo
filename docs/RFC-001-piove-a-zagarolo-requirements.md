@@ -2,7 +2,7 @@
 
 Status: Draft
 
-Last-Updated: 2025-10-03
+Last-Updated: 2026-01-06
 
 Authors: Project maintainers
 
@@ -122,6 +122,7 @@ Custom Chart.js Plugins (options objects):
 - `weatherIconsPlugin` (internal: precipitation mode): `{ weatherCodes:number[24], isDayData:number[24] }`.
 - `pressure1013LinePlugin` (`pressure1013Line`): `{ color?:string, lineWidth?:number, lineDash?:number[], opacity?:number, label?:string, font?:string }`.
 - `temperature21LinePlugin` (`temperature21Line`): `{ color?:string, lineWidth?:number, lineDash?:number[], opacity?:number, label?:string, font?:string }` (21°C reference line in temperature mode).
+- `temperatureZeroLinePlugin` (`temperatureZeroLine`): `{ color?:string, lineWidth?:number, lineDash?:number[], opacity?:number, label?:string, font?:string }` (0°C reference line in temperature mode, shown only when minimum temperature is below zero).
 - `uvAlertLinePlugin` (`uvAlertLine`): `{ value:number, color?:string, lineWidth?:number, lineDash?:number[], opacity?:number, label?:string, font?:string }` (drawn on UV Y2 scale).
 - `pressureWeatherIconsPlugin` (pressure mode, 3‑hour grouping): `{ weatherCodes:number[24], isDayData:number[24] }`.
 - `cloudCoverageIconsPlugin` (temperature/air quality): `{ cloudCoverageData:number[24] }` (3‑hour grouping).
@@ -246,7 +247,7 @@ Custom Chart.js Plugins (options objects):
 ## Appendix A: Chart Mode Datasets
 
 - Precipitation: `line(y='y', 0..100)` + `bar(y1='y1', 0..maxPrecip)`.
-- Temperature: `line(temp)` + `line(apparent, dashed)` + optional `bar(humidity)` + 21°C reference line.
+- Temperature: `line(temp)` + `line(apparent, dashed)` + optional `bar(humidity)` + 21°C reference line + 0°C reference line (when min temp < 0).
 - Wind: `bar(speed)` + arrows plugin from `wind_direction_10m`.
 - Pressure: `bar(delta)` + 1013 line + optional weather icons.
 - Air Quality: `bar(EAQI)` + optional `line(UV)` + UV alert line.
