@@ -1,5 +1,5 @@
 // Incrementare CACHE_NAME per forzare l'installazione di un nuovo Service Worker
-const CACHE_NAME = "piove-a-zagarolo-cache-v37";
+const CACHE_NAME = "piove-a-zagarolo-cache-v38";
 const urlsToCache = [
   "./",
   "./index.html",
@@ -12,7 +12,6 @@ const urlsToCache = [
   "./js/modules/charts.js",
   "./js/modules/chart-toggle.js",
   "./js/modules/ui.js",
-  "./js/modules/precipitation.js",
   "./js/modules/air-quality.js",
   "./js/modules/debug-mobile.js",
   "./js/pwa-install.js",
@@ -27,7 +26,6 @@ const urlsToCache = [
   "./font/weathericons-regular-webfont.woff",
   "./font/weathericons-regular-webfont.woff2",
   "./data.json",
-  "./data-precipitations.json",
   "./package.json"
 ];
 
@@ -54,8 +52,8 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // API dinamica data.json e data-precipitations.json: Stale-While-Revalidate
-  if (request.url.includes('data.json') || request.url.includes('data-precipitations.json')) {
+  // API dinamica data.json: Stale-While-Revalidate
+  if (request.url.includes('data.json')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async cache => {
         const cached = await cache.match(request);

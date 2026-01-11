@@ -1,7 +1,6 @@
 import { DAY_CONFIGS, ARIA_LABEL_DAY, dayFormatter, $, chartModes, CHART_MODES } from './constants.js';
 import { getRainIconClass, getWeatherDescription } from './icons.js';
 import { buildChart, getDaySlice, calculateUnifiedPressureScale, calculateUnifiedTemperatureScale } from './charts.js';
-import { precipitationManager } from './precipitation.js';
 import { updateAirQualityDisplay } from './air-quality.js';
 import { buildAppropriateChart } from './chart-toggle.js';
 import { setupNavigationDots, syncNavigationDotsWithChartMode } from './navigation-dots.js';
@@ -369,35 +368,8 @@ export async function displayData(data){
       let probSlice = getDaySlice(hourly.precipitation_probability, i);
       let precipSlice = getDaySlice(hourly.precipitation, i);
     
-    // For today's chart (index 0), blend actual and forecast data
-    if (i === 0) {
-      // Clear probability for past hours  
-      //probSlice = precipitationManager.blendTodayProbability(probSlice);
-      
-      // Blend actual and forecast precipitation if data is available
-      //if (precipitationManager.isDataValid()) {
-      //  precipSlice = precipitationManager.blendTodayPrecipitation(precipSlice);
-      //}
-
-      // TODO Questa sezione è da rivedere:
-      // il giorno 2025-08-21 tra le 01:00 e le 03:00 c'è stato un aquazzone
-      // che questa logica si è perso.
-      // Fra 5 giorni verificare se in archivio per quella data gli eventi di precipitazione
-      // dalla mezzanotte risultano 0.00, 0.00, 0.10, 0.80, 0.00, ...
-      // Eventualmente, eliminare tutta questa sezione e la gestione di data-precipitations.json
-
-      // // Recalculate summary (percentage + mm) using ONLY future hours (including current hour)
-      // try {
-      //   const currentHour = precipitationManager.getCurrentHourRome();
-      //   const futureProb = probSlice.slice(currentHour); // already zeroed past hours
-      //   const futurePrecip = precipSlice.slice(currentHour);
-      //   let maxProb = 0;
-      //   for (const v of futureProb) if (typeof v === 'number' && v > maxProb) maxProb = v;
-      //   const sumPrecip = futurePrecip.reduce((acc, v) => acc + (typeof v === 'number' ? v : 0), 0);
-
-      //   // Update percentage element for today (oggi)
-      //   const percToday = $('today-percentage');
-      //   if (percToday) {
+      const percToday = $('today-percentage');
+      if (percToday) {
       //     if (!percToday.dataset.enhanced || percToday.dataset.value !== String(maxProb)) {
       //       percToday.innerHTML = `<span class="value">${maxProb}</span><span class="percent-symbol" aria-hidden="true">%</span>`;
       //       percToday.dataset.enhanced = 'true';

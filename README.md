@@ -26,7 +26,7 @@
 - **Charts**: Chart.js (local UMD build)
 - **PWA**: Service Worker + Web App Manifest
 - **Weather Data API**: Open-Meteo
-- **Data Files**: `data.json`, optional `data-precipitations.json`
+- **Data Files**: `data.json`
 - **Build Tooling**: Node.js (utility scripts only; no bundler yet)
 - **CI/CD**: GitHub Actions (hourly data + release automation)
 - **Hosting**: GitHub Pages
@@ -41,7 +41,6 @@
 │   └── modules/                # UI, charts, cache, icons, AQ, gestures, etc.
 ├── vendor/                     # Local third‑party libraries (Bootstrap, Chart.js)
 ├── data.json                   # Forecast + current conditions (hourly refresh)
-├── data-precipitations.json    # Optional observed hourly precipitation
 ├── service-worker.js
 ├── manifest.json
 └── docs/                       # RFC & documentation
@@ -50,7 +49,7 @@
 ### Data Flow
 
 1. Hourly GitHub Action fetches Open-Meteo data for Zagarolo (41.75°N, 12.875°E).
-1. Updates `data.json` (and `data-precipitations.json` if precipitation script used).
+1. Updates `data.json`.
 1. Client fetches `data.json?nocache=<minute>` to mitigate stale caches.
 1. Data cached in `localStorage` (TTL 3 hours) and by the Service Worker (stale-while-revalidate for data files).
 1. Charts + UI render from cached or freshly fetched data; periodic client refresh every 30 minutes.
@@ -68,7 +67,6 @@
 ## 📂 Main Data Files
 
 - `data.json`: Current conditions + multi-day forecast (today, tomorrow, day after). Updated hourly.
-- `data-precipitations.json`: Optional observed hourly precipitation for the current day (resets daily).
 
 ## 🛠️ Local Development
 

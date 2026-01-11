@@ -1,7 +1,6 @@
 // Entry point modulare principale
 import { displayData, showToast } from './modules/ui.js';
 import { loadCachedData, saveCachedData } from './modules/cache.js';
-import { precipitationManager } from './modules/precipitation.js';
 import './modules/debug-mobile.js';
 
 let _fetchInFlight = false;
@@ -64,9 +63,6 @@ async function retrieveData() {
     if (!response.ok) throw new Error('Errore nel caricamento dei dati meteo');
     const data = await response.json();
     
-    // Load actual precipitation data
-    await precipitationManager.loadActualData();
-    
     await displayData(data);
     saveCachedData(data);
     hideSplashScreen(); // Hide splash screen after data is displayed
@@ -75,8 +71,6 @@ async function retrieveData() {
     console.error('Errore:', e);
     const cached = loadCachedData();
     if (cached) {
-      // Try to load precipitation data even from cache
-      try { await precipitationManager.loadActualData(); } catch {}
       await displayData(cached.data);
       hideSplashScreen(); // Hide splash screen even when showing cached data
     } else {
@@ -102,9 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateOfflineBadge();
   const cached = loadCachedData(); 
   if (cached) {
-    // Load precipitation data and then display
-    precipitationManager.loadActualData().then(async () => {
-      await displayData(cached.data);
+    displayData(cached.data).then(() => {
       hideSplashScreen(); // Hide splash screen when cached data is displayed
     });
   }

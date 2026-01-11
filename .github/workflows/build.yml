@@ -50,17 +50,6 @@ jobs:
           jq -s '.[0] + {"air_quality": .[1]}' data.json air-quality.json > merged.json && mv merged.json data.json
           # Clean up temporary file
           rm air-quality.json
-
-      # Update actual precipitation data
-      - name: Update actual precipitation data
-        run: |
-          node _scripts/update-precipitation.js
-      
-      # Validate renamed precipitation data file
-      - name: Validate data-precipitations.json
-        run: |
-          if [ ! -f data-precipitations.json ]; then echo "data-precipitations.json missing"; exit 1; fi
-          jq '.' data-precipitations.json > /dev/null || (echo "Invalid JSON in data-precipitations.json" && exit 2)
      
       # Commit changes rewriting (amending) last commit to avoid growing history
       - name: Commit updated weather data (rolling amend)
@@ -69,7 +58,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Add only the generated data files (extend if more files are produced)
-          git add data.json data-precipitations.json || true
+          git add data.json || true
           # If nothing staged, exit gracefully
           if git diff --cached --quiet; then
             echo "No data changes to commit";
