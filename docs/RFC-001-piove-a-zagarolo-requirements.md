@@ -2,7 +2,7 @@
 
 Status: Draft
 
-Last-Updated: 2026-01-11
+Last-Updated: 2026-01-06
 
 Authors: Project maintainers
 
@@ -56,7 +56,7 @@ Primary file `data.json` (example in repo) SHALL include:
 
 - [DATA-001]: Section `current` with fields: `time`, `temperature_2m`, `apparent_temperature`, `rain`, `precipitation`, `pressure_msl`, `relative_humidity_2m`, `wind_speed_10m`, `wind_direction_10m`, `weather_code`, `is_day`.
 - [DATA-002]: Section `hourly` as aligned arrays (same length) for: `time`, `precipitation` (mm/h), `precipitation_probability` (%), `temperature_2m` (°C), `apparent_temperature` (°C), `wind_speed_10m` (km/h), `wind_direction_10m` (°), `pressure_msl` (hPa), `relative_humidity_2m` (%), `weather_code` (WMO), `is_day` (0/1), `cloud_cover` (%), `uv_index`.
-- [DATA-003]: Section `daily` with exactly 3 items, each containing: `time` (date), `sunrise`, `sunset`, `temperature_2m_max/min`, `weather_code`, `precipitation_sum` (mm), `precipitation_probability_max` (%), `moon_phase` (0-1).
+- [DATA-003]: Section `daily` with exactly 3 items, each containing: `time` (date), `sunrise`, `sunset`, `temperature_2m_max/min`, `weather_code`, `precipitation_sum` (mm), `precipitation_probability_max` (%).
 - [DATA-004]: Section `air_quality` with `current.european_aqi` and `hourly.european_aqi` (length aligned with the selected 24h window).
 - [DATA-005]: Field `last_update` as a human-readable timestamp.
 
@@ -70,7 +70,7 @@ Optional file `data-precipitations.json` (actuals):
 ## Functional Requirements
 
 - [FR-001]: The App MUST display a current conditions card (temperature, rain mm, pressure, humidity, wind speed and direction icon, weather icon with tooltip).
-- [FR-002]: The App MUST display three day cards (Today/Tomorrow/Day After) with date, max/min temperatures, daily precipitation probability (%), daily precipitation sum (mm), a day icon with tooltip, moon phase indicator with tooltip, and air quality indicator.
+- [FR-002]: The App MUST display three day cards (Today/Tomorrow/Day After) with date, max/min temperatures, daily precipitation probability (%), daily precipitation sum (mm), and a day icon with tooltip.
 - [FR-003]: The App MUST render one chart per day, and all charts MUST share a global mode and switch together via navigation dots or swipe.
 - [FR-010]: Chart mode “Precipitation” MUST show precipitation probability (%) as a line and precipitation (mm/h) as bars; include sunrise/sunset markers and a current‑hour line on Today.
 - [FR-011]: Chart mode “Temperature” MUST show temperature and apparent temperature as lines; MAY include humidity bars; MUST include sunrise/sunset markers and a current‑hour line on Today; SHOULD render cloud‑coverage icons every 3h.
@@ -141,7 +141,7 @@ Custom Chart.js Plugins (options objects):
 - `DATA_CACHE_TTL_MS: number` (default 3h)
 - `CHART_MODE_CACHE_KEY: 'chartModeV1'`
 - `CHART_MODES`: `{ PRECIPITATION|'precipitation', TEMPERATURE|'temperature', WIND|'wind', PRESSURE|'pressure', AIR_QUALITY|'air-quality' }`
-- `DAY_CONFIGS`: day descriptors `{ key, index, chartId, cardId, iconId, moonId }`.
+- `DAY_CONFIGS`: day descriptors `{ key, index, chartId, cardId, iconId }`.
 - `saveChartMode(mode:string): void` — persists global mode.
 - `loadSavedChartMode(): string|null` — loads persisted mode.
 - `chartModes: Record<chartId,string>` — in‑memory synced global state.
@@ -183,17 +183,7 @@ Custom Chart.js Plugins (options objects):
 
 - [UX-001]: `navigation-dots.js` and `gesture-handler.js` MUST keep all three charts in sync to the same `CHART_MODES` value.
 - [UX-002]: `navigation-dots.js` and `gesture-handler.js` SHOULD announce the active chart mode.
-- `version-tooltip.js`, `air-quality.js`, `moon-phases.js` — present version, EAQI, and moon phase mini‑UI elements.
-
-1. `js/modules/moon-phases.js` (Moon Phases)
-
-- [API-008]: The module MUST export functions for moon phase icons, names, tooltips, and indicator creation.
-
-- `getMoonPhaseIcon(phase:number): string` — returns moon phase emoji (🌑🌒🌓🌔🌕🌖🌗🌘) based on phase value (0-1).
-- `getMoonPhaseName(phase:number): string` — returns Italian moon phase name (Luna Nuova, Primo Quarto, Luna Piena, etc.).
-- `getMoonPhasePercentage(phase:number): number` — returns illumination percentage (0-100).
-- `getMoonPhaseTooltip(phase:number): string` — returns HTML content for Bootstrap tooltip.
-- `createMoonPhaseIndicator(cardId:string, phase:number, moonId:string): HTMLElement` — creates and inserts moon phase indicator element.
+- `version-tooltip.js`, `air-quality.js` — present version and EAQI mini‑UI elements.
 
 ## Service Worker Requirements
 
