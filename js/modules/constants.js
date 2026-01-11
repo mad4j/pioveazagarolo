@@ -13,9 +13,9 @@ export const CHART_MODES = {
 };
 
 export const DAY_CONFIGS = [
-  { key: 'today', index: 0, chartId: 'today-chart', cardId: 'today-card', iconId: 'today-icon', moonId: 'today-moon' },
-  { key: 'tomorrow', index: 1, chartId: 'tomorrow-chart', cardId: 'tomorrow-card', iconId: 'tomorrow-icon', moonId: 'tomorrow-moon' },
-  { key: 'dayaftertomorrow', index: 2, chartId: 'dayaftertomorrow-chart', cardId: 'dayaftertomorrow-card', iconId: 'dayaftertomorrow-icon', moonId: 'dayaftertomorrow-moon' }
+  { key: 'today', index: 0, chartId: 'today-chart', cardId: 'today-card', iconId: 'today-icon' },
+  { key: 'tomorrow', index: 1, chartId: 'tomorrow-chart', cardId: 'tomorrow-card', iconId: 'tomorrow-icon' },
+  { key: 'dayaftertomorrow', index: 2, chartId: 'dayaftertomorrow-chart', cardId: 'dayaftertomorrow-card', iconId: 'dayaftertomorrow-icon' }
 ];
 export const ARIA_LABEL_DAY = ['oggi','domani','dopodomani'];
 export const dayFormatter = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
