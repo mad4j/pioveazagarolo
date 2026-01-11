@@ -741,47 +741,6 @@ export function getShowersSnowfallWarningColor(showersTotal, snowfallTotal) {
   return null;
 }
 
-// Cache for warning images
-const warningImages = {
-  thunder: null,
-  snowflake: null,
-  loaded: false
-};
-
-// Preload warning images
-function preloadWarningImages() {
-  if (warningImages.loaded) return Promise.resolve();
-  
-  return Promise.all([
-    new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        warningImages.thunder = img;
-        resolve();
-      };
-      img.onerror = () => {
-        console.warn('Failed to load thunder.png warning icon');
-        resolve();
-      };
-      img.src = 'images/tunder.png';
-    }),
-    new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        warningImages.snowflake = img;
-        resolve();
-      };
-      img.onerror = () => {
-        console.warn('Failed to load snowflake.png warning icon');
-        resolve();
-      };
-      img.src = 'images/snowflake.png';
-    })
-  ]).then(() => {
-    warningImages.loaded = true;
-  });
-}
-
 /**
  * Draw weather icon for showers or snowfall on chart
  * @param {CanvasRenderingContext2D} ctx - Canvas context
@@ -796,47 +755,22 @@ function drawShowersSnowfallIcon(ctx, x, y, color, showersTotal, snowfallTotal) 
   
   // Determine which icon to use based on predominant type
   // If snowfall is present (even small amounts), show snow icon
-  // Otherwise show thunder icon for showers
-  const icon = snowfallTotal > 0 ? warningImages.snowflake : warningImages.thunder;
+  // Otherwise show rain icon for showers
+  const glyph = snowfallTotal > 0 ? '\uf01b' : '\uf019';  // wi-snow : wi-rain
   
-  if (icon && icon.complete) {
-    // Draw image at 14x14 size centered on x,y with severity color
-    const size = 14;
-    
-    // Create temporary canvas for color overlay
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = size;
-    tempCanvas.height = size;
-    const tempCtx = tempCanvas.getContext('2d');
-    
-    // Draw original image
-    tempCtx.drawImage(icon, 0, 0, size, size);
-    
-    // Apply color overlay using multiply blend mode
-    tempCtx.globalCompositeOperation = 'source-in';
-    tempCtx.fillStyle = color;
-    tempCtx.fillRect(0, 0, size, size);
-    
-    // Draw colored image on main canvas
-    ctx.drawImage(tempCanvas, x - size / 2, y - size / 2);
-  } else {
-    // Fallback: use font icon if images not loaded
-    const glyph = snowfallTotal > 0 ? '\uf01b' : '\uf01a';  // wi-snow : wi-showers
-    
-    ctx.font = '14px weathericons';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+  ctx.font = '16px weathericons';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = color;
+  
+  try {
+    ctx.fillText(glyph, x, y);
+  } catch {
+    // Fallback: draw a simple circle if font not ready
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, 2 * Math.PI);
     ctx.fillStyle = color;
-    
-    try {
-      ctx.fillText(glyph, x, y);
-    } catch {
-      // Final fallback: draw a simple circle if font not ready
-      ctx.beginPath();
-      ctx.arc(x, y, 3, 0, 2 * Math.PI);
-      ctx.fillStyle = color;
-      ctx.fill();
-    }
+    ctx.fill();
   }
   
   ctx.restore();
@@ -912,11 +846,6 @@ export async function buildChart(target, probabilityData, precipitationData, sun
   if (!chartLoaded) {
     console.error(`❌ Cannot build chart ${target}: Chart.js library not available`);
     return;
-  }
-  
-  // Preload warning images if showers/snowfall data is provided
-  if (showersData && snowfallData) {
-    await preloadWarningImages();
   }
   
   // Verify canvas dimensions (must be visible and sized)
