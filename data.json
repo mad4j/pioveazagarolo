@@ -1171,7 +1171,8 @@
     "temperature_2m_min": "°C",
     "weather_code": "wmo code",
     "precipitation_sum": "mm",
-    "precipitation_probability_max": "%"
+    "precipitation_probability_max": "%",
+    "moon_phase": ""
   },
   "daily": {
     "time": [
@@ -1213,6 +1214,11 @@
       0,
       0,
       3
+    ],
+    "moon_phase": [
+      0.42,
+      0.46,
+      0.50
     ]
   },
   "last_update": "2026-01-11 11:07",

@@ -2,6 +2,7 @@ import { DAY_CONFIGS, ARIA_LABEL_DAY, dayFormatter, $, chartModes, CHART_MODES }
 import { getRainIconClass, getWeatherDescription } from './icons.js';
 import { buildChart, getDaySlice, calculateUnifiedPressureScale, calculateUnifiedTemperatureScale } from './charts.js';
 import { updateAirQualityDisplay } from './air-quality.js';
+import { getMoonPhaseIcon, getMoonPhaseName, getMoonPhaseTooltip } from './moon-phases.js';
 import { buildAppropriateChart } from './chart-toggle.js';
 import { setupNavigationDots, syncNavigationDotsWithChartMode } from './navigation-dots.js';
 import { setupSwipeGestures } from './gesture-handler.js';
@@ -254,6 +255,67 @@ export function addWeatherIconTooltip(iconElement, weatherCode) {
   iconElement.style.cursor = 'pointer';
 }
 
+/**
+ * Crea e visualizza l'icona della fase lunare per una carta meteo
+ * @param {string} cardId - ID della carta contenitore
+ * @param {number} moonPhase - Valore fase lunare (0-1)
+ * @param {string} moonId - ID per l'elemento indicatore luna
+ */
+export function createMoonPhaseIndicator(cardId, moonPhase, moonId) {
+  const card = $(cardId);
+  if (!card || moonPhase === undefined || moonPhase === null) return;
+
+  // Trova il contenitore rain-icon dove aggiungere l'icona
+  const rainIconContainer = card.querySelector('.rain-icon');
+  if (!rainIconContainer) return;
+
+  // Rimuovi indicatore esistente se presente
+  const existingIcon = $(moonId);
+  if (existingIcon) {
+    existingIcon.remove();
+  }
+
+  // Cerca l'icona qualità dell'aria per posizionare la luna prima di essa
+  const airQualityIcon = rainIconContainer.querySelector('.air-quality-icon');
+
+  // Crea elemento icona fase lunare
+  const moonIcon = document.createElement('div');
+  moonIcon.id = moonId;
+  moonIcon.className = 'moon-phase-icon';
+  moonIcon.style.cssText = `
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin-left: 8px;
+    user-select: none;
+    flex-shrink: 0;
+    font-size: 1.2rem;
+  `;
+  
+  // Inserisci l'emoji della fase lunare
+  moonIcon.innerHTML = `<span role="img" aria-label="${getMoonPhaseName(moonPhase)}">${getMoonPhaseIcon(moonPhase)}</span>`;
+  
+  moonIcon.setAttribute('data-bs-toggle', 'tooltip');
+  moonIcon.setAttribute('data-bs-placement', 'top');
+  moonIcon.setAttribute('data-bs-html', 'true');
+  moonIcon.setAttribute('data-bs-title', getMoonPhaseTooltip(moonPhase));
+  
+  // Inserisci prima dell'icona qualità dell'aria se presente, altrimenti alla fine
+  if (airQualityIcon) {
+    rainIconContainer.insertBefore(moonIcon, airQualityIcon);
+  } else {
+    rainIconContainer.appendChild(moonIcon);
+  }
+  
+  // Inizializza il tooltip Bootstrap
+  if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+    new bootstrap.Tooltip(moonIcon);
+  }
+}
+
 export function updateCardClass(cardId, percentage) {
   const card = document.getElementById(cardId);
   if (!card) return;
@@ -430,5 +492,15 @@ export async function displayData(data){
   // Questa funzione gestisce la visualizzazione delle icone colorate per l'indice europeo di qualità dell'aria
   if (data.air_quality) {
     updateAirQualityDisplay(data.air_quality);
+  }
+  
+  // Aggiorna indicatori fase lunare se disponibili
+  if (data.daily && data.daily.moon_phase) {
+    DAY_CONFIGS.forEach((cfg) => {
+      const moonPhase = data.daily.moon_phase[cfg.index];
+      if (moonPhase !== undefined && moonPhase !== null) {
+        createMoonPhaseIndicator(cfg.cardId, moonPhase, cfg.moonId);
+      }
+    });
   }
 }
